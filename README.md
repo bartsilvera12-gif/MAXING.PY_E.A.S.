@@ -25,10 +25,10 @@ en la raíz automáticamente (ver `vercel.json`).
 `index.html` carga `./support.js`, así que hay que servirlo por HTTP (con `file://` no funciona).
 
 ```bash
-python -m http.server 8000
+npx serve .
 ```
 
-Luego abrir <http://localhost:8000/>.
+Luego abrir la URL que imprime (por defecto <http://localhost:3000/>).
 
 ## Marca
 
