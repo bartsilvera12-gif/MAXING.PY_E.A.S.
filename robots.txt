@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /carrito
+Disallow: /cuenta
+
+Sitemap: https://maxing.py/sitemap.xml

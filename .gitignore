@@ -1,0 +1,10 @@
+# Build artifacts
+/dist/
+*.zip
+
+# OS / editores
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
