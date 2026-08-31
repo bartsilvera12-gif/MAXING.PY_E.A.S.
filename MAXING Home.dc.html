@@ -334,14 +334,17 @@ article:hover button { filter: brightness(1.08); }
 
 <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
 <main>
-  <section aria-label="Bienvenida" style="position:relative;overflow:hidden;background:#F7FBF8">
+  <section aria-label="Bienvenida" style="position:relative;overflow:hidden;isolation:isolate;background:#F7FBF8">
     <!-- Respaldo por si la foto no carga: fondo claro con el acento verde a la
          derecha, en vez de un hueco. -->
     <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(70% 90% at 78% 58%, rgba(64,223,54,0.20), rgba(64,223,54,0) 62%), linear-gradient(90deg,#FFFFFF 0%,#F6FBF7 55%,#EAF6EC 100%)"></div>
     <img src="./hero.jpg" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:72% 42%">
+    <!-- Mismo efecto que la seccion de promocion, en variante clara: al
+         multiplicarse sobre la foto solo aporta el tinte verde animado. -->
+    <canvas data-rb="velaris" data-velaris="claro" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block;mix-blend-mode:multiply"></canvas>
     <!-- La foto ya es blanca a la izquierda; el velo solo asegura el contraste
          del texto oscuro cuando el recorte corre los productos hacia ese lado. -->
-    <div data-rb="hero-veil" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0.90) 0%,rgba(255,255,255,0.84) 30%,rgba(255,255,255,0.52) 52%,rgba(255,255,255,0.12) 74%,rgba(255,255,255,0) 88%)"></div>
+    <div data-rb="hero-veil" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0.60) 0%,rgba(255,255,255,0.48) 30%,rgba(255,255,255,0.26) 52%,rgba(255,255,255,0.06) 74%,rgba(255,255,255,0) 88%)"></div>
     <div style="position:relative;max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,84px) 24px;min-height:clamp(450px,43vw,790px);display:flex;align-items:center">
       <div style="max-width:min(100%,580px)">
         <span data-rb="shiny-claro" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">Tecnología · Informática · Gaming</span>
@@ -938,6 +941,7 @@ class Component extends DCLogic {
     "uniform float u_grain;",
     "uniform vec3  u_colors[4];",
     "uniform vec3  u_bg;",
+    "uniform float u_light;", // 1 = variante clara: el efecto tinta en vez de iluminar
     "vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }",
     "float snoise(vec2 v){",
     "  const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);",
@@ -977,8 +981,11 @@ class Component extends DCLogic {
     "  col = mix(col, u_colors[2], smoothstep(-0.38, 0.32, n3) * 0.80);",
     "  col = mix(col, u_colors[3], smoothstep(0.0, 0.7, n1 * n2) * 0.5);",
     "  float glow = smoothstep(0.95, 0.0, dist) * 0.58;",
-    "  col += u_colors[1] * glow;",
-    "  col = mix(col * 0.38, col, vignette);",
+    "  col += u_colors[1] * glow * (1.0 - u_light);",
+    "  col = mix(col, u_colors[1], glow * u_light * 0.7);",
+    // En oscuro la vinieta apaga los bordes; en claro los devuelve al fondo,
+    // porque multiplicar por 0.38 ensuciaria la foto blanca de abajo.
+    "  col = mix(mix(col * 0.38, u_bg, u_light), col, vignette);",
     "  float grain = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453 + u_time);",
     "  col += (grain - 0.5) * u_grain * 0.1;",
     "  gl_FragColor = vec4(col, 1.0);",
@@ -999,10 +1006,15 @@ class Component extends DCLogic {
       const h = hex.replace("#", "");
       return [parseInt(h.slice(0, 2), 16) / 255, parseInt(h.slice(2, 4), 16) / 255, parseInt(h.slice(4, 6), 16) / 255];
     };
+    // La variante clara se multiplica sobre la foto del hero: parte de blanco
+    // (neutro para multiply) y solo tinta con verdes pastel.
+    const claro = canvas.getAttribute("data-velaris") === "claro";
     // Paleta del sitio: lima, verde de marca, esmeralda y negro.
-    const COLORES = ["#86DC2C", "#40DF36", "#16AE95", "#000000"];
-    const FONDO = "#0D0D0D";
-    const VELOCIDAD = 1.4, GRANO = 0.28;
+    const COLORES = claro
+      ? ["#A9E585", "#7BDD72", "#93E2CE", "#FFFFFF"]
+      : ["#86DC2C", "#40DF36", "#16AE95", "#000000"];
+    const FONDO = claro ? "#FFFFFF" : "#0D0D0D";
+    const VELOCIDAD = 1.4, GRANO = claro ? 0.10 : 0.28;
 
     const compilar = (tipo, src) => {
       const s = gl.createShader(tipo);
@@ -1034,7 +1046,8 @@ class Component extends DCLogic {
       time: gl.getUniformLocation(program, "u_time"),
       grain: gl.getUniformLocation(program, "u_grain"),
       colors: gl.getUniformLocation(program, "u_colors"),
-      bg: gl.getUniformLocation(program, "u_bg")
+      bg: gl.getUniformLocation(program, "u_bg"),
+      light: gl.getUniformLocation(program, "u_light")
     };
     const planos = new Float32Array(COLORES.reduce((a, c) => a.concat(hexARgb(c)), []));
     const fondo = hexARgb(FONDO);
@@ -1057,6 +1070,7 @@ class Component extends DCLogic {
       gl.uniform1f(loc.time, t * 0.001 * VELOCIDAD);
       gl.uniform1f(loc.grain, GRANO);
       gl.uniform3f(loc.bg, fondo[0], fondo[1], fondo[2]);
+      gl.uniform1f(loc.light, claro ? 1 : 0);
       gl.uniform3fv(loc.colors, planos);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
