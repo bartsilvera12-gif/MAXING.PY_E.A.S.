@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MAXING.py">
+  <rect width="64" height="64" rx="14" fill="#000000"/>
+  <path d="M10 46 L10 18 L17 18 L26 34 L35 18 L42 18 L42 46 L35 46 L35 27 L26 43 L17 27 L17 46 Z" fill="#FFFFFF"/>
+  <circle cx="50" cy="41.5" r="4.5" fill="#40DF36"/>
+</svg>
