@@ -90,7 +90,7 @@ button { font-family: inherit; }
    verde pasa como destello: en verde pleno perderia jerarquia. */
 [data-rb~="shiny-title"] { background: linear-gradient(100deg, #FFFFFF 30%, #FFFFFF 44%, #40DF36 52%, #FFFFFF 60%, #FFFFFF 70%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: rb-shine 5s linear infinite; }
 /* Variantes claras del barrido: misma animacion, base oscura para leer sobre blanco. */
-[data-rb~="shiny-claro"] { background: linear-gradient(100deg, #116230 34%, #1F8F19 46%, #40DF36 54%, #116230 66%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: rb-shine 5s linear infinite; }
+[data-rb~="shiny-claro"] { background: linear-gradient(100deg, #0B4A22 34%, #157A28 46%, #2FBF6B 54%, #0B4A22 66%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: rb-shine 5s linear infinite; }
 [data-rb~="shiny-title-claro"] { background: linear-gradient(100deg, #0B1F12 30%, #0B1F12 44%, #2FBF6B 52%, #0B1F12 60%, #0B1F12 70%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: rb-shine 5s linear infinite; }
 @keyframes rb-shine { from { background-position: 190% 0; } to { background-position: -90% 0; } }
 
@@ -115,7 +115,7 @@ button { font-family: inherit; }
   [data-rb~="shiny"], [data-rb~="shiny-dark"] { animation: none !important; background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; color: #737373 !important; }
   [data-rb~="shiny-dark"] { color: #40DF36 !important; }
   [data-rb~="shiny-title"] { animation: none !important; background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; color: #FFFFFF !important; }
-  [data-rb~="shiny-claro"] { animation: none !important; background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; color: #116230 !important; }
+  [data-rb~="shiny-claro"] { animation: none !important; background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; color: #0B4A22 !important; }
   [data-rb~="shiny-title-claro"] { animation: none !important; background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; color: #0B1F12 !important; }
   [data-rb-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
 }
@@ -160,7 +160,7 @@ article:hover [data-rb~="zoom"],
 /* Hero: en pantallas angostas el texto cae sobre los productos, no sobre
    el fondo vacio, asi que el velo pasa de horizontal a vertical. */
 @media (max-width: 900px) {
-  [data-rb~="hero-veil"] { background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.62) 48%, rgba(255,255,255,0.86) 100%) !important; }
+  [data-rb~="hero-veil"] { background: linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(255,255,255,0.50) 48%, rgba(255,255,255,0.72) 100%) !important; }
 }
 
 /* Catalogo: sidebar + listado. auto-fit generaba una columna de 0px y el
@@ -344,12 +344,12 @@ article:hover button { filter: brightness(1.08); }
     <canvas data-rb="velaris" data-velaris="claro" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block;mix-blend-mode:multiply"></canvas>
     <!-- La foto ya es blanca a la izquierda; el velo solo asegura el contraste
          del texto oscuro cuando el recorte corre los productos hacia ese lado. -->
-    <div data-rb="hero-veil" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0.60) 0%,rgba(255,255,255,0.48) 30%,rgba(255,255,255,0.26) 52%,rgba(255,255,255,0.06) 74%,rgba(255,255,255,0) 88%)"></div>
+    <div data-rb="hero-veil" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0.44) 0%,rgba(255,255,255,0.32) 30%,rgba(255,255,255,0.14) 52%,rgba(255,255,255,0.03) 74%,rgba(255,255,255,0) 88%)"></div>
     <div style="position:relative;max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,84px) 24px;min-height:clamp(450px,43vw,790px);display:flex;align-items:center">
       <div style="max-width:min(100%,580px)">
         <span data-rb="shiny-claro" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">Tecnología · Informática · Gaming</span>
         <h1 data-rb="shiny-title-claro" style="margin:16px 0 0;font-size:clamp(32px,5vw,64px);line-height:1.03;font-weight:800;letter-spacing:-0.035em;text-wrap:balance"><span>Tecnología</span> <span style="--rb-delay:90ms">que</span> <span style="--rb-delay:180ms">mejora</span> <span style="--rb-delay:270ms">tu</span> <span style="--rb-delay:360ms">día.</span></h1>
-        <p style="margin:18px 0 0;max-width:46ch;font-size:clamp(14.5px,1.2vw,17px);line-height:1.55;font-weight:500;color:#3E4A44;text-wrap:pretty">Encontrá tecnología, informática y accesorios para trabajar, crear, jugar y disfrutar más.</p>
+        <p style="margin:18px 0 0;max-width:46ch;font-size:clamp(14.5px,1.2vw,17px);line-height:1.55;font-weight:500;color:#2E3B35;text-wrap:pretty">Encontrá tecnología, informática y accesorios para trabajar, crear, jugar y disfrutar más.</p>
         <div style="margin-top:28px;display:flex;flex-wrap:wrap;gap:12px">
           <a href="#" onClick="{{ goCatalog }}" style="height:52px;padding:0 28px;display:inline-flex;align-items:center;background:#40DF36;color:#0B1F12;font-size:15px;font-weight:700;border-radius:10px;transition:filter 200ms" style-hover="filter:brightness(1.08)">Explorar productos</a>
           <a href="#ofertas" style="height:52px;padding:0 28px;display:inline-flex;align-items:center;border:1.5px solid rgba(11,31,18,0.30);color:#0B1F12;font-size:15px;font-weight:700;border-radius:10px;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:rgba(64,223,54,0.16)">Ver ofertas</a>
@@ -975,14 +975,14 @@ class Component extends DCLogic {
     "  float n3 = snoise(p * 0.75 + vec2(t * 0.1, -t * 0.2) + n2 * 0.2);",
     "  vec3 col = u_bg;",
     "  float dist = length(p) * 1.5;",
-    "  float vignette = 1.0 - smoothstep(0.3, 1.2, dist);",
+    "  float vignette = 1.0 - smoothstep(mix(0.3, 0.75, u_light), mix(1.2, 2.6, u_light), dist);",
     "  col = mix(col, u_colors[0], smoothstep(-0.34, 0.42, n1) * 1.0);",
     "  col = mix(col, u_colors[1], smoothstep(-0.24, 0.46, n2) * 0.90);",
     "  col = mix(col, u_colors[2], smoothstep(-0.38, 0.32, n3) * 0.80);",
     "  col = mix(col, u_colors[3], smoothstep(0.0, 0.7, n1 * n2) * 0.5);",
     "  float glow = smoothstep(0.95, 0.0, dist) * 0.58;",
     "  col += u_colors[1] * glow * (1.0 - u_light);",
-    "  col = mix(col, u_colors[1], glow * u_light * 0.7);",
+    "  col = mix(col, u_colors[1], glow * u_light * 0.95);",
     // En oscuro la vinieta apaga los bordes; en claro los devuelve al fondo,
     // porque multiplicar por 0.38 ensuciaria la foto blanca de abajo.
     "  col = mix(mix(col * 0.38, u_bg, u_light), col, vignette);",
@@ -1011,7 +1011,7 @@ class Component extends DCLogic {
     const claro = canvas.getAttribute("data-velaris") === "claro";
     // Paleta del sitio: lima, verde de marca, esmeralda y negro.
     const COLORES = claro
-      ? ["#A9E585", "#7BDD72", "#93E2CE", "#FFFFFF"]
+      ? ["#7ADB4A", "#40DF36", "#4FD9BC", "#1B9E5A"]
       : ["#86DC2C", "#40DF36", "#16AE95", "#000000"];
     const FONDO = claro ? "#FFFFFF" : "#0D0D0D";
     const VELOCIDAD = 1.4, GRANO = claro ? 0.10 : 0.28;
