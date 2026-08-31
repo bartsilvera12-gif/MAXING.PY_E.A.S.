@@ -157,10 +157,23 @@ article:hover [data-rb~="zoom"],
   [data-rb~="cat"]:hover [data-rb~="rule"] { width: 18px; }
 }
 
-/* Hero: en pantallas angostas el texto cae sobre los productos, no sobre
-   el fondo vacio, asi que el velo pasa de horizontal a vertical. */
+/* Hero: entre 700 y 900px el texto todavia cae sobre los productos, no
+   sobre el fondo vacio, asi que el velo pasa de horizontal a vertical. */
 @media (max-width: 900px) {
   [data-rb~="hero-veil"] { background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.64) 48%, rgba(255,255,255,0.82) 100%) !important; }
+}
+
+/* En telefono se apila: la foto pasa a ser su propio bloque, encuadrada al
+   centro, y el texto va debajo. Superpuestos, el texto tapaba los equipos
+   y obligaba a lavar la foto con el velo. */
+@media (max-width: 700px) {
+  /* !important porque el contenedor trae position/inset en linea. */
+  [data-rb~="hero-media"] { position: relative !important; inset: auto !important; height: clamp(260px, 82vw, 380px) !important; }
+  [data-rb~="hero-media"] img { object-position: 74% 48% !important; }
+  /* Sin texto encima no hace falta aclarar la foto; solo se funde abajo
+     con el fondo de la pagina para que no quede un corte duro. */
+  [data-rb~="hero-veil"] { background: linear-gradient(180deg, rgba(247,251,248,0) 0%, rgba(247,251,248,0) 66%, rgba(247,251,248,0.92) 100%) !important; }
+  [data-rb~="hero-txt"] { min-height: 0 !important; padding: 26px 24px 38px !important; }
 }
 
 /* Catalogo: sidebar + listado. auto-fit generaba una columna de 0px y el
@@ -334,7 +347,8 @@ article:hover button { filter: brightness(1.08); }
 
 <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
 <main>
-  <section aria-label="Bienvenida" style="position:relative;overflow:hidden;isolation:isolate;background:#F7FBF8">
+  <section aria-label="Bienvenida" data-rb="hero" style="position:relative;overflow:hidden;isolation:isolate;background:#F7FBF8">
+    <div data-rb="hero-media" aria-hidden="true" style="position:absolute;inset:0">
     <!-- Respaldo por si la foto no carga: fondo claro con el acento verde a la
          derecha, en vez de un hueco. -->
     <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(70% 90% at 78% 58%, rgba(64,223,54,0.20), rgba(64,223,54,0) 62%), linear-gradient(90deg,#FFFFFF 0%,#F6FBF7 55%,#EAF6EC 100%)"></div>
@@ -345,7 +359,8 @@ article:hover button { filter: brightness(1.08); }
     <!-- La foto ya es blanca a la izquierda; el velo solo asegura el contraste
          del texto oscuro cuando el recorte corre los productos hacia ese lado. -->
     <div data-rb="hero-veil" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0.60) 0%,rgba(255,255,255,0.48) 30%,rgba(255,255,255,0.28) 52%,rgba(255,255,255,0.07) 74%,rgba(255,255,255,0) 88%)"></div>
-    <div style="position:relative;max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,84px) 24px;min-height:clamp(450px,43vw,790px);display:flex;align-items:center">
+    </div>
+    <div data-rb="hero-txt" style="position:relative;max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,84px) 24px;min-height:clamp(450px,43vw,790px);display:flex;align-items:center">
       <div style="max-width:min(100%,580px)">
         <span data-rb="shiny-claro" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">Tecnología · Informática · Gaming</span>
         <h1 data-rb="shiny-title-claro" style="margin:16px 0 0;font-size:clamp(32px,5vw,64px);line-height:1.03;font-weight:800;letter-spacing:-0.035em;text-wrap:balance"><span>Tecnología</span> <span style="--rb-delay:90ms">que</span> <span style="--rb-delay:180ms">mejora</span> <span style="--rb-delay:270ms">tu</span> <span style="--rb-delay:360ms">día.</span></h1>
