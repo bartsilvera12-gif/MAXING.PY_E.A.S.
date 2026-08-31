@@ -39,7 +39,11 @@ while ($listener.IsListening) {
   $res = $ctx.Response
   try {
     $rel = [System.Uri]::UnescapeDataString($req.Url.AbsolutePath)
-    if ($rel -eq '/' -or $rel.EndsWith('/')) { $rel = $rel + 'index.html' }
+    if ($rel -eq "/" -or $rel.EndsWith("/")) { $rel = $rel + "index.html" }
+
+    # Igual que el rewrite de vercel.json: una ruta sin extension prueba con .html
+
+    elseif (-not [System.IO.Path]::HasExtension($rel)) { $rel = $rel + ".html" }
     $rel = $rel.TrimStart('/') -replace '/', '\'
     $full = Join-Path $Root $rel
     $resolved = $null

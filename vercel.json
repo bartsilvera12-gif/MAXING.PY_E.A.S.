@@ -1,5 +1,8 @@
 {
   "outputDirectory": ".",
   "cleanUrls": false,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/politicadeprivacidad", "destination": "/politicadeprivacidad.html" }
+  ]
 }

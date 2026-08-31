@@ -411,7 +411,7 @@ article:hover button { filter: brightness(1.08); }
   </section>
 
   <section aria-label="Promoción" data-rb="aurora-host" style="background:#000000;color:#FFFFFF">
-    <div data-rb="aurora aurora-dark" aria-hidden="true"><span></span><span></span><span></span></div>
+    <canvas data-rb="velaris" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas>
     <div style="max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,72px) 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:40px;align-items:center">
       <div>
         <span data-rb="shiny-dark" style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">Setup completo</span>
@@ -809,7 +809,7 @@ article:hover button { filter: brightness(1.08); }
   <div style="border-top:1px solid #171717">
     <div style="max-width:1320px;margin:0 auto;padding:18px 24px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:12.5px;font-weight:500">
       <span>© 2026 MAXING.py</span>
-      <span>Paraguay</span>
+      <span>Paraguay · Desarrollado por <a href="https://neura.com.py" target="_blank" rel="noopener" style="color:#40DF36;font-weight:700">NEURA</a></span>
     </div>
   </div>
 </footer>
@@ -979,8 +979,12 @@ class Component extends DCLogic {
   ].join("\n");
 
   velarisInit() {
-    const canvas = document.querySelector('[data-rb~="velaris"]');
-    if (!canvas) return;
+    this.velarisRAF = [];
+    this.velarisRO = [];
+    document.querySelectorAll('[data-rb~="velaris"]').forEach((c) => this.velarisMontar(c));
+  }
+
+  velarisMontar(canvas) {
     const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
     if (!gl) return; // sin WebGL queda el degradé CSS que ya esta debajo
 
@@ -1037,8 +1041,9 @@ class Component extends DCLogic {
       gl.viewport(0, 0, canvas.width, canvas.height);
     };
     redimensionar();
-    this.velarisRO = new ResizeObserver(redimensionar);
-    this.velarisRO.observe(canvas.parentElement || canvas);
+    const ro = new ResizeObserver(redimensionar);
+    this.velarisRO.push(ro);
+    ro.observe(canvas.parentElement || canvas);
 
     const dibujar = (t) => {
       gl.uniform2f(loc.res, canvas.width, canvas.height);
@@ -1050,13 +1055,17 @@ class Component extends DCLogic {
     };
 
     if (this.rbReduce) { dibujar(0); return; } // un solo cuadro, sin animar
-    const loop = (t) => { dibujar(t); this.velarisRAF = requestAnimationFrame(loop); };
-    this.velarisRAF = requestAnimationFrame(loop);
+    // Cada canvas guarda su id en su propia posicion: con mas de uno, escribir
+    // siempre en la ultima pisaba el id del otro y quedaba un rAF sin cancelar.
+    const slot = this.velarisRAF.length;
+    this.velarisRAF.push(0);
+    const loop = (t) => { dibujar(t); this.velarisRAF[slot] = requestAnimationFrame(loop); };
+    this.velarisRAF[slot] = requestAnimationFrame(loop);
   }
 
   velarisDestroy() {
-    if (this.velarisRAF) cancelAnimationFrame(this.velarisRAF);
-    if (this.velarisRO) this.velarisRO.disconnect();
+    (this.velarisRAF || []).forEach((id) => cancelAnimationFrame(id));
+    (this.velarisRO || []).forEach((ro) => ro.disconnect());
   }
 
   rbInit() {
