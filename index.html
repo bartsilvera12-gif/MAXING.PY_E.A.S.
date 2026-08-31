@@ -36,7 +36,16 @@
 </script>
 <style>
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; font-family: Manrope, "Helvetica Neue", Helvetica, sans-serif; background: #FFFFFF; color: #171717; -webkit-font-smoothing: antialiased; }
+body { margin: 0; font-family: Manrope, "Helvetica Neue", Helvetica, sans-serif; color: #171717; -webkit-font-smoothing: antialiased;
+  /* Soft Green Glow: el original es un div con radial-gradient sobre blanco.
+     Acá va en el body, fijo al viewport, para que acompañe el scroll en toda
+     la página en vez de centrarse en el documento entero. */
+  background-color: #F4FAF6;
+  background-image: radial-gradient(circle at 50% 45%, rgba(64,223,54,0.30), rgba(64,223,54,0.10) 38%, rgba(64,223,54,0) 68%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 140% 120%;
+  background-position: center; }
 * { box-sizing: border-box; }
 a { color: #171717; text-decoration: none; }
 a:hover { color: #40DF36; }
@@ -188,13 +197,24 @@ article:hover button { filter: brightness(1.08); }
   article:hover [data-rb~="price"] { transform: none !important; }
   article [data-rb~="zoom"]::after { display: none; }
 }
+
+/* --- Beneficios: recuadro con borde verde animado ---
+   El borde es un degrade en el contenedor y una capa interna opaca encima:
+   border-image con gradiente no anima de forma pareja entre navegadores. */
+[data-rb~="benecard"] { padding: 1.6px; border-radius: 14px; background: linear-gradient(115deg, #86DC2C, #40DF36, #16AE95, #40DF36, #86DC2C); background-size: 300% 100%; animation: rb-borde 7s linear infinite; }
+[data-rb~="benecard-in"] { height: 100%; padding: 20px 18px 22px; border-radius: 12.4px; background: #FFFFFF; }
+@keyframes rb-borde { from { background-position: 0% 50%; } to { background-position: 300% 50%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-rb~="benecard"] { animation: none !important; background: #40DF36; }
+}
 </style>
 </helmet>
 
-<div style="min-height:100vh;background:#FFFFFF">
+<div style="min-height:100vh">
 
 <header style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-bottom:1px solid #E8E8E8">
-  <div style="max-width:1320px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;gap:clamp(16px,3vw,44px);flex-wrap:wrap">
+  <div style="max-width:1320px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;gap:clamp(12px,1.6vw,44px);flex-wrap:wrap">
     <button type="button" onClick="{{ toggleMenu }}" aria-label="Abrir menú" style="width:44px;height:44px;display:{{ burgerDisplay }};place-items:center;border:none;background:#000000;color:#FFFFFF;cursor:pointer;border-radius:8px">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
     </button>
@@ -204,7 +224,17 @@ article:hover button { filter: brightness(1.08); }
       <span style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:#40DF36">.py</span>
     </a>
 
+  <nav aria-label="Categorías principales" style="flex:1 1 0;min-width:0;display:{{ navDisplay }}">
+    <div style="min-width:0;display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="8">
+        <a href="#" onClick="{{ n.onClick }}" onMouseEnter="{{ n.onEnter }}" onMouseLeave="{{ closeMega }}" style="padding:7px 11px;font-size:13px;font-weight:700;color:{{ n.color }};background:{{ n.bg }};border:1.5px solid {{ n.border }};border-radius:9px;transition:color 180ms,border-color 180ms,background 180ms,filter 180ms" style-hover="background:#171717;color:#FFFFFF;border-color:#171717">{{ n.label }}</a>
+      </sc-for>
+    </div>
+  </nav>
     <div style="margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 0 auto">
+      <button type="button" onClick="{{ toggleSearch }}" aria-label="Buscar productos" style="width:44px;height:44px;display:grid;place-items:center;border:1.5px solid #40DF3680;background:#FFFFFF;color:#1F8F19;cursor:pointer;border-radius:8px;transition:background 200ms,border-color 200ms" style-hover="background:#F1FBF0;border-color:#40DF36">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      </button>
       <button type="button" onClick="{{ goFavs }}" aria-label="Favoritos" style="position:relative;width:44px;height:44px;display:grid;place-items:center;border:1.5px solid #40DF3680;background:#FFFFFF;color:#1F8F19;cursor:pointer;border-radius:8px;transition:background 200ms,border-color 200ms" style-hover="background:#F1FBF0;border-color:#40DF36">
         <sc-if value="{{ hayFav }}" hint-placeholder-val="{{ true }}">
           <span style="position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;display:grid;place-items:center;background:#E0245E;color:#FFFFFF;font-size:10.5px;font-weight:800;border-radius:9px">{{ favCount }}</span>
@@ -229,20 +259,12 @@ article:hover button { filter: brightness(1.08); }
     </div>
   </sc-if>
 
-  <nav aria-label="Categorías principales" style="border-top:1px solid #F0F0F0;display:{{ navDisplay }}">
-    <div style="max-width:1320px;margin:0 auto;padding:12px 24px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="8">
-        <a href="#" onClick="{{ n.onClick }}" onMouseEnter="{{ n.onEnter }}" onMouseLeave="{{ closeMega }}" style="padding:9px 15px;font-size:14px;font-weight:700;color:{{ n.color }};background:{{ n.bg }};border:1.5px solid {{ n.border }};border-radius:9px;transition:color 180ms,border-color 180ms,background 180ms,filter 180ms" style-hover="background:#171717;color:#FFFFFF;border-color:#171717">{{ n.label }}</a>
-      </sc-for>
-    </div>
-  </nav>
-
   <sc-if value="{{ megaOpen }}" hint-placeholder-val="{{ false }}">
     <div onMouseEnter="{{ keepMega }}" onMouseLeave="{{ closeMega }}" style="border-top:1px solid #F0F0F0;background:#FFFFFF;box-shadow:0 12px 24px rgba(0,0,0,0.04)">
       <div style="max-width:1320px;margin:0 auto;padding:28px 24px 32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:28px">
         <sc-for list="{{ megaCols }}" as="col" hint-placeholder-count="4">
           <div>
-            <h3 style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#737373">{{ col.title }}</h3>
+            <h3 style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ col.title }}</h3>
             <div style="display:flex;flex-direction:column;gap:9px">
               <sc-for list="{{ col.items }}" as="it" hint-placeholder-count="4">
                 <a href="#" onClick="{{ goCatalog }}" style="font-size:14px;font-weight:500;color:#171717">{{ it }}</a>
@@ -267,24 +289,38 @@ article:hover button { filter: brightness(1.08); }
           <sc-for list="{{ cartItems }}" as="p" hint-placeholder-count="2">
             <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:11px 14px;border:1px solid #E8E8E8;border-radius:10px">
               <div style="min-width:0">
-                <span style="display:block;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#737373">{{ p.brand }}</span>
+                <span style="display:block;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ p.brand }}</span>
                 <span style="display:block;font-size:14px;font-weight:700;color:#171717">{{ p.name }}</span>
                 <span style="display:block;margin-top:2px;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:#A3A3A3">Código {{ p.sku }}</span>
               </div>
               <div style="display:flex;align-items:center;gap:14px">
                 <span style="font-size:15px;font-weight:800;letter-spacing:-0.02em;color:#000000">{{ p.price }}</span>
-                <button type="button" onClick="{{ p.quitarCart }}" aria-label="Quitar de la consulta" style="height:32px;padding:0 11px;border:1px solid #E8E8E8;background:#FFFFFF;color:#737373;font-size:12.5px;font-weight:700;border-radius:8px;cursor:pointer;transition:border-color 200ms,color 200ms" style-hover="border-color:#E0245E;color:#E0245E">Quitar</button>
+                <button type="button" onClick="{{ p.quitarCart }}" aria-label="Quitar de la consulta" style="height:32px;padding:0 11px;border:1px solid #E8E8E8;background:#FFFFFF;color:#5C6862;font-size:12.5px;font-weight:700;border-radius:8px;cursor:pointer;transition:border-color 200ms,color 200ms" style-hover="border-color:#E0245E;color:#E0245E">Quitar</button>
               </div>
             </div>
           </sc-for>
         </div>
         <div style="margin-top:16px;padding-top:16px;border-top:1px solid #F0F0F0;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
-          <span style="font-size:13.5px;font-weight:600;color:#737373">Total publicado: <b style="color:#000000">{{ cartTotal }}</b></span>
+          <span style="font-size:13.5px;font-weight:600;color:#5C6862">Total publicado: <b style="color:#000000">{{ cartTotal }}</b></span>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button type="button" onClick="{{ vaciarCart }}" style="height:46px;padding:0 16px;border:1px solid #D4D4D4;background:#FFFFFF;color:#171717;font-size:14px;font-weight:700;border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#171717;background:#F5F5F5">Vaciar</button>
             <a href="{{ cartWa }}" target="_blank" rel="noopener" style="height:46px;padding:0 20px;display:inline-flex;align-items:center;background:#40DF36;color:#000000;font-size:14px;font-weight:700;border-radius:9px;transition:filter 200ms" style-hover="filter:brightness(1.08)">Consultar por WhatsApp</a>
           </div>
         </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="border-top:1px solid #F0F0F0;background:#FFFFFF;box-shadow:0 14px 28px rgba(0,0,0,0.07)">
+      <div style="max-width:1320px;margin:0 auto;padding:16px 24px 20px">
+        <form onSubmit="{{ doSearch }}" role="search" style="display:flex;align-items:center;gap:10px;height:52px;padding:0 18px;background:#F5F5F5;border:1px solid #E8E8E8;border-radius:10px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#737373" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar productos</label>
+          <input id="q" type="search" value="{{ q }}" onInput="{{ onQ }}" placeholder="¿Qué estás buscando?" style="flex:1;min-width:0;border:none;background:transparent;outline:none;font-size:15px;font-family:inherit;color:#171717">
+          <button type="button" onClick="{{ cerrarSearch }}" style="flex:0 0 auto;height:34px;padding:0 12px;border:1px solid #D4D4D4;background:#FFFFFF;color:#171717;font-size:12.5px;font-weight:700;border-radius:8px;cursor:pointer;transition:border-color 200ms" style-hover="border-color:#171717">Cerrar</button>
+          <button type="submit" style="flex:0 0 auto;border:none;background:#000000;color:#FFFFFF;font-size:13px;font-weight:700;padding:9px 16px;border-radius:7px;cursor:pointer;transition:background 200ms" style-hover="background:#40DF36;color:#000000">Buscar</button>
+        </form>
       </div>
     </div>
   </sc-if>
@@ -296,9 +332,10 @@ article:hover button { filter: brightness(1.08); }
     <!-- Respaldo por si la foto no carga: fondo oscuro con el acento verde a la
          derecha, en vez de un hueco. -->
     <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(70% 90% at 82% 55%, rgba(64,223,54,0.22), rgba(64,223,54,0) 62%), linear-gradient(90deg,#0D0D0D 0%,#141414 55%,#1B1B1B 100%)"></div>
-    <img src="./hero.jpg" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:78% 50%">
-    <div data-rb="hero-veil" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,8,8,0.94) 0%,rgba(8,8,8,0.86) 32%,rgba(8,8,8,0.45) 58%,rgba(8,8,8,0.05) 82%,rgba(8,8,8,0) 100%)"></div>
-    <div style="position:relative;max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,84px) 24px;min-height:clamp(420px,38vw,700px);display:flex;align-items:center">
+    <canvas data-rb="velaris" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas>
+    <img src="./hero.jpg" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:78% 50%;opacity:0.62">
+    <div data-rb="hero-veil" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,8,8,0.78) 0%,rgba(8,8,8,0.68) 34%,rgba(8,8,8,0.38) 60%,rgba(8,8,8,0.05) 84%,rgba(8,8,8,0) 100%)"></div>
+    <div style="position:relative;max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,84px) 24px;min-height:clamp(450px,43vw,790px);display:flex;align-items:center">
       <div style="max-width:min(100%,580px)">
         <span data-rb="shiny-dark" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">Tecnología · Informática · Gaming</span>
         <h1 data-rb="shiny-title" style="margin:16px 0 0;font-size:clamp(32px,5vw,64px);line-height:1.03;font-weight:800;letter-spacing:-0.035em;text-wrap:balance"><span>Tecnología</span> <span style="--rb-delay:90ms">que</span> <span style="--rb-delay:180ms">mejora</span> <span style="--rb-delay:270ms">tu</span> <span style="--rb-delay:360ms">día.</span></h1>
@@ -311,23 +348,12 @@ article:hover button { filter: brightness(1.08); }
     </div>
   </section>
 
-  <div style="border-top:1px solid #F0F0F0">
-    <div style="max-width:1320px;margin:0 auto;padding:12px 24px">
-      <form onSubmit="{{ doSearch }}" role="search" style="width:100%;display:flex;align-items:center;gap:10px;height:52px;padding:0 18px;background:#F5F5F5;border:1px solid #F5F5F5;border-radius:10px;transition:border-color 200ms,background 200ms" style-focus="border-color:#40DF36;background:#FFFFFF">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#737373" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4.2-4.2"></path></svg>
-        <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar productos</label>
-        <input id="q" type="search" value="{{ q }}" onInput="{{ onQ }}" placeholder="¿Qué estás buscando?" style="flex:1;border:none;background:transparent;outline:none;font-size:15px;font-weight:500;color:#171717;min-width:0">
-        <button type="submit" style="border:none;background:#000000;color:#FFFFFF;font-size:13px;font-weight:700;padding:9px 16px;border-radius:7px;cursor:pointer;transition:background 200ms" style-hover="background:#40DF36;color:#000000">Buscar</button>
-      </form>
-    </div>
-  </div>
-
   <section aria-labelledby="cat-h" style="border-bottom:1px solid #E8E8E8">
     <div style="max-width:1320px;margin:0 auto;padding:clamp(48px,6vw,80px) 24px">
       <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:end;justify-content:space-between;margin-bottom:32px">
         <div>
           <h2 id="cat-h" style="margin:0;font-size:clamp(26px,3vw,38px);font-weight:800;letter-spacing:-0.03em;color:#000000">Encontrá lo que necesitás</h2>
-          <p style="margin:10px 0 0;font-size:15px;font-weight:500;color:#737373">Categorías de computación, gaming, celulares y accesorios tecnológicos.</p>
+          <p style="margin:10px 0 0;font-size:15px;font-weight:500;color:#5C6862">Categorías de computación, gaming, celulares y accesorios tecnológicos.</p>
         </div>
         <a href="#" onClick="{{ goCatalog }}" style="font-size:14px;font-weight:700;color:#171717;border-bottom:2px solid #40DF36;padding-bottom:3px">Ver todas las categorías</a>
       </div>
@@ -359,7 +385,7 @@ article:hover button { filter: brightness(1.08); }
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden">
             <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center;overflow:hidden">
               <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
-              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.06em;color:#737373;text-align:center;padding:0 12px">{{ p.img }}</span>
+              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.06em;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
               <button type="button" onClick="{{ p.toggleFav }}" aria-label="{{ p.favLabel }}" title="{{ p.favLabel }}" style="position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#E0245E;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="{{ p.favColor }}" stroke-width="1.9" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a3.9 3.9 0 0 1 7-2.4A3.9 3.9 0 0 1 19 11c0 4.6-7 9-7 9z"></path></svg></button>
               <button type="button" onClick="{{ p.addCart }}" aria-label="{{ p.addLabel }}" title="{{ p.addLabel }}" style="position:absolute;top:10px;right:52px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8F19" stroke-width="1.9" aria-hidden="true"><path d="M6 8h12l-1.2 11H7.2L6 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg></button>
               <sc-if value="{{ p.badge }}" hint-placeholder-val="{{ false }}">
@@ -367,9 +393,9 @@ article:hover button { filter: brightness(1.08); }
               </sc-if>
             </div>
             <div style="padding:16px;display:flex;flex-direction:column;gap:6px;flex:1">
-              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#737373">{{ p.brand }}</span>
+              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ p.brand }}</span>
               <h3 style="margin:0;font-size:15px;font-weight:700;line-height:1.3;color:#171717">{{ p.name }}</h3>
-              <p style="margin:0;font-size:12.5px;font-weight:500;line-height:1.45;color:#737373">{{ p.spec }}</p>
+              <p style="margin:0;font-size:12.5px;font-weight:500;line-height:1.45;color:#5C6862">{{ p.spec }}</p>
               <div style="margin-top:auto;padding-top:14px;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap">
                 <span data-rb="price" style="font-size:19px;font-weight:800;letter-spacing:-0.02em;color:#000000">{{ p.price }}</span>
                 <sc-if value="{{ p.oldPrice }}" hint-placeholder-val="{{ false }}">
@@ -395,7 +421,7 @@ article:hover button { filter: brightness(1.08); }
       </div>
       <div data-rb="spot" data-rb-reveal style="position:relative;aspect-ratio:16/10;background:#171717;border-radius:14px;display:grid;place-items:center;overflow:hidden">
         <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#1F1F1F 0 10px,#171717 10px 20px)"></div>
-        <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.06em;color:#737373">foto real: setup escritorio · 16:10</span>
+        <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.06em;color:#5C6862">foto real: setup escritorio · 16:10</span>
       </div>
     </div>
   </section>
@@ -405,7 +431,7 @@ article:hover button { filter: brightness(1.08); }
       <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:end;justify-content:space-between;margin-bottom:32px">
         <div>
           <h2 id="off-h" style="margin:0;font-size:clamp(26px,3vw,38px);font-weight:800;letter-spacing:-0.03em;color:#000000">Ofertas que valen la pena</h2>
-          <p style="margin:10px 0 0;font-size:15px;font-weight:500;color:#737373">Selección con descuento vigente.</p>
+          <p style="margin:10px 0 0;font-size:15px;font-weight:500;color:#5C6862">Selección con descuento vigente.</p>
         </div>
         <a href="#" onClick="{{ goCatalog }}" style="font-size:14px;font-weight:700;color:#171717;border-bottom:2px solid #40DF36;padding-bottom:3px">Ver todas las ofertas</a>
       </div>
@@ -414,15 +440,15 @@ article:hover button { filter: brightness(1.08); }
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden">
             <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center">
               <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
-              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#737373;text-align:center;padding:0 12px">{{ p.img }}</span>
+              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
               <button type="button" onClick="{{ p.toggleFav }}" aria-label="{{ p.favLabel }}" title="{{ p.favLabel }}" style="position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#E0245E;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="{{ p.favColor }}" stroke-width="1.9" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a3.9 3.9 0 0 1 7-2.4A3.9 3.9 0 0 1 19 11c0 4.6-7 9-7 9z"></path></svg></button>
               <button type="button" onClick="{{ p.addCart }}" aria-label="{{ p.addLabel }}" title="{{ p.addLabel }}" style="position:absolute;top:10px;right:52px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8F19" stroke-width="1.9" aria-hidden="true"><path d="M6 8h12l-1.2 11H7.2L6 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg></button>
               <span data-rb="beat" style="position:absolute;top:12px;left:12px;background:#40DF36;color:#000000;font-size:11px;font-weight:800;padding:5px 9px;border-radius:6px">{{ p.badge }}</span>
             </div>
             <div style="padding:16px;display:flex;flex-direction:column;gap:6px;flex:1">
-              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#737373">{{ p.brand }}</span>
+              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ p.brand }}</span>
               <h3 style="margin:0;font-size:15px;font-weight:700;line-height:1.3;color:#171717">{{ p.name }}</h3>
-              <p style="margin:0;font-size:12.5px;font-weight:500;line-height:1.45;color:#737373">{{ p.spec }}</p>
+              <p style="margin:0;font-size:12.5px;font-weight:500;line-height:1.45;color:#5C6862">{{ p.spec }}</p>
               <div style="margin-top:auto;padding-top:14px;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap">
                 <span data-rb="price" style="font-size:19px;font-weight:800;letter-spacing:-0.02em;color:#000000">{{ p.price }}</span>
                 <span style="font-size:13px;font-weight:500;color:#A3A3A3;text-decoration:line-through">{{ p.oldPrice }}</span>
@@ -435,12 +461,12 @@ article:hover button { filter: brightness(1.08); }
     </div>
   </section>
 
-  <section aria-labelledby="new-h" style="border-bottom:1px solid #E8E8E8;background:#F5F5F5">
+  <section aria-labelledby="new-h" style="border-bottom:1px solid #CDE3D3;background:rgba(255,255,255,0.34)">
     <div style="max-width:1320px;margin:0 auto;padding:clamp(48px,6vw,80px) 24px">
       <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:end;justify-content:space-between;margin-bottom:32px">
         <div>
           <h2 id="new-h" style="margin:0;font-size:clamp(26px,3vw,38px);font-weight:800;letter-spacing:-0.03em;color:#000000">Descubrí nuestras últimas novedades</h2>
-          <p style="margin:10px 0 0;font-size:15px;font-weight:500;color:#737373">Ingresos recientes en informática y accesorios.</p>
+          <p style="margin:10px 0 0;font-size:15px;font-weight:500;color:#5C6862">Ingresos recientes en informática y accesorios.</p>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:16px">
@@ -448,14 +474,14 @@ article:hover button { filter: brightness(1.08); }
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden">
             <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center">
               <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
-              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#737373;text-align:center;padding:0 12px">{{ p.img }}</span>
+              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
               <button type="button" onClick="{{ p.toggleFav }}" aria-label="{{ p.favLabel }}" title="{{ p.favLabel }}" style="position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#E0245E;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="{{ p.favColor }}" stroke-width="1.9" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a3.9 3.9 0 0 1 7-2.4A3.9 3.9 0 0 1 19 11c0 4.6-7 9-7 9z"></path></svg></button>
               <button type="button" onClick="{{ p.addCart }}" aria-label="{{ p.addLabel }}" title="{{ p.addLabel }}" style="position:absolute;top:10px;right:52px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8F19" stroke-width="1.9" aria-hidden="true"><path d="M6 8h12l-1.2 11H7.2L6 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg></button>
             </div>
             <div style="padding:16px;display:flex;flex-direction:column;gap:6px;flex:1">
-              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#737373">{{ p.brand }}</span>
+              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ p.brand }}</span>
               <h3 style="margin:0;font-size:15px;font-weight:700;line-height:1.3;color:#171717">{{ p.name }}</h3>
-              <p style="margin:0;font-size:12.5px;font-weight:500;line-height:1.45;color:#737373">{{ p.spec }}</p>
+              <p style="margin:0;font-size:12.5px;font-weight:500;line-height:1.45;color:#5C6862">{{ p.spec }}</p>
               <div data-rb="price" style="margin-top:auto;padding-top:14px;font-size:19px;font-weight:800;letter-spacing:-0.02em;color:#000000">{{ p.price }}</div>
               <button type="button" onClick="{{ p.open }}" style="margin-top:12px;height:44px;border:1px solid #40DF36;background:#40DF36;color:#000000;font-size:13.5px;font-weight:700;border-radius:9px;cursor:pointer;transition:background 200ms,color 200ms,border-color 200ms" style-hover="filter:brightness(0.93)">Ver producto</button>
             </div>
@@ -470,12 +496,11 @@ article:hover button { filter: brightness(1.08); }
       <h2 id="brand-h" style="margin:0 0 28px;font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-0.03em;color:#000000">Las marcas que buscás</h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:12px">
         <sc-for list="{{ brands }}" as="b" hint-placeholder-count="10">
-          <div style="height:82px;display:grid;place-items:center;background:#40DF36;border:1px solid #40DF36;border-radius:10px">
-            <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.08em;font-weight:600;color:#000000">{{ b }}</span>
+          <div style="height:82px;display:grid;place-items:center;background:#116230;border:1px solid #116230;border-radius:10px">
+            <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.08em;font-weight:600;color:#FFFFFF">{{ b }}</span>
           </div>
         </sc-for>
       </div>
-      <p style="margin:16px 0 0;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#A3A3A3">placeholders listos para reemplazar por los logos oficiales (SVG, altura homogénea)</p>
     </div>
   </section>
 
@@ -484,27 +509,30 @@ article:hover button { filter: brightness(1.08); }
       <h2 id="ben-h" style="margin:0 0 32px;font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-0.03em;color:#000000">Por qué comprar en MAXING.py</h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:28px">
         <sc-for list="{{ benefits }}" as="b" hint-placeholder-count="4">
-          <div>
-            <div data-rb="ico" style="width:44px;height:44px;border:1px solid {{ b.line }};background:{{ b.tint }};border-radius:12px;display:grid;place-items:center">{{ b.icon }}</div>
-            <h3 style="margin:16px 0 8px;font-size:16px;font-weight:700;color:#171717">{{ b.title }}</h3>
-            <p style="margin:0;font-size:14px;line-height:1.55;font-weight:500;color:#737373;text-wrap:pretty">{{ b.text }}</p>
+          <div data-rb="benecard">
+            <div data-rb="benecard-in">
+              <div data-rb="ico" style="width:44px;height:44px;border:1px solid {{ b.line }};background:{{ b.tint }};border-radius:12px;display:grid;place-items:center">{{ b.icon }}</div>
+              <h3 style="margin:16px 0 8px;font-size:16px;font-weight:700;color:#171717">{{ b.title }}</h3>
+              <p style="margin:0;font-size:14px;line-height:1.55;font-weight:500;color:#5C6862;text-wrap:pretty">{{ b.text }}</p>
+            </div>
           </div>
         </sc-for>
       </div>
     </div>
   </section>
 
-  <section aria-labelledby="seo-h" style="border-bottom:1px solid #E8E8E8;background:#F5F5F5">
+  <section aria-labelledby="seo-h" style="border-bottom:1px solid #CDE3D3;background:rgba(255,255,255,0.34)">
     <div style="max-width:1320px;margin:0 auto;padding:clamp(36px,4.5vw,64px) 24px">
-      <div style="background:#FFFFFF;border:1.5px solid #40DF36;border-radius:16px;padding:clamp(28px,3.5vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(24px,3vw,44px)">
-      <div>
-        <h2 id="seo-h" style="margin:0;font-size:clamp(24px,2.8vw,36px);font-weight:800;letter-spacing:-0.03em;line-height:1.1;color:#1F8F19">Tecnología para trabajar, crear y disfrutar</h2>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:16px">
-        <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">En MAXING.py acercamos productos de informática y tecnología para profesionales, empresas, gamers y usuarios que buscan rendimiento, calidad y una buena experiencia de compra.</p>
-        <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">Trabajamos con computadoras, notebooks, componentes de PC, monitores, celulares, audio, periféricos y accesorios tecnológicos, con asesoramiento directo para elegir el equipo correcto según el uso y el presupuesto.</p>
-        <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">Si buscás una tienda de tecnología e informática en Paraguay, escribinos por WhatsApp y te ayudamos a encontrar lo que necesitás.</p>
-      </div>
+      <div style="background:#FFFFFF;border:1.5px solid #40DF36;border-radius:16px;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:stretch">
+        <div style="padding:clamp(26px,3.2vw,44px);display:flex;flex-direction:column;justify-content:center;gap:16px">
+          <h2 id="seo-h" style="margin:0;font-size:clamp(22px,2.4vw,32px);font-weight:800;letter-spacing:-0.03em;line-height:1.12;color:#1F8F19">Tecnología para trabajar, crear y disfrutar</h2>
+          <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">En MAXING.py acercamos productos de informática y tecnología para profesionales, empresas, gamers y usuarios que buscan rendimiento, calidad y una buena experiencia de compra.</p>
+          <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">Trabajamos con computadoras, notebooks, componentes de PC, monitores, celulares, audio, periféricos y accesorios tecnológicos, con asesoramiento directo para elegir el equipo correcto según el uso y el presupuesto.</p>
+          <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">Si buscás una tienda de tecnología e informática en Paraguay, escribinos por WhatsApp y te ayudamos a encontrar lo que necesitás.</p>
+        </div>
+        <div style="min-height:clamp(200px,22vw,300px);background:#FFFFFF">
+          <img src="./seccion.jpg" alt="Setup de escritorio con PC, monitor, teclado y auriculares" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 50%">
+        </div>
       </div>
     </div>
   </section>
@@ -513,7 +541,7 @@ article:hover button { filter: brightness(1.08); }
     <div style="max-width:1320px;margin:0 auto;padding:clamp(40px,5vw,64px) 24px;display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between">
       <div>
         <h2 id="soc-h" style="margin:0;font-size:clamp(20px,2.2vw,26px);font-weight:800;letter-spacing:-0.02em;color:#000000">Seguinos y descubrí lo nuevo</h2>
-        <p style="margin:8px 0 0;font-size:14.5px;font-weight:500;color:#737373">Novedades, lanzamientos y recomendaciones en nuestras redes.</p>
+        <p style="margin:8px 0 0;font-size:14.5px;font-weight:500;color:#5C6862">Novedades, lanzamientos y recomendaciones en nuestras redes.</p>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:12px">
         <a href="https://instagram.com/maxing.py" target="_blank" rel="noopener" data-rb="soc soc-ig" style="height:50px;padding:0 22px;display:inline-flex;align-items:center;gap:10px;border:1px solid #40DF36;border-radius:10px;font-size:14.5px;font-weight:700;transition:border-color 220ms,background 220ms,transform 220ms" style-hover="border-color:#2A8F24;background:#F1FBF0">
@@ -543,17 +571,17 @@ article:hover button { filter: brightness(1.08); }
 <sc-if value="{{ isCatalog }}" hint-placeholder-val="{{ false }}">
 <main>
   <div style="max-width:1320px;margin:0 auto;padding:22px 24px 0">
-    <nav aria-label="Ruta de navegación" style="display:flex;gap:8px;font-size:12.5px;font-weight:600;color:#737373">
+    <nav aria-label="Ruta de navegación" style="display:flex;gap:8px;font-size:12.5px;font-weight:600;color:#5C6862">
       <a href="#" onClick="{{ goHome }}">Inicio</a><span>/</span><span style="color:#171717">Productos</span>
     </nav>
     <h1 style="margin:18px 0 8px;font-size:clamp(28px,3.4vw,42px);font-weight:800;letter-spacing:-0.03em;color:#000000">Productos de tecnología e informática</h1>
-    <p style="margin:0;max-width:70ch;font-size:15px;font-weight:500;line-height:1.6;color:#737373">Computación, gaming, celulares, audio, periféricos y accesorios. Filtrá por categoría, marca y precio.</p>
+    <p style="margin:0;max-width:70ch;font-size:15px;font-weight:500;line-height:1.6;color:#5C6862">Computación, gaming, celulares, audio, periféricos y accesorios. Filtrá por categoría, marca y precio.</p>
   </div>
   <div data-rb="cat-layout" style="max-width:1320px;margin:0 auto;padding:28px 24px clamp(56px,6vw,88px)">
     <aside aria-label="Filtros" style="min-width:0;display:flex;flex-direction:column;gap:26px">
       <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
         <div>
-          <h2 style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#737373">{{ f.title }}</h2>
+          <h2 style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ f.title }}</h2>
           <div style="display:flex;flex-direction:column;gap:10px">
             <sc-for list="{{ f.items }}" as="it" hint-placeholder-count="5">
               <label style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;color:#171717;cursor:pointer">
@@ -566,9 +594,9 @@ article:hover button { filter: brightness(1.08); }
         </div>
       </sc-for>
       <div>
-        <h2 style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#737373">Rango de precio</h2>
+        <h2 style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">Rango de precio</h2>
         <input type="range" min="{{ priceMin }}" max="{{ priceMax }}" step="{{ priceStep }}" value="{{ priceVal }}" onInput="{{ onPrice }}" style="width:100%;accent-color:#40DF36;cursor:pointer" aria-label="Precio máximo">
-        <p style="margin:8px 0 0;display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:600;color:#737373">
+        <p style="margin:8px 0 0;display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:600;color:#5C6862">
           <span>{{ priceMinLabel }}</span>
           <span style="color:#171717">{{ priceValLabel }}</span>
         </p>
@@ -585,13 +613,13 @@ article:hover button { filter: brightness(1.08); }
       </form>
       <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding-bottom:20px;border-bottom:1px solid #E8E8E8">
         <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
-          <span style="font-size:13.5px;font-weight:600;color:#737373">{{ resultCount }} productos</span>
+          <span style="font-size:13.5px;font-weight:600;color:#5C6862">{{ resultCount }} productos</span>
           <sc-if value="{{ hasFilters }}" hint-placeholder-val="{{ false }}">
             <button type="button" onClick="{{ clearFilters }}" style="height:32px;padding:0 12px;border:1px solid #D4D4D4;background:#FFFFFF;color:#171717;font-size:12.5px;font-weight:700;border-radius:8px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#171717;background:#F5F5F5">Limpiar filtros</button>
           </sc-if>
         </div>
         <div style="display:flex;gap:10px;align-items:center">
-          <label for="sort" style="font-size:13.5px;font-weight:600;color:#737373">Ordenar por</label>
+          <label for="sort" style="font-size:13.5px;font-weight:600;color:#5C6862">Ordenar por</label>
           <select id="sort" value="{{ sortVal }}" onChange="{{ onSort }}" style="height:42px;padding:0 12px;border:1px solid #D4D4D4;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;background:#FFFFFF;color:#171717;cursor:pointer">
             <option value="rel">Más relevantes</option>
             <option value="asc">Menor precio</option>
@@ -605,7 +633,7 @@ article:hover button { filter: brightness(1.08); }
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden">
             <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center">
               <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
-              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#737373;text-align:center;padding:0 12px">{{ p.img }}</span>
+              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
               <button type="button" onClick="{{ p.toggleFav }}" aria-label="{{ p.favLabel }}" title="{{ p.favLabel }}" style="position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#E0245E;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="{{ p.favColor }}" stroke-width="1.9" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a3.9 3.9 0 0 1 7-2.4A3.9 3.9 0 0 1 19 11c0 4.6-7 9-7 9z"></path></svg></button>
               <button type="button" onClick="{{ p.addCart }}" aria-label="{{ p.addLabel }}" title="{{ p.addLabel }}" style="position:absolute;top:10px;right:52px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8F19" stroke-width="1.9" aria-hidden="true"><path d="M6 8h12l-1.2 11H7.2L6 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg></button>
               <sc-if value="{{ p.badge }}" hint-placeholder-val="{{ false }}">
@@ -613,9 +641,9 @@ article:hover button { filter: brightness(1.08); }
               </sc-if>
             </div>
             <div style="padding:16px;display:flex;flex-direction:column;gap:6px;flex:1">
-              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#737373">{{ p.brand }}</span>
+              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ p.brand }}</span>
               <h3 style="margin:0;font-size:15px;font-weight:700;line-height:1.3;color:#171717">{{ p.name }}</h3>
-              <p style="margin:0;font-size:12.5px;font-weight:500;line-height:1.45;color:#737373">{{ p.spec }}</p>
+              <p style="margin:0;font-size:12.5px;font-weight:500;line-height:1.45;color:#5C6862">{{ p.spec }}</p>
               <p style="margin:0;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:#A3A3A3">Código {{ p.sku }}</p>
               <div style="margin-top:auto;padding-top:14px;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap">
                 <span data-rb="price" style="font-size:19px;font-weight:800;letter-spacing:-0.02em;color:#000000">{{ p.price }}</span>
@@ -631,7 +659,7 @@ article:hover button { filter: brightness(1.08); }
       <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
         <div style="padding:56px 0;text-align:center">
           <p style="margin:0;font-size:16px;font-weight:700;color:#171717">No hay productos con esos filtros.</p>
-          <p style="margin:8px 0 0;font-size:14px;font-weight:500;color:#737373">Probá quitar alguno o ampliar el rango de precio.</p>
+          <p style="margin:8px 0 0;font-size:14px;font-weight:500;color:#5C6862">Probá quitar alguno o ampliar el rango de precio.</p>
           <button type="button" onClick="{{ clearFilters }}" style="margin-top:18px;height:44px;padding:0 20px;border:1px solid #171717;background:#FFFFFF;color:#171717;font-size:13.5px;font-weight:700;border-radius:9px;cursor:pointer;transition:background 200ms,color 200ms" style-hover="background:#171717;color:#FFFFFF">Limpiar filtros</button>
         </div>
       </sc-if>
@@ -643,7 +671,7 @@ article:hover button { filter: brightness(1.08); }
 <sc-if value="{{ isProduct }}" hint-placeholder-val="{{ false }}">
 <main>
   <div style="max-width:1320px;margin:0 auto;padding:22px 24px 0">
-    <nav aria-label="Ruta de navegación" style="display:flex;flex-wrap:wrap;gap:8px;font-size:12.5px;font-weight:600;color:#737373">
+    <nav aria-label="Ruta de navegación" style="display:flex;flex-wrap:wrap;gap:8px;font-size:12.5px;font-weight:600;color:#5C6862">
       <a href="#" onClick="{{ goHome }}">Inicio</a><span>/</span>
       <a href="#" onClick="{{ goCatalog }}">Productos</a><span>/</span>
       <span style="color:#171717">{{ current.name }}</span>
@@ -653,7 +681,7 @@ article:hover button { filter: brightness(1.08); }
     <div>
       <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;border-radius:14px;display:grid;place-items:center;overflow:hidden">
         <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 10px,#F0F0F0 10px 20px)"></div>
-        <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#737373;text-align:center;padding:0 16px">{{ current.img }}</span>
+        <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5C6862;text-align:center;padding:0 16px">{{ current.img }}</span>
       </div>
       <div style="margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
         <sc-for list="{{ gallery }}" as="g" hint-placeholder-count="4">
@@ -664,9 +692,9 @@ article:hover button { filter: brightness(1.08); }
       </div>
     </div>
     <div>
-      <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#737373">{{ current.brand }}</span>
+      <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ current.brand }}</span>
       <h1 style="margin:12px 0 0;font-size:clamp(26px,3.2vw,40px);font-weight:800;letter-spacing:-0.03em;line-height:1.08;color:#000000">{{ current.name }}</h1>
-      <p style="margin:12px 0 0;font-size:15px;font-weight:500;color:#737373">{{ current.spec }}</p>
+      <p style="margin:12px 0 0;font-size:15px;font-weight:500;color:#5C6862">{{ current.spec }}</p>
       <p style="margin:8px 0 0;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#A3A3A3">Código {{ current.sku }}</p>
       <div style="margin-top:26px;padding:22px;border:1px solid #E8E8E8;border-radius:12px">
         <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
@@ -679,7 +707,7 @@ article:hover button { filter: brightness(1.08); }
           </sc-if>
         </div>
         <p style="margin:10px 0 0;font-size:12.5px;font-weight:500;color:#A3A3A3">Precio en guaraníes, IVA incluido.</p>
-        <p style="margin:12px 0 0;font-size:13.5px;font-weight:600;color:#737373">Disponibilidad: {{ current.stock }} · consultanos por stock actualizado.</p>
+        <p style="margin:12px 0 0;font-size:13.5px;font-weight:600;color:#5C6862">Disponibilidad: {{ current.stock }} · consultanos por stock actualizado.</p>
         <div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:12px">
           <a href="{{ current.wa }}" target="_blank" rel="noopener" style="flex:1 1 200px;height:54px;display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#40DF36;color:#000000;font-size:15px;font-weight:700;border-radius:10px;transition:filter 200ms" style-hover="filter:brightness(1.08)">Consultar por WhatsApp</a>
           <button type="button" style="flex:1 1 160px;height:54px;border:1px solid #171717;background:#FFFFFF;color:#171717;font-size:15px;font-weight:700;border-radius:10px;cursor:pointer;transition:background 200ms,color 200ms" style-hover="background:#171717;color:#FFFFFF">Agregar al carrito</button>
@@ -697,7 +725,7 @@ article:hover button { filter: brightness(1.08); }
       <div style="border:1px solid #E8E8E8;border-radius:12px;overflow:hidden">
         <sc-for list="{{ current.specs }}" as="s" hint-placeholder-count="5">
           <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #F0F0F0;font-size:14px">
-            <span style="font-weight:600;color:#737373">{{ s.k }}</span>
+            <span style="font-weight:600;color:#5C6862">{{ s.k }}</span>
             <span style="font-weight:600;color:#171717">{{ s.v }}</span>
           </div>
         </sc-for>
@@ -712,12 +740,12 @@ article:hover button { filter: brightness(1.08); }
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden" style-hover="border-color:#171717">
             <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center">
               <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
-              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#737373;text-align:center;padding:0 12px">{{ p.img }}</span>
+              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
               <button type="button" onClick="{{ p.toggleFav }}" aria-label="{{ p.favLabel }}" title="{{ p.favLabel }}" style="position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#E0245E;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="{{ p.favColor }}" stroke-width="1.9" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a3.9 3.9 0 0 1 7-2.4A3.9 3.9 0 0 1 19 11c0 4.6-7 9-7 9z"></path></svg></button>
               <button type="button" onClick="{{ p.addCart }}" aria-label="{{ p.addLabel }}" title="{{ p.addLabel }}" style="position:absolute;top:10px;right:52px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8F19" stroke-width="1.9" aria-hidden="true"><path d="M6 8h12l-1.2 11H7.2L6 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg></button>
             </div>
             <div style="padding:16px;display:flex;flex-direction:column;gap:6px;flex:1">
-              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#737373">{{ p.brand }}</span>
+              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ p.brand }}</span>
               <h3 style="margin:0;font-size:15px;font-weight:700;line-height:1.3;color:#171717">{{ p.name }}</h3>
               <div style="margin-top:auto;padding-top:14px;font-size:18px;font-weight:800;color:#000000">{{ p.price }}</div>
               <button type="button" onClick="{{ p.open }}" style="margin-top:12px;height:44px;border:1px solid #40DF36;background:#40DF36;color:#000000;font-size:13.5px;font-weight:700;border-radius:9px;cursor:pointer;transition:background 200ms,color 200ms,border-color 200ms" style-hover="filter:brightness(0.93)">Ver producto</button>
@@ -731,7 +759,7 @@ article:hover button { filter: brightness(1.08); }
 </sc-if>
 
 
-<section aria-label="Cómo comprar en MAXING.py" style="background:#FFFFFF;border-top:1px solid #E8E8E8">
+<section aria-label="Cómo comprar en MAXING.py" style="background:#E6F2E9;border-top:1px solid #C8DCCE">
   <div style="max-width:1320px;margin:0 auto;padding:clamp(36px,4vw,56px) 24px;display:flex;flex-wrap:wrap;gap:18px">
     <sc-for list="{{ footerOps }}" as="op" hint-placeholder-count="4">
       <div style="flex:1 1 220px;min-width:0;background:#FFFFFF;border:1.5px solid {{ op.color }};border-radius:12px;padding:18px 20px 20px">
@@ -834,7 +862,7 @@ const PMAX = Math.max(...PRICES);
 const PSTEP = 5000;
 
 class Component extends DCLogic {
-  state = { page: "home", pid: 0, menuOpen: false, mega: null, narrow: false, fCat: [], fBrand: [], fStock: [], fMax: PMAX, sort: "rel", q: "", fav: [], cart: [], onlyFav: false, cartOpen: false };
+  state = { page: "home", pid: 0, menuOpen: false, mega: null, narrow: false, fCat: [], fBrand: [], fStock: [], fMax: PMAX, sort: "rel", q: "", fav: [], cart: [], onlyFav: false, cartOpen: false, searchOpen: false };
 
   // Favoritos y lista de consulta sobreviven al recargar. Sin backend, el
   // unico lugar donde persistir es el navegador del visitante.
@@ -881,6 +909,156 @@ class Component extends DCLogic {
   /* ---- React Bits (port vanilla): SpotlightCard, ScrollReveal, Magnet ----
      El runtime del canvas re-renderiza, así que todo va por delegación en
      document + un MutationObserver que re-escanea los nodos nuevos. */
+
+  /* ---- Velaris: degradé animado con simplex noise, portado a WebGL vanilla ----
+     El componente original es React + Tailwind; acá solo se conserva el shader,
+     que es GLSL puro. Los colores salen de la paleta del sitio. Si el navegador
+     no soporta WebGL, queda el degradé CSS de respaldo que ya estaba debajo. */
+  VELARIS_VS = [
+    "attribute vec2 position;",
+    "varying vec2 vUv;",
+    "void main() {",
+    "  vUv = position * 0.5 + 0.5;",
+    "  gl_Position = vec4(position, 0.0, 1.0);",
+    "}"
+  ].join("\n");
+
+  VELARIS_FS = [
+    "precision highp float;",
+    "varying vec2 vUv;",
+    "uniform vec2  u_resolution;",
+    "uniform float u_time;",
+    "uniform float u_grain;",
+    "uniform vec3  u_colors[4];",
+    "uniform vec3  u_bg;",
+    "vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }",
+    "float snoise(vec2 v){",
+    "  const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);",
+    "  vec2 i  = floor(v + dot(v, C.yy) );",
+    "  vec2 x0 = v -   i + dot(i, C.xx);",
+    "  vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);",
+    "  vec4 x12 = x0.xyxy + C.xxzz;",
+    "  x12.xy -= i1;",
+    "  i = mod(i, 289.0);",
+    "  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));",
+    "  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);",
+    "  m = m*m ; m = m*m ;",
+    "  vec3 x = 2.0 * fract(p * C.www) - 1.0;",
+    "  vec3 h = abs(x) - 0.5;",
+    "  vec3 ox = floor(x + 0.5);",
+    "  vec3 a0 = x - ox;",
+    "  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );",
+    "  vec3 g;",
+    "  g.x  = a0.x  * x0.x  + h.x  * x0.y;",
+    "  g.yz = a0.yz * x12.xz + h.yz * x12.yw;",
+    "  return 130.0 * dot(m, g);",
+    "}",
+    "void main() {",
+    "  vec2 uv = vUv;",
+    "  float ratio = u_resolution.x / u_resolution.y;",
+    "  vec2 p = uv - vec2(0.12, 0.5);", // centro del efecto corrido a la izquierda
+    "  p.x *= ratio;",
+    "  float t = u_time * 0.1;",
+    "  float n1 = snoise(p * 0.4 + vec2(t * 0.2, -t * 0.3));",
+    "  float n2 = snoise(p * 0.55 + vec2(-t * 0.15, t * 0.25) + n1 * 0.25);",
+    "  float n3 = snoise(p * 0.75 + vec2(t * 0.1, -t * 0.2) + n2 * 0.2);",
+    "  vec3 col = u_bg;",
+    "  float dist = length(p) * 1.5;",
+    "  float vignette = 1.0 - smoothstep(0.3, 1.2, dist);",
+    "  col = mix(col, u_colors[0], smoothstep(-0.25, 0.5, n1) * 0.72);",
+    "  col = mix(col, u_colors[1], smoothstep(-0.15, 0.55, n2) * 0.60);",
+    "  col = mix(col, u_colors[2], smoothstep(-0.3, 0.4, n3) * 0.50);",
+    "  col = mix(col, u_colors[3], smoothstep(0.0, 0.7, n1 * n2) * 0.5);",
+    "  float glow = smoothstep(0.85, 0.0, dist) * 0.28;",
+    "  col += u_colors[1] * glow;",
+    "  col = mix(col * 0.24, col, vignette);",
+    "  float grain = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453 + u_time);",
+    "  col += (grain - 0.5) * u_grain * 0.1;",
+    "  gl_FragColor = vec4(col, 1.0);",
+    "}"
+  ].join("\n");
+
+  velarisInit() {
+    const canvas = document.querySelector('[data-rb~="velaris"]');
+    if (!canvas) return;
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    if (!gl) return; // sin WebGL queda el degradé CSS que ya esta debajo
+
+    const hexARgb = (hex) => {
+      const h = hex.replace("#", "");
+      return [parseInt(h.slice(0, 2), 16) / 255, parseInt(h.slice(2, 4), 16) / 255, parseInt(h.slice(4, 6), 16) / 255];
+    };
+    // Paleta del sitio: lima, verde de marca, esmeralda y negro.
+    const COLORES = ["#86DC2C", "#40DF36", "#16AE95", "#000000"];
+    const FONDO = "#0D0D0D";
+    const VELOCIDAD = 1.4, GRANO = 0.28;
+
+    const compilar = (tipo, src) => {
+      const s = gl.createShader(tipo);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error("[velaris]", gl.getShaderInfoLog(s)); return null; }
+      return s;
+    };
+    const vs = compilar(gl.VERTEX_SHADER, this.VELARIS_VS);
+    const fs = compilar(gl.FRAGMENT_SHADER, this.VELARIS_FS);
+    if (!vs || !fs) return;
+
+    const program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { console.error("[velaris]", gl.getProgramInfoLog(program)); return; }
+    gl.useProgram(program);
+
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const pos = gl.getAttribLocation(program, "position");
+    gl.enableVertexAttribArray(pos);
+    gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+    const loc = {
+      res: gl.getUniformLocation(program, "u_resolution"),
+      time: gl.getUniformLocation(program, "u_time"),
+      grain: gl.getUniformLocation(program, "u_grain"),
+      colors: gl.getUniformLocation(program, "u_colors"),
+      bg: gl.getUniformLocation(program, "u_bg")
+    };
+    const planos = new Float32Array(COLORES.reduce((a, c) => a.concat(hexARgb(c)), []));
+    const fondo = hexARgb(FONDO);
+
+    const redimensionar = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = canvas.clientWidth || canvas.parentElement.clientWidth;
+      const h = canvas.clientHeight || canvas.parentElement.clientHeight;
+      canvas.width = Math.max(1, Math.round(w * dpr));
+      canvas.height = Math.max(1, Math.round(h * dpr));
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    };
+    redimensionar();
+    this.velarisRO = new ResizeObserver(redimensionar);
+    this.velarisRO.observe(canvas.parentElement || canvas);
+
+    const dibujar = (t) => {
+      gl.uniform2f(loc.res, canvas.width, canvas.height);
+      gl.uniform1f(loc.time, t * 0.001 * VELOCIDAD);
+      gl.uniform1f(loc.grain, GRANO);
+      gl.uniform3f(loc.bg, fondo[0], fondo[1], fondo[2]);
+      gl.uniform3fv(loc.colors, planos);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    };
+
+    if (this.rbReduce) { dibujar(0); return; } // un solo cuadro, sin animar
+    const loop = (t) => { dibujar(t); this.velarisRAF = requestAnimationFrame(loop); };
+    this.velarisRAF = requestAnimationFrame(loop);
+  }
+
+  velarisDestroy() {
+    if (this.velarisRAF) cancelAnimationFrame(this.velarisRAF);
+    if (this.velarisRO) this.velarisRO.disconnect();
+  }
+
   rbInit() {
     this.rbSeen = new WeakSet();
     this.rbMagnets = [];
@@ -976,12 +1154,14 @@ class Component extends DCLogic {
         this.rbQueued = requestAnimationFrame(() => { this.rbQueued = 0; this.rbScan(); });
       });
       this.rbMO.observe(document.body, { childList: true, subtree: true });
+      this.velarisInit();
     } catch (err) {
       revealAll();
     }
   }
 
   rbDestroy() {
+    this.velarisDestroy();
     if (this.rbFallback) clearTimeout(this.rbFallback);
     if (this.rbMO) this.rbMO.disconnect();
     if (this.rbIO) this.rbIO.disconnect();
@@ -1148,9 +1328,12 @@ class Component extends DCLogic {
       novedades: view(PRODUCTS.slice(8, 12)),
       catalogItems: view(found),
       // --- Buscador ---
+      searchOpen: s.searchOpen,
+      toggleSearch: () => this.setState({ searchOpen: !s.searchOpen, cartOpen: false }),
+      cerrarSearch: () => this.setState({ searchOpen: false }),
       q: s.q,
       onQ: (e) => this.setState({ q: e.target.value }),
-      doSearch: (e) => { if (e) e.preventDefault(); this.setState({ page: "catalog", onlyFav: false, cartOpen: false, menuOpen: false }); window.scrollTo(0, 0); },
+      doSearch: (e) => { if (e) e.preventDefault(); this.setState({ page: "catalog", onlyFav: false, cartOpen: false, menuOpen: false, searchOpen: false }); window.scrollTo(0, 0); },
       hayBusqueda: s.q.trim().length > 0,
       etiquetaBusqueda: 'Buscando "' + s.q.trim() + '"',
       limpiarBusqueda: () => this.setState({ q: "" }),
@@ -1164,7 +1347,7 @@ class Component extends DCLogic {
       cartCount: s.cart.length,
       hayCart: s.cart.length > 0,
       cartOpen: s.cartOpen && s.cart.length > 0,
-      toggleCart: () => this.setState({ cartOpen: !s.cartOpen }),
+      toggleCart: () => this.setState({ cartOpen: !s.cartOpen, searchOpen: false }),
       cerrarCart: () => this.setState({ cartOpen: false }),
       vaciarCart: () => this.guardar({ cart: [] }),
       cartItems: view(s.cart.map((i) => PRODUCTS[i]).filter(Boolean)),
