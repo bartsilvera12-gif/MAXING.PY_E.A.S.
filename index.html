@@ -204,6 +204,8 @@ article:hover button { filter: brightness(1.08); }
 [data-rb~="benecard"] { padding: 1.6px; border-radius: 14px; background: linear-gradient(115deg, #86DC2C, #40DF36, #16AE95, #40DF36, #86DC2C); background-size: 300% 100%; animation: rb-borde 7s linear infinite; }
 [data-rb~="benecard-in"] { height: 100%; padding: 20px 18px 22px; border-radius: 12.4px; background: #FFFFFF; }
 @keyframes rb-borde { from { background-position: 0% 50%; } to { background-position: 300% 50%; } }
+/* El ultimo item del menu movil no lleva separador colgando */
+[data-rb~="menu-movil"] a:last-child { border-bottom: 0 !important; }
 
 @media (prefers-reduced-motion: reduce) {
   [data-rb~="benecard"] { animation: none !important; background: #40DF36; }
@@ -251,11 +253,10 @@ article:hover button { filter: brightness(1.08); }
   </div>
 
   <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
-    <div style="border-top:1px solid #F0F0F0;background:#FFFFFF;padding:12px 24px 22px;display:flex;flex-direction:column;gap:2px">
+    <div data-rb="menu-movil" style="border-top:1px solid #F0F0F0;background:#FFFFFF;padding:12px 24px 22px;display:flex;flex-direction:column;gap:2px">
       <sc-for list="{{ nav }}" as="n" hint-placeholder-count="8">
         <a href="#" onClick="{{ n.onClick }}" style="padding:13px 0;font-size:16px;font-weight:600;border-bottom:1px solid #F5F5F5">{{ n.label }}</a>
       </sc-for>
-      <a href="{{ waLink }}" target="_blank" rel="noopener" style="margin-top:14px;height:50px;display:grid;place-items:center;background:#40DF36;color:#000000;font-weight:700;border-radius:10px">Consultar por WhatsApp</a>
     </div>
   </sc-if>
 
@@ -1319,7 +1320,8 @@ class Component extends DCLogic {
 
     return {
       waLink: wa,
-      showWa: this.props.showFloatingWhatsapp ?? true,
+      // El boton flotante se esconde mientras el menu movil esta desplegado
+      showWa: (this.props.showFloatingWhatsapp ?? true) && !(s.menuOpen && s.narrow),
       isHome: s.page === "home", isCatalog: s.page === "catalog", isProduct: s.page === "product",
       goHome: this.go("home"), goCatalog: this.go("catalog"), noop: (e) => e.preventDefault(),
       toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
