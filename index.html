@@ -170,9 +170,9 @@ article:hover [data-rb~="zoom"],
   /* !important porque el contenedor trae position/inset en linea. */
   [data-rb~="hero-media"] { position: relative !important; inset: auto !important; height: clamp(260px, 82vw, 380px) !important; }
   [data-rb~="hero-media"] img { object-position: 74% 48% !important; }
-  /* Sin texto encima no hace falta aclarar la foto; solo se funde abajo
-     con el fondo de la pagina para que no quede un corte duro. */
-  [data-rb~="hero-veil"] { background: linear-gradient(180deg, rgba(247,251,248,0) 0%, rgba(247,251,248,0) 66%, rgba(247,251,248,0.92) 100%) !important; }
+  /* En telefono el verde se atenua con un lavado blanco parejo, y el borde
+     inferior se funde con el fondo para que no quede un corte duro. */
+  [data-rb~="hero-veil"] { background: linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(255,255,255,0.34) 62%, rgba(247,251,248,0.94) 100%) !important; }
   [data-rb~="hero-txt"] { min-height: 0 !important; padding: 26px 24px 38px !important; }
 }
 
@@ -979,6 +979,22 @@ const PRODUCTS = [
       "Su diseño Slim en color blanco aporta un estilo moderno que se adapta perfectamente a cualquier setup o espacio de entretenimiento."
     ],
     features: ["825 GB de almacenamiento", "Alto rendimiento y carga rápida", "Edición Digital", "Control inalámbrico DualSense incluido", "Color White", "Modelo CFI-2115 B01X", "Diseño compacto Slim"] },
+
+  { brand: "Apple", name: "iPhone 17 256 GB", spec: "6,3\" · 48+48 MP · 18 MP · Black", price: 6700000, cat: "Celulares", stock: "Disponible", sku: "BE/A3520", foto: "./productos/apple-iphone-17.jpg", img: "foto: iPhone 17",
+    desc: [
+      "Descubrí el iPhone 17, un smartphone que combina potencia, diseño y versatilidad para acompañarte en cada momento. Su elegante acabado Black le brinda un estilo moderno y sofisticado, mientras que sus 256 GB de almacenamiento ofrecen amplio espacio para tus fotos, videos, aplicaciones y archivos.",
+      "Pensado para el día a día, es una excelente opción tanto para trabajo como para entretenimiento. Disfrutá de tus contenidos, capturá tus mejores momentos y mantenete conectado estés donde estés, con una experiencia fluida y práctica."
+    ],
+    features: ["256 GB de almacenamiento", "Color Black", "Alto rendimiento", "Cámaras 48+48 MP", "Frontal de 18 MP", "Pantalla de 6,3\""] },
+
+  // Provisorio en Monitores: no hay categoria de TV todavia (ver README).
+  { brand: "Samsung", name: "Smart TV LED 55\" UN55U8000FGXPR", spec: "55\" · UHD 4K · Crystal · Smart TV", price: 3200000, cat: "Monitores", stock: "Disponible", sku: "UN55U8000FGXPR", foto: "./productos/samsung-tv-55-un55u8000.jpg", img: "foto: Samsung Smart TV 55",
+    desc: [
+      "Disfrutá de una experiencia de entretenimiento más inmersiva con el Samsung Smart TV de 55\", que combina un diseño elegante con la calidad de imagen UHD 4K y la tecnología Crystal para ofrecer imágenes nítidas, colores vibrantes y gran nivel de detalle.",
+      "Su pantalla de 55 pulgadas es ideal para disfrutar películas, series, deportes y videojuegos con una experiencia visual envolvente. Gracias a sus funciones Smart, podés acceder fácilmente a tus plataformas y contenidos favoritos desde un solo lugar.",
+      "Perfecto para convertir tu sala en un verdadero espacio de entretenimiento, ya sea para una noche de películas, disfrutar de tus series favoritas o vivir tus partidas en una pantalla de gran tamaño."
+    ],
+    features: ["Pantalla de 55\"", "Resolución UHD 4K", "Tecnología Crystal", "Smart TV", "Ideal para películas, series y streaming", "Excelente opción para gaming y entretenimiento"] },
 
   // --- Demo pendiente de reemplazo (ver README) ---
   { brand: "ASUS", name: "ROG Strix G16", spec: "RTX 4060 · 16 GB RAM · 512 GB SSD", price: 8250000, cat: "Gaming", stock: "Disponible", img: "foto: notebook gamer", sku: "MX-NB-0142", badge: "" },
