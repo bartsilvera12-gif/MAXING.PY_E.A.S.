@@ -333,7 +333,7 @@ article:hover button { filter: brightness(1.08); }
          derecha, en vez de un hueco. -->
     <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(70% 90% at 82% 55%, rgba(64,223,54,0.22), rgba(64,223,54,0) 62%), linear-gradient(90deg,#0D0D0D 0%,#141414 55%,#1B1B1B 100%)"></div>
     <canvas data-rb="velaris" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas>
-    <img src="./hero.jpg" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:78% 50%;opacity:0.62">
+    <img src="./hero.jpg" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:78% 50%;opacity:0.40">
     <div data-rb="hero-veil" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,8,8,0.78) 0%,rgba(8,8,8,0.68) 34%,rgba(8,8,8,0.38) 60%,rgba(8,8,8,0.05) 84%,rgba(8,8,8,0) 100%)"></div>
     <div style="position:relative;max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,84px) 24px;min-height:clamp(450px,43vw,790px);display:flex;align-items:center">
       <div style="max-width:min(100%,580px)">
@@ -956,7 +956,7 @@ class Component extends DCLogic {
     "void main() {",
     "  vec2 uv = vUv;",
     "  float ratio = u_resolution.x / u_resolution.y;",
-    "  vec2 p = uv - vec2(0.12, 0.5);", // centro del efecto corrido a la izquierda
+    "  vec2 p = uv - vec2(0.38, 0.5);", // centro del efecto corrido a la izquierda
     "  p.x *= ratio;",
     "  float t = u_time * 0.1;",
     "  float n1 = snoise(p * 0.4 + vec2(t * 0.2, -t * 0.3));",
@@ -965,13 +965,13 @@ class Component extends DCLogic {
     "  vec3 col = u_bg;",
     "  float dist = length(p) * 1.5;",
     "  float vignette = 1.0 - smoothstep(0.3, 1.2, dist);",
-    "  col = mix(col, u_colors[0], smoothstep(-0.25, 0.5, n1) * 0.72);",
-    "  col = mix(col, u_colors[1], smoothstep(-0.15, 0.55, n2) * 0.60);",
-    "  col = mix(col, u_colors[2], smoothstep(-0.3, 0.4, n3) * 0.50);",
+    "  col = mix(col, u_colors[0], smoothstep(-0.34, 0.42, n1) * 1.0);",
+    "  col = mix(col, u_colors[1], smoothstep(-0.24, 0.46, n2) * 0.90);",
+    "  col = mix(col, u_colors[2], smoothstep(-0.38, 0.32, n3) * 0.80);",
     "  col = mix(col, u_colors[3], smoothstep(0.0, 0.7, n1 * n2) * 0.5);",
-    "  float glow = smoothstep(0.85, 0.0, dist) * 0.28;",
+    "  float glow = smoothstep(0.95, 0.0, dist) * 0.58;",
     "  col += u_colors[1] * glow;",
-    "  col = mix(col * 0.24, col, vignette);",
+    "  col = mix(col * 0.38, col, vignette);",
     "  float grain = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453 + u_time);",
     "  col += (grain - 0.5) * u_grain * 0.1;",
     "  gl_FragColor = vec4(col, 1.0);",
