@@ -394,8 +394,13 @@ article:hover button { filter: brightness(1.08); }
         <sc-for list="{{ featured }}" as="p" hint-placeholder-count="8">
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden">
             <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center;overflow:hidden">
-              <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
-              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.06em;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
+              <sc-if value="{{ p.foto }}" hint-placeholder-val="{{ true }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background:#FFFFFF"><img src="{{ p.foto }}" alt="{{ p.name }}" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:8%"></div>
+              </sc-if>
+              <sc-if value="{{ p.sinFoto }}" hint-placeholder-val="{{ false }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
+                <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.06em;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
+              </sc-if>
               <button type="button" onClick="{{ p.toggleFav }}" aria-label="{{ p.favLabel }}" title="{{ p.favLabel }}" style="position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#E0245E;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="{{ p.favColor }}" stroke-width="1.9" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a3.9 3.9 0 0 1 7-2.4A3.9 3.9 0 0 1 19 11c0 4.6-7 9-7 9z"></path></svg></button>
               <button type="button" onClick="{{ p.addCart }}" aria-label="{{ p.addLabel }}" title="{{ p.addLabel }}" style="position:absolute;top:10px;right:52px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8F19" stroke-width="1.9" aria-hidden="true"><path d="M6 8h12l-1.2 11H7.2L6 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg></button>
               <sc-if value="{{ p.badge }}" hint-placeholder-val="{{ false }}">
@@ -449,8 +454,13 @@ article:hover button { filter: brightness(1.08); }
         <sc-for list="{{ offers }}" as="p" hint-placeholder-count="4">
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden">
             <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center">
-              <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
-              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
+              <sc-if value="{{ p.foto }}" hint-placeholder-val="{{ true }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background:#FFFFFF"><img src="{{ p.foto }}" alt="{{ p.name }}" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:8%"></div>
+              </sc-if>
+              <sc-if value="{{ p.sinFoto }}" hint-placeholder-val="{{ false }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
+                <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
+              </sc-if>
               <button type="button" onClick="{{ p.toggleFav }}" aria-label="{{ p.favLabel }}" title="{{ p.favLabel }}" style="position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#E0245E;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="{{ p.favColor }}" stroke-width="1.9" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a3.9 3.9 0 0 1 7-2.4A3.9 3.9 0 0 1 19 11c0 4.6-7 9-7 9z"></path></svg></button>
               <button type="button" onClick="{{ p.addCart }}" aria-label="{{ p.addLabel }}" title="{{ p.addLabel }}" style="position:absolute;top:10px;right:52px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8F19" stroke-width="1.9" aria-hidden="true"><path d="M6 8h12l-1.2 11H7.2L6 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg></button>
               <span data-rb="beat" style="position:absolute;top:12px;left:12px;background:#40DF36;color:#000000;font-size:11px;font-weight:800;padding:5px 9px;border-radius:6px">{{ p.badge }}</span>
@@ -483,8 +493,13 @@ article:hover button { filter: brightness(1.08); }
         <sc-for list="{{ novedades }}" as="p" hint-placeholder-count="4">
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden">
             <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center">
-              <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
-              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
+              <sc-if value="{{ p.foto }}" hint-placeholder-val="{{ true }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background:#FFFFFF"><img src="{{ p.foto }}" alt="{{ p.name }}" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:8%"></div>
+              </sc-if>
+              <sc-if value="{{ p.sinFoto }}" hint-placeholder-val="{{ false }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
+                <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
+              </sc-if>
               <button type="button" onClick="{{ p.toggleFav }}" aria-label="{{ p.favLabel }}" title="{{ p.favLabel }}" style="position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#E0245E;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="{{ p.favColor }}" stroke-width="1.9" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a3.9 3.9 0 0 1 7-2.4A3.9 3.9 0 0 1 19 11c0 4.6-7 9-7 9z"></path></svg></button>
               <button type="button" onClick="{{ p.addCart }}" aria-label="{{ p.addLabel }}" title="{{ p.addLabel }}" style="position:absolute;top:10px;right:52px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8F19" stroke-width="1.9" aria-hidden="true"><path d="M6 8h12l-1.2 11H7.2L6 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg></button>
             </div>
@@ -642,8 +657,13 @@ article:hover button { filter: brightness(1.08); }
         <sc-for list="{{ catalogItems }}" as="p" hint-placeholder-count="9">
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden">
             <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center">
-              <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
-              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
+              <sc-if value="{{ p.foto }}" hint-placeholder-val="{{ true }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background:#FFFFFF"><img src="{{ p.foto }}" alt="{{ p.name }}" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:8%"></div>
+              </sc-if>
+              <sc-if value="{{ p.sinFoto }}" hint-placeholder-val="{{ false }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
+                <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
+              </sc-if>
               <button type="button" onClick="{{ p.toggleFav }}" aria-label="{{ p.favLabel }}" title="{{ p.favLabel }}" style="position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#E0245E;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="{{ p.favColor }}" stroke-width="1.9" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a3.9 3.9 0 0 1 7-2.4A3.9 3.9 0 0 1 19 11c0 4.6-7 9-7 9z"></path></svg></button>
               <button type="button" onClick="{{ p.addCart }}" aria-label="{{ p.addLabel }}" title="{{ p.addLabel }}" style="position:absolute;top:10px;right:52px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8F19" stroke-width="1.9" aria-hidden="true"><path d="M6 8h12l-1.2 11H7.2L6 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg></button>
               <sc-if value="{{ p.badge }}" hint-placeholder-val="{{ false }}">
@@ -690,9 +710,17 @@ article:hover button { filter: brightness(1.08); }
   <div style="max-width:1320px;margin:0 auto;padding:26px 24px clamp(48px,6vw,80px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:clamp(28px,4vw,56px)">
     <div>
       <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;border-radius:14px;display:grid;place-items:center;overflow:hidden">
-        <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 10px,#F0F0F0 10px 20px)"></div>
-        <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5C6862;text-align:center;padding:0 16px">{{ current.img }}</span>
+        <sc-if value="{{ current.foto }}" hint-placeholder-val="{{ true }}">
+          <div data-rb="zoom" style="position:absolute;inset:0;background:#FFFFFF"><img src="{{ current.foto }}" alt="{{ current.name }}" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:8%"></div>
+        </sc-if>
+        <sc-if value="{{ current.sinFoto }}" hint-placeholder-val="{{ false }}">
+          <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 10px,#F0F0F0 10px 20px)"></div>
+          <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5C6862;text-align:center;padding:0 16px">{{ current.img }}</span>
+        </sc-if>
       </div>
+      <!-- Solo mientras el producto no tenga foto real: con una sola foto,
+           cuatro miniaturas de relleno prometen imagenes que no existen. -->
+      <sc-if value="{{ hayGaleria }}" hint-placeholder-val="{{ false }}">
       <div style="margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
         <sc-for list="{{ gallery }}" as="g" hint-placeholder-count="4">
           <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;border:1px solid #E8E8E8;border-radius:9px;display:grid;place-items:center;cursor:pointer;transition:border-color 200ms" style-hover="border-color:#171717">
@@ -700,6 +728,7 @@ article:hover button { filter: brightness(1.08); }
           </div>
         </sc-for>
       </div>
+      </sc-if>
     </div>
     <div>
       <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ current.brand }}</span>
@@ -723,6 +752,12 @@ article:hover button { filter: brightness(1.08); }
           <button type="button" style="flex:1 1 160px;height:54px;border:1px solid #171717;background:#FFFFFF;color:#171717;font-size:15px;font-weight:700;border-radius:10px;cursor:pointer;transition:background 200ms,color 200ms" style-hover="background:#171717;color:#FFFFFF">Agregar al carrito</button>
         </div>
       </div>
+      <sc-if value="{{ current.hayDesc }}" hint-placeholder-val="{{ true }}">
+        <h2 style="margin:34px 0 14px;font-size:17px;font-weight:700;color:#000000">Descripción</h2>
+        <sc-for list="{{ current.desc }}" as="parr" hint-placeholder-count="3">
+          <p style="margin:0 0 12px;font-size:14.5px;font-weight:500;line-height:1.65;color:#525252;text-wrap:pretty">{{ parr }}</p>
+        </sc-for>
+      </sc-if>
       <h2 style="margin:34px 0 14px;font-size:17px;font-weight:700;color:#000000">Características principales</h2>
       <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
         <sc-for list="{{ current.features }}" as="f" hint-placeholder-count="4">
@@ -749,8 +784,13 @@ article:hover button { filter: brightness(1.08); }
         <sc-for list="{{ related }}" as="p" hint-placeholder-count="4">
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden" style-hover="border-color:#171717">
             <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center">
-              <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
-              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
+              <sc-if value="{{ p.foto }}" hint-placeholder-val="{{ true }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background:#FFFFFF"><img src="{{ p.foto }}" alt="{{ p.name }}" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:8%"></div>
+              </sc-if>
+              <sc-if value="{{ p.sinFoto }}" hint-placeholder-val="{{ false }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
+                <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
+              </sc-if>
               <button type="button" onClick="{{ p.toggleFav }}" aria-label="{{ p.favLabel }}" title="{{ p.favLabel }}" style="position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#E0245E;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="{{ p.favColor }}" stroke-width="1.9" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a3.9 3.9 0 0 1 7-2.4A3.9 3.9 0 0 1 19 11c0 4.6-7 9-7 9z"></path></svg></button>
               <button type="button" onClick="{{ p.addCart }}" aria-label="{{ p.addLabel }}" title="{{ p.addLabel }}" style="position:absolute;top:10px;right:52px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8F19" stroke-width="1.9" aria-hidden="true"><path d="M6 8h12l-1.2 11H7.2L6 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg></button>
             </div>
@@ -848,6 +888,69 @@ const CAT = [
 
 const NAV_GREENS = ["#2FBF6B", "#86DC2C", "#6ADD2F", "#4EDE33", "#40DF36", "#2FD453", "#24CA6B", "#1BBD83", "#16B092", "#14A28C"];
 const PRODUCTS = [
+  // --- Catálogo real cargado con el cliente (agosto 2026) ---
+  { brand: "MSI", name: "Katana 15 B14WEK-001US", spec: "Core i7-14650HX · RTX 5050 8 GB · 16 GB / 512 GB", price: 9200000, cat: "Gaming", stock: "Disponible", sku: "B14WEK-001US", foto: "./productos/msi-katana-15.jpg", img: "foto: MSI Katana 15",
+    desc: [
+      "Potencia gaming lista para llevarla al siguiente nivel. El MSI Katana 15 combina un potente Intel Core i7-14650HX, 16 GB de memoria RAM y 512 GB de almacenamiento SSD, ofreciendo el rendimiento que necesitás para jugar, trabajar y crear sin complicaciones.",
+      "Su pantalla de 15,6\" brinda una experiencia cómoda para tus partidas y tareas diarias, mientras que la NVIDIA GeForce RTX 5050 de 8 GB aporta la potencia gráfica necesaria para disfrutar de juegos exigentes, edición de contenido y aplicaciones que requieren alto rendimiento.",
+      "Con Windows 11 y el característico diseño gaming de MSI, el Katana 15 es una excelente opción para quienes buscan rendimiento, velocidad y versatilidad en un solo equipo."
+    ],
+    features: ["Intel Core i7-14650HX", "NVIDIA GeForce RTX 5050 8 GB", "16 GB de RAM", "SSD de 512 GB", "Pantalla de 15,6\"", "Windows 11"] },
+
+  { brand: "HP", name: "15-FD2050WM", spec: "Core Ultra 5 225U · 15,6\" táctil · 8 GB / 512 GB", price: 4000000, cat: "Computación", stock: "Disponible", sku: "15-FD2050WM", foto: "./productos/hp-15-fd2050wm.jpg", img: "foto: HP 15-FD2050WM",
+    desc: [
+      "Elegancia, versatilidad y rendimiento para acompañarte todos los días. El HP 15-FD2050WM cuenta con una pantalla de 15,6\" táctil y un diseño en color Silver, combinando comodidad y funcionalidad en un equipo ideal para estudio, trabajo y entretenimiento.",
+      "Su procesador Intel Core Ultra 5 225U, acompañado de 8 GB de RAM y 512 GB de almacenamiento SSD, ofrece una experiencia rápida y fluida para realizar múltiples tareas, trabajar con documentos, navegar, estudiar y utilizar tus aplicaciones favoritas.",
+      "La pantalla táctil permite interactuar de forma intuitiva con el equipo, mientras que Windows 11 brinda una experiencia moderna y sencilla desde el primer momento."
+    ],
+    features: ["Intel Core Ultra 5 225U", "Pantalla táctil de 15,6\"", "8 GB de RAM", "SSD de 512 GB", "Windows 11", "Diseño Silver"] },
+
+  { brand: "Apple", name: "AirPods Pro 3", spec: "MagSafe · USB-C · inalámbrico", price: 1800000, cat: "Audio", stock: "Disponible", sku: "MFHP4ZA/A", foto: "./productos/apple-airpods-pro-3.jpg", img: "foto: AirPods Pro 3",
+    desc: [
+      "Sumergite en una experiencia de audio premium con los Apple AirPods Pro 3, diseñados para ofrecer un sonido envolvente, comodidad y una conexión inalámbrica fluida. Su formato compacto y ergonómico permite disfrutarlos cómodamente durante el día, ya sea para escuchar música, realizar llamadas o consumir contenido.",
+      "Incorporan estuche de carga MagSafe con conexión USB-C, brindando una forma práctica de mantener tus AirPods siempre listos para usar. Su diseño elegante y minimalista los convierte en el complemento ideal para tus dispositivos Apple."
+    ],
+    features: ["Audio de alta calidad", "Conexión inalámbrica", "Estuche de carga MagSafe", "Puerto USB-C", "Diseño compacto y elegante", "Integración con el ecosistema Apple"] },
+
+  { brand: "Mtek", name: "Monitor Gamer 27\" M27SFV280C", spec: "Curvo · Full HD · 280 Hz · 1 ms", price: 1400000, cat: "Monitores", stock: "Disponible", sku: "M27SFV280C", foto: "./productos/mtek-m27sfv280c.jpg", img: "foto: Mtek M27SFV280C",
+    desc: [
+      "Llevá tu experiencia visual al siguiente nivel con el Mtek M27SFV280C, un monitor curvo de 27\" diseñado para ofrecer velocidad, fluidez y una experiencia inmersiva, especialmente en gaming.",
+      "Su panel VA con resolución Full HD (1920 × 1080) ofrece imágenes nítidas y colores vibrantes, mientras que sus 280 Hz de frecuencia de actualización y 1 ms de tiempo de respuesta permiten disfrutar de movimientos más fluidos y una respuesta rápida en partidas competitivas.",
+      "Además, incorpora tecnologías Flicker Free y Blue Light Reduction, pensadas para brindar mayor comodidad durante largas jornadas frente a la pantalla. Su conectividad incluye 2 puertos HDMI, 1 DisplayPort y salida de audio, junto con cables HDMI y DisplayPort incluidos."
+    ],
+    features: ["Pantalla curva de 27\"", "Frecuencia de actualización de 280 Hz", "Tiempo de respuesta de 1 ms", "Panel VA Full HD (1920 × 1080)", "Flicker Free y Blue Light Reduction", "2 HDMI, 1 DisplayPort y salida de audio", "Cables HDMI y DisplayPort incluidos"] },
+
+  { brand: "MSI", name: "Monitor Gamer 24\" MAG 242C", spec: "Curvo · Full HD · 180 Hz · 1 ms", price: 1100000, cat: "Monitores", stock: "Disponible", sku: "MAG 242C", foto: "./productos/msi-mag-242c.jpg", img: "foto: MSI MAG 242C",
+    desc: [
+      "Llevá tus partidas a otro nivel con el MSI MAG 242C, un monitor gaming de 24\" con pantalla curva, diseñado para ofrecer una experiencia fluida e inmersiva.",
+      "Su resolución Full HD proporciona imágenes nítidas, mientras que su frecuencia de actualización de 180 Hz permite disfrutar de movimientos más fluidos, especialmente en juegos competitivos y de acción. Además, su tiempo de respuesta de 1 ms ayuda a mantener una respuesta rápida durante las escenas más dinámicas.",
+      "Con su diseño curvo y estética gaming, el MAG 242C es una excelente opción para complementar tu setup, ya sea para jugar, disfrutar de contenido multimedia o trabajar."
+    ],
+    features: ["Pantalla curva de 24\"", "Resolución Full HD", "Frecuencia de actualización de 180 Hz", "Tiempo de respuesta de 1 ms", "Diseño gaming MSI", "Ideal para gaming competitivo"] },
+
+  { brand: "Apple", name: "iPhone 17 Pro 256 GB", spec: "6,3\" · eSIM · 48+48+48 MP · Deep Blue", price: 8300000, cat: "Celulares", stock: "Disponible", sku: "LL/A3256", foto: "./productos/apple-iphone-17-pro.jpg", img: "foto: iPhone 17 Pro",
+    desc: [
+      "Descubrí el nuevo iPhone 17 Pro, un smartphone diseñado para quienes buscan potencia, tecnología y una experiencia premium en cada momento. Su elegante acabado Deep Blue y sus 256 GB de almacenamiento ofrecen el equilibrio perfecto entre estilo y espacio para tus fotos, videos, aplicaciones y archivos.",
+      "Con eSIM, disfrutás de una conectividad práctica y moderna, ideal para mantenerte comunicado estés donde estés. Su rendimiento permite disfrutar de tus aplicaciones, juegos, contenido multimedia y herramientas de trabajo con una experiencia fluida."
+    ],
+    features: ["256 GB de almacenamiento", "Color Deep Blue", "Tecnología eSIM", "Cámaras 48+48+48 MP", "Frontal de 18 MP", "Pantalla de 6,3\""] },
+
+  { brand: "Apple", name: "iPhone 17 Pro Max 256 GB", spec: "6,9\" · 48+48+48 MP · 18 MP · Silver", price: 9100000, cat: "Celulares", stock: "Disponible", sku: "BE/A3526", foto: "./productos/apple-iphone-17-pro-max.jpg", img: "foto: iPhone 17 Pro Max",
+    desc: [
+      "Potencia, elegancia y una experiencia premium en un solo equipo. El iPhone 17 Pro Max cuenta con 256 GB de almacenamiento, ofreciendo espacio de sobra para tus fotos, videos, aplicaciones y archivos, mientras su diseño en acabado Silver aporta un estilo sofisticado.",
+      "Pensado para quienes buscan un smartphone capaz de acompañar un uso exigente, es ideal para crear contenido, editar videos, trabajar, disfrutar de entretenimiento y gestionar tus tareas diarias con comodidad. Su formato Pro Max ofrece una experiencia especialmente atractiva para quienes priorizan una pantalla amplia y una experiencia móvil completa."
+    ],
+    features: ["256 GB de almacenamiento", "Color Silver", "Rendimiento de gama Pro", "Cámaras 48+48+48 MP", "Frontal de 18 MP", "Pantalla de 6,9\""] },
+
+  { brand: "Apple", name: "MacBook Neo 13\"", spec: "Chip A18 Pro · 8 GB / 256 GB · Silver", price: 5600000, cat: "Computación", stock: "Disponible", sku: "MHFA4LL/A", foto: "./productos/apple-macbook-neo-13.jpg", img: "foto: MacBook Neo 13",
+    desc: [
+      "Elegancia, portabilidad y rendimiento en un solo equipo. El MacBook Neo combina un diseño compacto en color Silver con la potencia y eficiencia del chip Apple A18 Pro, ofreciendo una experiencia fluida para acompañarte tanto en el trabajo como en el estudio.",
+      "Cuenta con 8 GB de memoria y 256 GB de almacenamiento, ideales para gestionar documentos, navegar, utilizar aplicaciones, realizar videollamadas y disfrutar de contenido multimedia. Su formato de 13\" facilita llevarlo a cualquier lugar sin renunciar a una experiencia cómoda de uso.",
+      "Además, forma parte del ecosistema Apple, permitiendo una integración práctica con otros dispositivos y servicios de la marca."
+    ],
+    features: ["Pantalla de 13\"", "Chip Apple A18 Pro", "8 GB de memoria", "256 GB de almacenamiento", "Color Silver", "Ecosistema Apple", "Diseño compacto y portátil"] },
+
+  // --- Demo pendiente de reemplazo (ver README) ---
   { brand: "ASUS", name: "ROG Strix G16", spec: "RTX 4060 · 16 GB RAM · 512 GB SSD", price: 8250000, cat: "Gaming", stock: "Disponible", img: "foto: notebook gamer", sku: "MX-NB-0142", badge: "" },
   { brand: "Logitech", name: "MX Master 3S", spec: "Inalámbrico · 8000 DPI · silencioso", price: 695000, oldPrice: 820000, badge: "-15%", cat: "Periféricos", stock: "Disponible", img: "foto: mouse", sku: "MX-PE-0207" },
   { brand: "Samsung", name: "Monitor Odyssey G5 27\"", spec: "QHD · 165 Hz · 1 ms", price: 2190000, cat: "Monitores", stock: "Disponible", img: "foto: monitor curvo", sku: "MX-MO-0311" },
@@ -1305,7 +1408,7 @@ class Component extends DCLogic {
       const i = PRODUCTS.indexOf(p);
       const esFav = s.fav.includes(i);
       const enLista = s.cart.includes(i);
-      return { ...p, price: P(p.price), oldPrice: p.oldPrice ? P(p.oldPrice) : "", badge: p.badge || "",
+      return { ...p, price: P(p.price), oldPrice: p.oldPrice ? P(p.oldPrice) : "", badge: p.badge || "", sinFoto: !p.foto,
         open: this.go("product", i),
         favColor: esFav ? "#E0245E" : "#A3A3A3",
         favFill: esFav ? "#E0245E" : "none",
@@ -1408,8 +1511,13 @@ class Component extends DCLogic {
       ],
       filters: [group("Categoría", "cat", "fCat"), group("Marca", "brand", "fBrand"), group("Disponibilidad", "stock", "fStock")],
       current: { ...current, wa: waFor(current), price: P(current.price), sku: current.sku || "MX-0000", oldPrice: current.oldPrice ? P(current.oldPrice) : "", badge: current.badge || "",
-        features: ["Pensado para uso intensivo diario.", "Compatible con accesorios estándar.", "Garantía según política del fabricante.", "Consultá disponibilidad antes de confirmar."],
+        sinFoto: !current.foto,
+        hayDesc: !!(current.desc && current.desc.length),
+        desc: current.desc || [],
+        // Los productos cargados traen su propia lista; el resto cae al texto generico.
+        features: current.features || ["Pensado para uso intensivo diario.", "Compatible con accesorios estándar.", "Garantía según política del fabricante.", "Consultá disponibilidad antes de confirmar."],
         specs: [{ k: "Marca", v: current.brand }, { k: "Modelo", v: current.name }, { k: "Especificación", v: current.spec }, { k: "Categoría", v: current.cat }, { k: "Disponibilidad", v: current.stock }, { k: "Código", v: current.sku || "MX-0000" }] },
+      hayGaleria: !current.foto,
       gallery: ["ángulo 2", "ángulo 3", "detalle", "en uso"],
       // `todo` no se renderiza: queda como registro de lo que falta confirmar
       // con el cliente (ver README). Para mostrarlo, agregar un parrafo con op.todo.
