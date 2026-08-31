@@ -389,7 +389,7 @@ article:hover button { filter: brightness(1.08); }
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:16px">
         <sc-for list="{{ categories }}" as="c" hint-placeholder-count="8">
-          <a href="#" onClick="{{ goCatalog }}" data-rb="spot cat" data-rb-reveal style="display:block;border:1px solid #E8E8E8;border-radius:12px;overflow:hidden;background:#FFFFFF;transition:border-color 220ms,transform 220ms,box-shadow 220ms" style-hover="border-color:{{ c.color }};transform:translateY(-3px);box-shadow:0 10px 22px {{ c.glow }}">
+          <a href="#" onClick="{{ c.abrir }}" data-rb="spot cat" data-rb-reveal style="display:block;border:1px solid #E8E8E8;border-radius:12px;overflow:hidden;background:#FFFFFF;transition:border-color 220ms,transform 220ms,box-shadow 220ms" style-hover="border-color:{{ c.color }};transform:translateY(-3px);box-shadow:0 10px 22px {{ c.glow }}">
             <div style="position:relative;aspect-ratio:4/3;background:{{ c.soft }};display:grid;place-items:center">
               <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,{{ c.tint }} 8px 16px)"></div>
               <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.06em;color:#5C6660">{{ c.img }}</span>
@@ -1365,6 +1365,38 @@ class Component extends DCLogic {
     };
   }
 
+  // Abre el catálogo ya filtrado por una categoría. Los demás filtros se
+  // limpian: si quedaba una marca o una búsqueda de antes, el resultado podía
+  // salir vacío y parecía que el botón no hacía nada.
+  irACat(cat) {
+    return (e) => {
+      if (e) e.preventDefault();
+      this.setState({
+        page: "catalog", fCat: [cat], fBrand: [], fStock: [], fMax: PMAX,
+        q: "", sort: "rel", onlyFav: false,
+        menuOpen: false, mega: null, cartOpen: false, searchOpen: false
+      });
+      window.scrollTo(0, 0);
+    };
+  }
+
+  // Lleva a una sección del inicio. El salto va diferido porque el nodo recién
+  // vuelve al DOM después de que el runtime renderiza la página de inicio.
+  irAAncla(id) {
+    return (e) => {
+      if (e) e.preventDefault();
+      this.setState({ page: "home", menuOpen: false, mega: null, cartOpen: false, searchOpen: false });
+      setTimeout(() => {
+        const nodo = document.getElementById(id);
+        if (!nodo) { window.scrollTo(0, 0); return; }
+        const actual = window.pageYOffset || document.documentElement.scrollTop || 0;
+        const destino = Math.max(0, nodo.getBoundingClientRect().top + actual - 16);
+        try { window.scrollTo({ top: destino, behavior: "smooth" }); }
+        catch (err) { window.scrollTo(0, destino); } // navegadores sin scroll suave
+      }, 80);
+    };
+  }
+
   icon(kind, color) {
     const c = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: color || "#171717", strokeWidth: 1.7, "aria-hidden": true };
     const el = React.createElement;
@@ -1389,6 +1421,10 @@ class Component extends DCLogic {
     );
     const accent = this.props.accent ?? "#40DF36";
     const navLabels = ["Inicio", "Categorías", "Computación", "Gaming", "Celulares", "Audio", "Periféricos", "Accesorios", "Ofertas", "Marcas"];
+    // Las que son categoría real abren el catálogo filtrado; las demás son
+    // secciones del inicio y saltan a su ancla.
+    const CATS_NAV = CAT.map((c) => c.name);
+    const ANCLAS_NAV = { "Categorías": "cat-h", "Ofertas": "ofertas", "Marcas": "brand-h" };
     // Todas las secciones del nav despliegan, salvo Inicio, que es un enlace
     // directo al home. Marcas y Categorías salen del catálogo real (BRAND_LIST
     // y CAT) para que no queden desfasadas al agregar productos.
@@ -1451,7 +1487,12 @@ class Component extends DCLogic {
       bg: s.mega === label ? "#171717" : NAV_GREENS[i],
       border: s.mega === label ? "#171717" : NAV_GREENS[i],
       color: s.mega === label ? NAV_GREENS[i] : "#0B1F12",
-      onClick: label === "Inicio" ? this.go("home") : this.go("catalog"),
+      // Antes todo caía en el catálogo sin filtrar: desde el propio catálogo
+      // los botones no cambiaban nada y parecían rotos.
+      onClick: label === "Inicio" ? this.go("home")
+        : ANCLAS_NAV[label] ? this.irAAncla(ANCLAS_NAV[label])
+        : CATS_NAV.includes(label) ? this.irACat(label)
+        : this.go("catalog"),
       onEnter: () => this.setState({ mega: megaMap[label] && label !== "Inicio" ? label : null })
     }));
     // Cada producto lleva sus propias acciones de favorito y de consulta.
@@ -1507,7 +1548,7 @@ class Component extends DCLogic {
       navDisplay: s.narrow ? "none" : "block",
       nav,
       heroFacts: ["Catálogo amplio de informática y tecnología.", "Asesoramiento directo antes de comprar.", "Atención por WhatsApp todos los días."],
-      categories: CAT.map((c) => ({ ...c, tint: c.color + "2E", soft: c.color + "12", glow: c.color + "33" })),
+      categories: CAT.map((c) => ({ ...c, tint: c.color + "2E", soft: c.color + "12", glow: c.color + "33", abrir: this.irACat(c.name) })),
       featured: view(PRODUCTS.slice(0, 8)),
       offers: view(PRODUCTS.filter((p) => p.badge).slice(0, 4)),
       novedades: view(PRODUCTS.slice(8, 12)),
