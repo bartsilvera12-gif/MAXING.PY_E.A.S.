@@ -160,7 +160,7 @@ article:hover [data-rb~="zoom"],
 /* Hero: en pantallas angostas el texto cae sobre los productos, no sobre
    el fondo vacio, asi que el velo pasa de horizontal a vertical. */
 @media (max-width: 900px) {
-  [data-rb~="hero-veil"] { background: linear-gradient(180deg, rgba(255,255,255,0.84) 0%, rgba(255,255,255,0.56) 48%, rgba(255,255,255,0.78) 100%) !important; }
+  [data-rb~="hero-veil"] { background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.64) 48%, rgba(255,255,255,0.82) 100%) !important; }
 }
 
 /* Catalogo: sidebar + listado. auto-fit generaba una columna de 0px y el
@@ -344,7 +344,7 @@ article:hover button { filter: brightness(1.08); }
     <canvas data-rb="velaris" data-velaris="claro" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block;mix-blend-mode:multiply"></canvas>
     <!-- La foto ya es blanca a la izquierda; el velo solo asegura el contraste
          del texto oscuro cuando el recorte corre los productos hacia ese lado. -->
-    <div data-rb="hero-veil" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0.48) 0%,rgba(255,255,255,0.36) 30%,rgba(255,255,255,0.18) 52%,rgba(255,255,255,0.04) 74%,rgba(255,255,255,0) 88%)"></div>
+    <div data-rb="hero-veil" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0.60) 0%,rgba(255,255,255,0.48) 30%,rgba(255,255,255,0.28) 52%,rgba(255,255,255,0.07) 74%,rgba(255,255,255,0) 88%)"></div>
     <div style="position:relative;max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,84px) 24px;min-height:clamp(450px,43vw,790px);display:flex;align-items:center">
       <div style="max-width:min(100%,580px)">
         <span data-rb="shiny-claro" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">Tecnología · Informática · Gaming</span>
@@ -1085,7 +1085,7 @@ class Component extends DCLogic {
     "  col = mix(col, u_colors[3], smoothstep(0.0, 0.7, n1 * n2) * 0.5);",
     "  float glow = smoothstep(0.95, 0.0, dist) * 0.58;",
     "  col += u_colors[1] * glow * (1.0 - u_light);",
-    "  col = mix(col, u_colors[1], glow * u_light * 0.88);",
+    "  col = mix(col, u_colors[1], glow * u_light * 0.65);",
     // En oscuro la vinieta apaga los bordes; en claro los devuelve al fondo,
     // porque multiplicar por 0.38 ensuciaria la foto blanca de abajo.
     "  col = mix(mix(col * 0.38, u_bg, u_light), col, vignette);",
@@ -1114,7 +1114,7 @@ class Component extends DCLogic {
     const claro = canvas.getAttribute("data-velaris") === "claro";
     // Paleta del sitio: lima, verde de marca, esmeralda y negro.
     const COLORES = claro
-      ? ["#8ADD5C", "#4FDD45", "#5FDCC2", "#28A566"]
+      ? ["#A5E484", "#7ADF70", "#8CE0D0", "#54BC8A"]
       : ["#86DC2C", "#40DF36", "#16AE95", "#000000"];
     const FONDO = claro ? "#FFFFFF" : "#0D0D0D";
     const VELOCIDAD = 1.4, GRANO = claro ? 0.10 : 0.28;
