@@ -227,6 +227,17 @@ article:hover button { filter: brightness(1.08); }
 [data-rb~="benecard"] { padding: 1.6px; border-radius: 14px; background: linear-gradient(115deg, #86DC2C, #40DF36, #16AE95, #40DF36, #86DC2C); background-size: 300% 100%; animation: rb-borde 7s linear infinite; }
 [data-rb~="benecard-in"] { height: 100%; padding: 20px 18px 22px; border-radius: 12.4px; background: #FFFFFF; }
 @keyframes rb-borde { from { background-position: 0% 50%; } to { background-position: 300% 50%; } }
+/* --- Tarjetas de marca ---
+   Minimalistas en reposo para que el logo mande; al pasar el cursor entra el
+   verde de marca. La transicion se declara en la tarjeta y no en :hover, para
+   que el efecto tambien se vea al salir. */
+[data-rb~="marca"] { transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1); }
+[data-rb~="marca"]:hover { border-color: #40DF36 !important; box-shadow: 0 10px 22px rgba(64, 223, 54, 0.16) !important; transform: translateY(-4px) !important; }
+[data-rb~="marca"]:hover [data-rb~="marca-txt"] { color: #1F8F19; }
+[data-rb~="marca-txt"] { transition: color 220ms ease; }
+/* En pantallas chicas el hover no existe: el toque marca el borde igual. */
+[data-rb~="marca"]:active { border-color: #40DF36 !important; }
+
 /* El ultimo item del menu movil no lleva separador colgando */
 [data-rb~="menu-movil"] a:last-child { border-bottom: 0 !important; }
 
@@ -539,11 +550,17 @@ article:hover button { filter: brightness(1.08); }
   <section aria-labelledby="brand-h" style="border-bottom:1px solid #E8E8E8">
     <div style="max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,72px) 24px">
       <h2 id="brand-h" style="margin:0 0 28px;font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-0.03em;color:#000000">Las marcas que buscás</h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:12px">
+      <p style="margin:-18px 0 26px;font-size:15px;font-weight:500;color:#5C6862">Tocá una marca para ver todos sus productos.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,142px),1fr));gap:14px">
         <sc-for list="{{ brands }}" as="b" hint-placeholder-count="10">
-          <div style="height:82px;display:grid;place-items:center;background:#116230;border:1px solid #116230;border-radius:10px">
-            <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.08em;font-weight:600;color:#FFFFFF">{{ b }}</span>
-          </div>
+          <a href="#" onClick="{{ b.abrir }}" aria-label="{{ b.aria }}" data-rb="marca" data-rb-reveal style="height:96px;display:grid;place-items:center;padding:0 18px;background:#FFFFFF;border:1px solid #E4EDE7;border-radius:14px">
+            <sc-if value="{{ b.hayLogo }}" hint-placeholder-val="{{ false }}">
+              <img src="{{ b.logo }}" alt="{{ b.name }}" loading="lazy" style="max-width:100%;max-height:42px;object-fit:contain">
+            </sc-if>
+            <sc-if value="{{ b.sinLogo }}" hint-placeholder-val="{{ true }}">
+              <span data-rb="marca-txt" style="font-size:15px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:#1B2A21">{{ b.name }}</span>
+            </sc-if>
+          </a>
         </sc-for>
       </div>
     </div>
@@ -1044,6 +1061,9 @@ const PRODUCTS = [
 // El rango del slider sale del catálogo, no de valores fijos.
 // Marcas del catalogo, sin repetir: alimenta el mega-menu de Marcas.
 const BRAND_LIST = PRODUCTS.map((p) => p.brand).filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a.localeCompare(b, "es"));
+// Logos oficiales disponibles en ./marcas/. Agregar acá el slug cuando llegue
+// el archivo del cliente; sin eso la tarjeta cae al nombre tipografiado.
+const LOGOS_MARCA = [];
 
 const PRICES = PRODUCTS.map((p) => p.price);
 const PMIN = Math.min(...PRICES);
@@ -1630,7 +1650,19 @@ class Component extends DCLogic {
       sortVal: s.sort,
       onSort: (e) => this.setState({ sort: e.target.value }),
       related: view(PRODUCTS.filter((p) => p !== current).slice(0, 4)),
-      brands: ["ASUS", "MSI", "SAMSUNG", "LOGITECH", "LENOVO", "APPLE", "ACER", "HP", "KINGSTON", "CORSAIR"],
+      // Sale de BRAND_LIST, que se arma con los productos cargados: nunca
+      // aparece una marca que no tenga nada que mostrar al hacer clic.
+      // El logo se busca en ./marcas/<slug>.svg; mientras no esté el archivo
+      // oficial la tarjeta muestra el nombre tipografiado.
+      brands: BRAND_LIST.map((nombre) => {
+        const slug = nombre.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+        const logo = LOGOS_MARCA.includes(slug) ? "./marcas/" + slug + ".svg" : "";
+        return {
+          name: nombre, logo, hayLogo: !!logo, sinLogo: !logo,
+          aria: "Ver productos de " + nombre,
+          abrir: this.irAMarca(nombre)
+        };
+      }),
       benefits: [
         { icon: this.icon("check", "#1F8F19"), tint: "#E9FBE7", line: "#BCEDB7", title: "Productos seleccionados", text: "Elegimos equipos y accesorios por rendimiento real, no por catálogo." },
         { icon: this.icon("chat", "#1E6FE8"), tint: "#E8F1FE", line: "#C1D8FB", title: "Asesoramiento personalizado", text: "Te ayudamos a definir el equipo según tu uso y presupuesto." },
