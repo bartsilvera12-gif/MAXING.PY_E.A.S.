@@ -238,12 +238,12 @@ article:hover button { filter: brightness(1.08); }
    Minimalistas en reposo para que el logo mande; al pasar el cursor entra el
    verde de marca. La transicion se declara en la tarjeta y no en :hover, para
    que el efecto tambien se vea al salir. */
-[data-rb~="marca"] { transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1); }
-[data-rb~="marca"]:hover { border-color: #40DF36 !important; box-shadow: 0 10px 22px rgba(64, 223, 54, 0.16) !important; transform: translateY(-4px) !important; }
+[data-rb~="marca-caja"] { transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1); }
+[data-rb~="marca"]:hover [data-rb~="marca-caja"] { border-color: #40DF36; box-shadow: 0 10px 22px rgba(64, 223, 54, 0.16); transform: translateY(-4px); }
 [data-rb~="marca"]:hover [data-rb~="marca-txt"] { color: #1F8F19; }
 [data-rb~="marca-txt"] { transition: color 220ms ease; }
 /* En pantallas chicas el hover no existe: el toque marca el borde igual. */
-[data-rb~="marca"]:active { border-color: #40DF36 !important; }
+[data-rb~="marca"]:active [data-rb~="marca-caja"] { border-color: #40DF36; }
 
 /* Quienes somos: en escritorio la foto va a la derecha y el texto a la
    izquierda. En el marcado la foto viene primera para que en telefono, donde
@@ -281,12 +281,9 @@ article:hover button { filter: brightness(1.08); }
     scroll-padding-left: 24px;
   }
   [data-rb~="marcas-carril"]::-webkit-scrollbar { display: none; }
-  [data-rb~="marcas-carril"] [data-rb~="marca"] {
-    flex: 0 0 42%;
-    scroll-snap-align: start;
-    /* la elevacion del hover descuadraria el carril */
-    transform: none !important;
-  }
+  [data-rb~="marcas-carril"] [data-rb~="marca"] { flex: 0 0 42%; scroll-snap-align: start; }
+  /* la elevacion del hover descuadraria el carril */
+  [data-rb~="marcas-carril"] [data-rb~="marca-caja"] { transform: none !important; }
 }
 
 /* El ultimo item del menu movil no lleva separador colgando */
@@ -610,15 +607,17 @@ article:hover button { filter: brightness(1.08); }
       <p style="margin:-18px 0 26px;font-size:15px;font-weight:500;color:#5C6862">Tocá una marca para ver todos sus productos.</p>
       <div data-rb="marcas-carril" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,142px),1fr));gap:14px">
         <sc-for list="{{ brands }}" as="b" hint-placeholder-count="10">
-          <a href="#" onClick="{{ b.abrir }}" aria-label="{{ b.aria }}" data-rb="marca" data-rb-reveal style="height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:0 14px;background:#FFFFFF;border:1px solid #E4EDE7;border-radius:14px">
-            <sc-if value="{{ b.hayLogo }}" hint-placeholder-val="{{ true }}">
-              <img src="{{ b.logo }}" alt="" loading="lazy" style="max-width:100%;max-height:36px;object-fit:contain">
-            </sc-if>
-            <!-- El nombre va siempre, con logo o sin él: varios logos son solo
-                 símbolo y no todo el mundo los reconoce a primera vista. El alt
-                 de la imagen queda vacío para no repetir el nombre al lector de
-                 pantalla. -->
-            <span data-rb="marca-txt" style="font-size:12px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#1B2A21">{{ b.name }}</span>
+          <a href="#" onClick="{{ b.abrir }}" aria-label="{{ b.aria }}" data-rb="marca" data-rb-reveal style="display:flex;flex-direction:column;align-items:center;gap:10px">
+            <div data-rb="marca-caja" style="width:100%;height:96px;display:grid;place-items:center;padding:0 18px;background:#FFFFFF;border:1px solid #E4EDE7;border-radius:14px">
+              <sc-if value="{{ b.hayLogo }}" hint-placeholder-val="{{ true }}">
+                <img src="{{ b.logo }}" alt="" loading="lazy" style="max-width:100%;max-height:42px;object-fit:contain">
+              </sc-if>
+            </div>
+            <!-- El nombre va fuera del recuadro y siempre presente: varios logos
+                 son solo símbolo y no todo el mundo los reconoce a primera
+                 vista. El alt de la imagen queda vacío para que el lector de
+                 pantalla no repita el nombre. -->
+            <span data-rb="marca-txt" style="font-size:12px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#4A554E">{{ b.name }}</span>
           </a>
         </sc-for>
       </div>
