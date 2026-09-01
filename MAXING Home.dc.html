@@ -277,7 +277,7 @@ article:hover button { filter: brightness(1.08); }
 
   <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
     <div data-rb="menu-movil" style="border-top:1px solid #F0F0F0;background:#FFFFFF;padding:12px 24px 22px;display:flex;flex-direction:column;gap:2px">
-      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="8">
+      <sc-for list="{{ navMovil }}" as="n" hint-placeholder-count="12">
         <a href="#" onClick="{{ n.onClick }}" style="padding:13px 0;font-size:16px;font-weight:600;border-bottom:1px solid #F5F5F5">{{ n.label }}</a>
       </sc-for>
     </div>
@@ -291,7 +291,7 @@ article:hover button { filter: brightness(1.08); }
             <h3 style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ col.title }}</h3>
             <div style="display:flex;flex-direction:column;gap:9px">
               <sc-for list="{{ col.items }}" as="it" hint-placeholder-count="4">
-                <a href="#" onClick="{{ goCatalog }}" style="font-size:14px;font-weight:500;color:#171717">{{ it }}</a>
+                <a href="#" onClick="{{ it.abrir }}" style="font-size:14px;font-weight:500;color:#171717;transition:color 180ms" style-hover="color:#1F8F19">{{ it.label }}</a>
               </sc-for>
             </div>
           </div>
@@ -895,21 +895,31 @@ article:hover button { filter: brightness(1.08); }
 <script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#40DF36&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#40DF36&quot;,&quot;#000000&quot;,&quot;#737373&quot;],&quot;section&quot;:&quot;Marca&quot;},&quot;showFloatingWhatsapp&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Contacto&quot;}}">
 const P = (n) => "Gs. " + n.toLocaleString("es-PY").replace(/,/g, ".");
 
+// Las 12 categorías del catálogo, en el orden que definió el cliente. La rampa
+// de verdes va de lima a esmeralda y ordena visualmente la grilla del inicio.
+// Ofertas, Novedades y Más vendidos NO están acá: son colecciones, no categorías.
 const CAT = [
-  { name: "Computación", count: "Notebooks, PC, componentes", img: "foto: notebook abierta", color: "#86DC2C", ink: "#4E7F13" },
-  { name: "Gaming", count: "Setups y PC gamer", img: "foto: PC gamer", color: "#5FDE31", ink: "#327F17" },
+  { name: "Celulares", count: "Smartphones y accesorios", img: "foto: celulares", color: "#86DC2C", ink: "#4E7F13" },
+  { name: "Notebooks", count: "Trabajo, estudio y gaming", img: "foto: notebook abierta", color: "#6FDD2E", ink: "#3F7F15" },
+  { name: "PC & Componentes", count: "Placas, procesadores, RAM", img: "foto: PC gamer", color: "#5FDE31", ink: "#327F17" },
+  { name: "Gaming", count: "Consolas y setups", img: "foto: consola", color: "#4EDE33", ink: "#2A8018" },
   { name: "Monitores", count: "Full HD a 4K", img: "foto: monitor", color: "#40DF36", ink: "#24801C" },
-  { name: "Celulares", count: "Smartphones y accesorios", img: "foto: smartphone", color: "#2FD453", ink: "#187A32" },
-  { name: "Audio", count: "Auriculares y parlantes", img: "foto: auriculares", color: "#22C86F", ink: "#12784A" },
-  { name: "Periféricos", count: "Teclados y mouse", img: "foto: teclado", color: "#1ABB86", ink: "#0E7358" },
-  { name: "Almacenamiento", count: "SSD, HDD y memorias", img: "foto: SSD", color: "#16AE95", ink: "#0C6E60" },
-  { name: "Accesorios", count: "Cables, soportes, hubs", img: "foto: accesorios", color: "#159F8A", ink: "#0B6659" }
+  { name: "Audio", count: "Auriculares y parlantes", img: "foto: auriculares", color: "#35D944", ink: "#1E7D26" },
+  { name: "Periféricos", count: "Teclados, mouse y webcams", img: "foto: teclado", color: "#2FD453", ink: "#187A32" },
+  { name: "Almacenamiento", count: "SSD, HDD y memorias", img: "foto: SSD", color: "#26CC62", ink: "#14783C" },
+  { name: "Accesorios", count: "Cables, soportes, impresoras", img: "foto: accesorios", color: "#22C86F", ink: "#12784A" },
+  { name: "Tablets", count: "iPad y Android", img: "foto: tablet", color: "#1DC17C", ink: "#107553" },
+  { name: "Smartwatch & Wearables", count: "Relojes y pulseras", img: "foto: smartwatch", color: "#1ABB86", ink: "#0E7358" },
+  { name: "TV", count: "Smart TV 4K", img: "foto: smart TV", color: "#16AE95", ink: "#0C6E60" }
 ];
+// Un producto puede vivir en más de una categoría: una notebook gamer entra por
+// Notebooks y por Gaming. `cats` es la fuente; `cat` queda como respaldo viejo.
+const catsDe = (p) => (Array.isArray(p.cats) && p.cats.length ? p.cats : p.cat ? [p.cat] : []);
 
 const NAV_GREENS = ["#2FBF6B", "#86DC2C", "#6ADD2F", "#4EDE33", "#40DF36", "#2FD453", "#24CA6B", "#1BBD83", "#16B092", "#14A28C"];
 const PRODUCTS = [
   // --- Catálogo real cargado con el cliente (agosto 2026) ---
-  { brand: "MSI", name: "Katana 15 B14WEK-001US", spec: "Core i7-14650HX · RTX 5050 8 GB · 16 GB / 512 GB", price: 9200000, cat: "Gaming", stock: "Disponible", sku: "B14WEK-001US", foto: "./productos/msi-katana-15.jpg", img: "foto: MSI Katana 15",
+  { brand: "MSI", name: "Katana 15 B14WEK-001US", spec: "Core i7-14650HX · RTX 5050 8 GB · 16 GB / 512 GB", price: 9200000, cats: ["Notebooks", "Gaming"], stock: "Disponible", sku: "B14WEK-001US", foto: "./productos/msi-katana-15.jpg", img: "foto: MSI Katana 15",
     desc: [
       "Potencia gaming lista para llevarla al siguiente nivel. El MSI Katana 15 combina un potente Intel Core i7-14650HX, 16 GB de memoria RAM y 512 GB de almacenamiento SSD, ofreciendo el rendimiento que necesitás para jugar, trabajar y crear sin complicaciones.",
       "Su pantalla de 15,6\" brinda una experiencia cómoda para tus partidas y tareas diarias, mientras que la NVIDIA GeForce RTX 5050 de 8 GB aporta la potencia gráfica necesaria para disfrutar de juegos exigentes, edición de contenido y aplicaciones que requieren alto rendimiento.",
@@ -917,7 +927,7 @@ const PRODUCTS = [
     ],
     features: ["Intel Core i7-14650HX", "NVIDIA GeForce RTX 5050 8 GB", "16 GB de RAM", "SSD de 512 GB", "Pantalla de 15,6\"", "Windows 11"] },
 
-  { brand: "HP", name: "15-FD2050WM", spec: "Core Ultra 5 225U · 15,6\" táctil · 8 GB / 512 GB", price: 4000000, cat: "Computación", stock: "Disponible", sku: "15-FD2050WM", foto: "./productos/hp-15-fd2050wm.jpg", img: "foto: HP 15-FD2050WM",
+  { brand: "HP", name: "15-FD2050WM", spec: "Core Ultra 5 225U · 15,6\" táctil · 8 GB / 512 GB", price: 4000000, cats: ["Notebooks"], stock: "Disponible", sku: "15-FD2050WM", foto: "./productos/hp-15-fd2050wm.jpg", img: "foto: HP 15-FD2050WM",
     desc: [
       "Elegancia, versatilidad y rendimiento para acompañarte todos los días. El HP 15-FD2050WM cuenta con una pantalla de 15,6\" táctil y un diseño en color Silver, combinando comodidad y funcionalidad en un equipo ideal para estudio, trabajo y entretenimiento.",
       "Su procesador Intel Core Ultra 5 225U, acompañado de 8 GB de RAM y 512 GB de almacenamiento SSD, ofrece una experiencia rápida y fluida para realizar múltiples tareas, trabajar con documentos, navegar, estudiar y utilizar tus aplicaciones favoritas.",
@@ -925,14 +935,14 @@ const PRODUCTS = [
     ],
     features: ["Intel Core Ultra 5 225U", "Pantalla táctil de 15,6\"", "8 GB de RAM", "SSD de 512 GB", "Windows 11", "Diseño Silver"] },
 
-  { brand: "Apple", name: "AirPods Pro 3", spec: "MagSafe · USB-C · inalámbrico", price: 1800000, cat: "Audio", stock: "Disponible", sku: "MFHP4ZA/A", foto: "./productos/apple-airpods-pro-3.jpg", img: "foto: AirPods Pro 3",
+  { brand: "Apple", name: "AirPods Pro 3", spec: "MagSafe · USB-C · inalámbrico", price: 1800000, cats: ["Audio"], stock: "Disponible", sku: "MFHP4ZA/A", foto: "./productos/apple-airpods-pro-3.jpg", img: "foto: AirPods Pro 3",
     desc: [
       "Sumergite en una experiencia de audio premium con los Apple AirPods Pro 3, diseñados para ofrecer un sonido envolvente, comodidad y una conexión inalámbrica fluida. Su formato compacto y ergonómico permite disfrutarlos cómodamente durante el día, ya sea para escuchar música, realizar llamadas o consumir contenido.",
       "Incorporan estuche de carga MagSafe con conexión USB-C, brindando una forma práctica de mantener tus AirPods siempre listos para usar. Su diseño elegante y minimalista los convierte en el complemento ideal para tus dispositivos Apple."
     ],
     features: ["Audio de alta calidad", "Conexión inalámbrica", "Estuche de carga MagSafe", "Puerto USB-C", "Diseño compacto y elegante", "Integración con el ecosistema Apple"] },
 
-  { brand: "Mtek", name: "Monitor Gamer 27\" M27SFV280C", spec: "Curvo · Full HD · 280 Hz · 1 ms", price: 1400000, cat: "Monitores", stock: "Disponible", sku: "M27SFV280C", foto: "./productos/mtek-m27sfv280c.jpg", img: "foto: Mtek M27SFV280C",
+  { brand: "Mtek", name: "Monitor Gamer 27\" M27SFV280C", spec: "Curvo · Full HD · 280 Hz · 1 ms", price: 1400000, cats: ["Monitores", "Gaming"], stock: "Disponible", sku: "M27SFV280C", foto: "./productos/mtek-m27sfv280c.jpg", img: "foto: Mtek M27SFV280C",
     desc: [
       "Llevá tu experiencia visual al siguiente nivel con el Mtek M27SFV280C, un monitor curvo de 27\" diseñado para ofrecer velocidad, fluidez y una experiencia inmersiva, especialmente en gaming.",
       "Su panel VA con resolución Full HD (1920 × 1080) ofrece imágenes nítidas y colores vibrantes, mientras que sus 280 Hz de frecuencia de actualización y 1 ms de tiempo de respuesta permiten disfrutar de movimientos más fluidos y una respuesta rápida en partidas competitivas.",
@@ -940,7 +950,7 @@ const PRODUCTS = [
     ],
     features: ["Pantalla curva de 27\"", "Frecuencia de actualización de 280 Hz", "Tiempo de respuesta de 1 ms", "Panel VA Full HD (1920 × 1080)", "Flicker Free y Blue Light Reduction", "2 HDMI, 1 DisplayPort y salida de audio", "Cables HDMI y DisplayPort incluidos"] },
 
-  { brand: "MSI", name: "Monitor Gamer 24\" MAG 242C", spec: "Curvo · Full HD · 180 Hz · 1 ms", price: 1100000, cat: "Monitores", stock: "Disponible", sku: "MAG 242C", foto: "./productos/msi-mag-242c.jpg", img: "foto: MSI MAG 242C",
+  { brand: "MSI", name: "Monitor Gamer 24\" MAG 242C", spec: "Curvo · Full HD · 180 Hz · 1 ms", price: 1100000, cats: ["Monitores", "Gaming"], stock: "Disponible", sku: "MAG 242C", foto: "./productos/msi-mag-242c.jpg", img: "foto: MSI MAG 242C",
     desc: [
       "Llevá tus partidas a otro nivel con el MSI MAG 242C, un monitor gaming de 24\" con pantalla curva, diseñado para ofrecer una experiencia fluida e inmersiva.",
       "Su resolución Full HD proporciona imágenes nítidas, mientras que su frecuencia de actualización de 180 Hz permite disfrutar de movimientos más fluidos, especialmente en juegos competitivos y de acción. Además, su tiempo de respuesta de 1 ms ayuda a mantener una respuesta rápida durante las escenas más dinámicas.",
@@ -948,21 +958,21 @@ const PRODUCTS = [
     ],
     features: ["Pantalla curva de 24\"", "Resolución Full HD", "Frecuencia de actualización de 180 Hz", "Tiempo de respuesta de 1 ms", "Diseño gaming MSI", "Ideal para gaming competitivo"] },
 
-  { brand: "Apple", name: "iPhone 17 Pro 256 GB", spec: "6,3\" · eSIM · 48+48+48 MP · Deep Blue", price: 8300000, cat: "Celulares", stock: "Disponible", sku: "LL/A3256", foto: "./productos/apple-iphone-17-pro.jpg", img: "foto: iPhone 17 Pro",
+  { brand: "Apple", name: "iPhone 17 Pro 256 GB", spec: "6,3\" · eSIM · 48+48+48 MP · Deep Blue", price: 8300000, cats: ["Celulares"], stock: "Disponible", sku: "LL/A3256", foto: "./productos/apple-iphone-17-pro.jpg", img: "foto: iPhone 17 Pro",
     desc: [
       "Descubrí el nuevo iPhone 17 Pro, un smartphone diseñado para quienes buscan potencia, tecnología y una experiencia premium en cada momento. Su elegante acabado Deep Blue y sus 256 GB de almacenamiento ofrecen el equilibrio perfecto entre estilo y espacio para tus fotos, videos, aplicaciones y archivos.",
       "Con eSIM, disfrutás de una conectividad práctica y moderna, ideal para mantenerte comunicado estés donde estés. Su rendimiento permite disfrutar de tus aplicaciones, juegos, contenido multimedia y herramientas de trabajo con una experiencia fluida."
     ],
     features: ["256 GB de almacenamiento", "Color Deep Blue", "Tecnología eSIM", "Cámaras 48+48+48 MP", "Frontal de 18 MP", "Pantalla de 6,3\""] },
 
-  { brand: "Apple", name: "iPhone 17 Pro Max 256 GB", spec: "6,9\" · 48+48+48 MP · 18 MP · Silver", price: 9100000, cat: "Celulares", stock: "Disponible", sku: "BE/A3526", foto: "./productos/apple-iphone-17-pro-max.jpg", img: "foto: iPhone 17 Pro Max",
+  { brand: "Apple", name: "iPhone 17 Pro Max 256 GB", spec: "6,9\" · 48+48+48 MP · 18 MP · Silver", price: 9100000, cats: ["Celulares"], stock: "Disponible", sku: "BE/A3526", foto: "./productos/apple-iphone-17-pro-max.jpg", img: "foto: iPhone 17 Pro Max",
     desc: [
       "Potencia, elegancia y una experiencia premium en un solo equipo. El iPhone 17 Pro Max cuenta con 256 GB de almacenamiento, ofreciendo espacio de sobra para tus fotos, videos, aplicaciones y archivos, mientras su diseño en acabado Silver aporta un estilo sofisticado.",
       "Pensado para quienes buscan un smartphone capaz de acompañar un uso exigente, es ideal para crear contenido, editar videos, trabajar, disfrutar de entretenimiento y gestionar tus tareas diarias con comodidad. Su formato Pro Max ofrece una experiencia especialmente atractiva para quienes priorizan una pantalla amplia y una experiencia móvil completa."
     ],
     features: ["256 GB de almacenamiento", "Color Silver", "Rendimiento de gama Pro", "Cámaras 48+48+48 MP", "Frontal de 18 MP", "Pantalla de 6,9\""] },
 
-  { brand: "Apple", name: "MacBook Neo 13\"", spec: "Chip A18 Pro · 8 GB / 256 GB · Silver", price: 5600000, cat: "Computación", stock: "Disponible", sku: "MHFA4LL/A", foto: "./productos/apple-macbook-neo-13.jpg", img: "foto: MacBook Neo 13",
+  { brand: "Apple", name: "MacBook Neo 13\"", spec: "Chip A18 Pro · 8 GB / 256 GB · Silver", price: 5600000, cats: ["Notebooks"], stock: "Disponible", sku: "MHFA4LL/A", foto: "./productos/apple-macbook-neo-13.jpg", img: "foto: MacBook Neo 13",
     desc: [
       "Elegancia, portabilidad y rendimiento en un solo equipo. El MacBook Neo combina un diseño compacto en color Silver con la potencia y eficiencia del chip Apple A18 Pro, ofreciendo una experiencia fluida para acompañarte tanto en el trabajo como en el estudio.",
       "Cuenta con 8 GB de memoria y 256 GB de almacenamiento, ideales para gestionar documentos, navegar, utilizar aplicaciones, realizar videollamadas y disfrutar de contenido multimedia. Su formato de 13\" facilita llevarlo a cualquier lugar sin renunciar a una experiencia cómoda de uso.",
@@ -970,14 +980,14 @@ const PRODUCTS = [
     ],
     features: ["Pantalla de 13\"", "Chip Apple A18 Pro", "8 GB de memoria", "256 GB de almacenamiento", "Color Silver", "Ecosistema Apple", "Diseño compacto y portátil"] },
 
-  { brand: "Sony", name: "PlayStation 5 Pro 2 TB Digital", spec: "2 TB · Digital Edition · DualSense · White", price: 8200000, cat: "Gaming", stock: "Disponible", sku: "CFI-7119/7019", foto: "./productos/sony-ps5-pro-2tb.jpg", img: "foto: PlayStation 5 Pro",
+  { brand: "Sony", name: "PlayStation 5 Pro 2 TB Digital", spec: "2 TB · Digital Edition · DualSense · White", price: 8200000, cats: ["Gaming"], stock: "Disponible", sku: "CFI-7119/7019", foto: "./productos/sony-ps5-pro-2tb.jpg", img: "foto: PlayStation 5 Pro",
     desc: [
       "Llevá tu experiencia gaming al siguiente nivel con la PlayStation 5 Pro, una consola diseñada para quienes buscan mayor potencia, calidad gráfica y rendimiento. Su almacenamiento de 2 TB te permite disfrutar de una amplia biblioteca de juegos sin preocuparte constantemente por el espacio.",
       "La edición Digital ofrece una experiencia completamente enfocada en juegos descargables, mientras que su diseño en color White mantiene la estética moderna y característica de PlayStation."
     ],
     features: ["2 TB de almacenamiento", "Alto rendimiento para gaming", "Experiencia visual de nueva generación", "Edición Digital", "Color White", "Incluye control inalámbrico DualSense"] },
 
-  { brand: "Sony", name: "PlayStation 5 Slim 825 GB Digital", spec: "825 GB · Digital Edition · DualSense · White", price: 4650000, cat: "Gaming", stock: "Disponible", sku: "CFI-2115 B01X", foto: "./productos/sony-ps5-slim-825gb.jpg", img: "foto: PlayStation 5 Slim",
+  { brand: "Sony", name: "PlayStation 5 Slim 825 GB Digital", spec: "825 GB · Digital Edition · DualSense · White", price: 4650000, cats: ["Gaming"], stock: "Disponible", sku: "CFI-2115 B01X", foto: "./productos/sony-ps5-slim-825gb.jpg", img: "foto: PlayStation 5 Slim",
     desc: [
       "Disfrutá de una nueva generación de gaming con la PlayStation 5 Slim, una consola que combina potencia, velocidad y un diseño más compacto. Su almacenamiento de 825 GB te permite tener tus títulos favoritos siempre listos para jugar.",
       "Esta Digital Edition está pensada para quienes prefieren descargar y disfrutar sus juegos directamente desde la consola. Además, incluye el control inalámbrico DualSense, que ofrece una experiencia de juego más inmersiva gracias a sus funciones de respuesta háptica y gatillos adaptativos.",
@@ -985,7 +995,7 @@ const PRODUCTS = [
     ],
     features: ["825 GB de almacenamiento", "Alto rendimiento y carga rápida", "Edición Digital", "Control inalámbrico DualSense incluido", "Color White", "Modelo CFI-2115 B01X", "Diseño compacto Slim"] },
 
-  { brand: "Apple", name: "iPhone 17 256 GB", spec: "6,3\" · 48+48 MP · 18 MP · Black", price: 6700000, cat: "Celulares", stock: "Disponible", sku: "BE/A3520", foto: "./productos/apple-iphone-17.jpg", img: "foto: iPhone 17",
+  { brand: "Apple", name: "iPhone 17 256 GB", spec: "6,3\" · 48+48 MP · 18 MP · Black", price: 6700000, cats: ["Celulares"], stock: "Disponible", sku: "BE/A3520", foto: "./productos/apple-iphone-17.jpg", img: "foto: iPhone 17",
     desc: [
       "Descubrí el iPhone 17, un smartphone que combina potencia, diseño y versatilidad para acompañarte en cada momento. Su elegante acabado Black le brinda un estilo moderno y sofisticado, mientras que sus 256 GB de almacenamiento ofrecen amplio espacio para tus fotos, videos, aplicaciones y archivos.",
       "Pensado para el día a día, es una excelente opción tanto para trabajo como para entretenimiento. Disfrutá de tus contenidos, capturá tus mejores momentos y mantenete conectado estés donde estés, con una experiencia fluida y práctica."
@@ -993,7 +1003,7 @@ const PRODUCTS = [
     features: ["256 GB de almacenamiento", "Color Black", "Alto rendimiento", "Cámaras 48+48 MP", "Frontal de 18 MP", "Pantalla de 6,3\""] },
 
   // Provisorio en Monitores: no hay categoria de TV todavia (ver README).
-  { brand: "Samsung", name: "Smart TV LED 55\" UN55U8000FGXPR", spec: "55\" · UHD 4K · Crystal · Smart TV", price: 3200000, cat: "Monitores", stock: "Disponible", sku: "UN55U8000FGXPR", foto: "./productos/samsung-tv-55-un55u8000.jpg", img: "foto: Samsung Smart TV 55",
+  { brand: "Samsung", name: "Smart TV LED 55\" UN55U8000FGXPR", spec: "55\" · UHD 4K · Crystal · Smart TV", price: 3200000, cats: ["TV"], stock: "Disponible", sku: "UN55U8000FGXPR", foto: "./productos/samsung-tv-55-un55u8000.jpg", img: "foto: Samsung Smart TV 55",
     desc: [
       "Disfrutá de una experiencia de entretenimiento más inmersiva con el Samsung Smart TV de 55\", que combina un diseño elegante con la calidad de imagen UHD 4K y la tecnología Crystal para ofrecer imágenes nítidas, colores vibrantes y gran nivel de detalle.",
       "Su pantalla de 55 pulgadas es ideal para disfrutar películas, series, deportes y videojuegos con una experiencia visual envolvente. Gracias a sus funciones Smart, podés acceder fácilmente a tus plataformas y contenidos favoritos desde un solo lugar.",
@@ -1001,7 +1011,7 @@ const PRODUCTS = [
     ],
     features: ["Pantalla de 55\"", "Resolución UHD 4K", "Tecnología Crystal", "Smart TV", "Ideal para películas, series y streaming", "Excelente opción para gaming y entretenimiento"] },
 
-  { brand: "Xiaomi", name: "Smart TV LED 65\" A 2026 L65MB-APH", spec: "65\" · 4K UHD · Google TV · LED", price: 3750000, cat: "Monitores", stock: "Disponible", sku: "L65MB-APH", foto: "./productos/xiaomi-tv-a-2026-65.jpg", img: "foto: Xiaomi Smart TV 65",
+  { brand: "Xiaomi", name: "Smart TV LED 65\" A 2026 L65MB-APH", spec: "65\" · 4K UHD · Google TV · LED", price: 3750000, cats: ["TV"], stock: "Disponible", sku: "L65MB-APH", foto: "./productos/xiaomi-tv-a-2026-65.jpg", img: "foto: Xiaomi Smart TV 65",
     desc: [
       "Llevá el entretenimiento a otro nivel con la Xiaomi Smart TV A 2026 de 65\", una pantalla de gran formato que combina resolución 4K, tecnología LED y Google TV para ofrecer una experiencia completa en tu hogar.",
       "Su pantalla de 65 pulgadas permite disfrutar películas, series, deportes y videojuegos con gran nivel de detalle, mientras que Google TV facilita el acceso a tus aplicaciones y plataformas de streaming favoritas desde una interfaz práctica y moderna.",
@@ -1009,7 +1019,7 @@ const PRODUCTS = [
     ],
     features: ["Pantalla LED de 65\"", "Resolución 4K UHD", "Google TV", "Ideal para streaming y películas", "Excelente para deportes", "Ideal para gaming casual", "Diseño moderno y elegante", "Conectividad inteligente"] },
 
-  { brand: "Apple", name: "Watch Series 11 42 mm GPS", spec: "42 mm · GPS · Sport Band · Jet Black", price: 2550000, cat: "Accesorios", stock: "Disponible", sku: "MEQT4LW", foto: "./productos/apple-watch-s11-42mm.jpg", img: "foto: Apple Watch Series 11",
+  { brand: "Apple", name: "Watch Series 11 42 mm GPS", spec: "42 mm · GPS · Sport Band · Jet Black", price: 2550000, cats: ["Smartwatch & Wearables"], stock: "Disponible", sku: "MEQT4LW", foto: "./productos/apple-watch-s11-42mm.jpg", img: "foto: Apple Watch Series 11",
     desc: [
       "Tecnología, estilo y funcionalidad en tu muñeca. El Apple Watch Series 11 de 42 mm combina un diseño elegante en color Jet Black con una correa Sport Band, ofreciendo un look moderno que se adapta tanto a tu rutina diaria como a tus momentos de entrenamiento.",
       "Su conectividad GPS te permite disfrutar de funciones de ubicación y seguimiento durante tus actividades, mientras que su integración con el ecosistema Apple facilita mantenerte conectado, consultar información y gestionar diferentes funciones directamente desde tu muñeca."
@@ -1017,18 +1027,18 @@ const PRODUCTS = [
     features: ["Caja de 42 mm", "GPS", "Color Jet Black", "Correa Sport Band, talle S/M", "Integración con el ecosistema Apple", "Diseño moderno y elegante"] },
 
   // --- Demo pendiente de reemplazo (ver README) ---
-  { brand: "ASUS", name: "ROG Strix G16", spec: "RTX 4060 · 16 GB RAM · 512 GB SSD", price: 8250000, cat: "Gaming", stock: "Disponible", img: "foto: notebook gamer", sku: "MX-NB-0142", badge: "" },
-  { brand: "Logitech", name: "MX Master 3S", spec: "Inalámbrico · 8000 DPI · silencioso", price: 695000, oldPrice: 820000, badge: "-15%", cat: "Periféricos", stock: "Disponible", img: "foto: mouse", sku: "MX-PE-0207" },
-  { brand: "Samsung", name: "Monitor Odyssey G5 27\"", spec: "QHD · 165 Hz · 1 ms", price: 2190000, cat: "Monitores", stock: "Disponible", img: "foto: monitor curvo", sku: "MX-MO-0311" },
-  { brand: "Kingston", name: "SSD NV2 1 TB", spec: "NVMe M.2 · lectura 3500 MB/s", price: 485000, cat: "Almacenamiento", stock: "Disponible", img: "foto: SSD M.2", sku: "MX-AL-0128" },
-  { brand: "Lenovo", name: "IdeaPad Slim 5", spec: "Ryzen 7 · 16 GB RAM · 1 TB SSD", price: 5490000, oldPrice: 5990000, badge: "-8%", cat: "Computación", stock: "Disponible", img: "foto: notebook slim", sku: "MX-NB-0163" },
-  { brand: "Corsair", name: "Teclado K70 RGB", spec: "Mecánico · switches rojos · USB-C", price: 920000, cat: "Periféricos", stock: "A pedido", img: "foto: teclado mecánico", sku: "MX-PE-0245" },
-  { brand: "MSI", name: "GeForce RTX 4070 Ventus", spec: "12 GB GDDR6X · triple fan", price: 6350000, cat: "Computación", stock: "A pedido", img: "foto: placa de video", sku: "MX-CO-0189" },
-  { brand: "Apple", name: "AirPods Pro", spec: "Cancelación activa · USB-C", price: 1690000, cat: "Audio", stock: "Disponible", img: "foto: auriculares in-ear", sku: "MX-AU-0102" },
-  { brand: "HP", name: "Impresora Smart Tank", spec: "Multifunción · Wi-Fi · sistema continuo", price: 1450000, cat: "Accesorios", stock: "A pedido", img: "foto: impresora", sku: "MX-AC-0154" },
-  { brand: "Acer", name: "Nitro V15", spec: "RTX 3050 · 16 GB RAM · 512 GB SSD", price: 5150000, oldPrice: 5650000, badge: "-9%", cat: "Gaming", stock: "Disponible", img: "foto: notebook gaming", sku: "MX-NB-0171" },
-  { brand: "Samsung", name: "Galaxy A55", spec: "8 GB RAM · 256 GB · 120 Hz", price: 2890000, cat: "Celulares", stock: "Disponible", img: "foto: smartphone frente", sku: "MX-CE-0119" },
-  { brand: "Logitech", name: "Webcam C920", spec: "Full HD 1080p · micrófono estéreo", price: 520000, cat: "Accesorios", stock: "Disponible", img: "foto: webcam", sku: "MX-AC-0136" }
+  { brand: "ASUS", name: "ROG Strix G16", spec: "RTX 4060 · 16 GB RAM · 512 GB SSD", price: 8250000, cats: ["Notebooks", "Gaming"], stock: "Disponible", img: "foto: notebook gamer", sku: "MX-NB-0142", badge: "" },
+  { brand: "Logitech", name: "MX Master 3S", spec: "Inalámbrico · 8000 DPI · silencioso", price: 695000, oldPrice: 820000, badge: "-15%", cats: ["Periféricos"], stock: "Disponible", img: "foto: mouse", sku: "MX-PE-0207" },
+  { brand: "Samsung", name: "Monitor Odyssey G5 27\"", spec: "QHD · 165 Hz · 1 ms", price: 2190000, cats: ["Monitores", "Gaming"], stock: "Disponible", img: "foto: monitor curvo", sku: "MX-MO-0311" },
+  { brand: "Kingston", name: "SSD NV2 1 TB", spec: "NVMe M.2 · lectura 3500 MB/s", price: 485000, cats: ["Almacenamiento"], stock: "Disponible", img: "foto: SSD M.2", sku: "MX-AL-0128" },
+  { brand: "Lenovo", name: "IdeaPad Slim 5", spec: "Ryzen 7 · 16 GB RAM · 1 TB SSD", price: 5490000, oldPrice: 5990000, badge: "-8%", cats: ["Notebooks"], stock: "Disponible", img: "foto: notebook slim", sku: "MX-NB-0163" },
+  { brand: "Corsair", name: "Teclado K70 RGB", spec: "Mecánico · switches rojos · USB-C", price: 920000, cats: ["Periféricos", "Gaming"], stock: "A pedido", img: "foto: teclado mecánico", sku: "MX-PE-0245" },
+  { brand: "MSI", name: "GeForce RTX 4070 Ventus", spec: "12 GB GDDR6X · triple fan", price: 6350000, cats: ["PC & Componentes", "Gaming"], stock: "A pedido", img: "foto: placa de video", sku: "MX-CO-0189" },
+  { brand: "Apple", name: "AirPods Pro", spec: "Cancelación activa · USB-C", price: 1690000, cats: ["Audio"], stock: "Disponible", img: "foto: auriculares in-ear", sku: "MX-AU-0102" },
+  { brand: "HP", name: "Impresora Smart Tank", spec: "Multifunción · Wi-Fi · sistema continuo", price: 1450000, cats: ["Accesorios"], stock: "A pedido", img: "foto: impresora", sku: "MX-AC-0154" },
+  { brand: "Acer", name: "Nitro V15", spec: "RTX 3050 · 16 GB RAM · 512 GB SSD", price: 5150000, oldPrice: 5650000, badge: "-9%", cats: ["Notebooks", "Gaming"], stock: "Disponible", img: "foto: notebook gaming", sku: "MX-NB-0171" },
+  { brand: "Samsung", name: "Galaxy A55", spec: "8 GB RAM · 256 GB · 120 Hz", price: 2890000, cats: ["Celulares"], stock: "Disponible", img: "foto: smartphone frente", sku: "MX-CE-0119" },
+  { brand: "Logitech", name: "Webcam C920", spec: "Full HD 1080p · micrófono estéreo", price: 520000, cats: ["Accesorios", "Periféricos"], stock: "Disponible", img: "foto: webcam", sku: "MX-AC-0136" }
 ];
 
 // El rango del slider sale del catálogo, no de valores fijos.
@@ -1395,6 +1405,20 @@ class Component extends DCLogic {
     };
   }
 
+  // Igual que irACat pero por marca: la usan las tarjetas de marca y el
+  // mega-menú, para que un clic en un logo lleve al catálogo ya filtrado.
+  irAMarca(marca) {
+    return (e) => {
+      if (e) e.preventDefault();
+      this.setState({
+        page: "catalog", fCat: [], fBrand: [marca], fStock: [], fMax: PMAX,
+        q: "", sort: "rel", onlyFav: false,
+        menuOpen: false, mega: null, cartOpen: false, searchOpen: false
+      });
+      window.scrollTo(0, 0);
+    };
+  }
+
   // Lleva a una sección del inicio. El salto va diferido porque el nodo recién
   // vuelve al DOM después de que el runtime renderiza la página de inicio.
   irAAncla(id) {
@@ -1435,66 +1459,51 @@ class Component extends DCLogic {
       "¿Está disponible?"
     );
     const accent = this.props.accent ?? "#40DF36";
-    const navLabels = ["Inicio", "Categorías", "Computación", "Gaming", "Celulares", "Audio", "Periféricos", "Accesorios", "Ofertas", "Marcas"];
+    // Las 12 categorías no entran en la barra del encabezado sin romper el
+    // renglón, así que arriba va una selección y el resto vive en el mega-menú
+    // "Categorías". En el teléfono, en cambio, el menú desplegable las lista
+    // todas: hay lugar de sobra y así no queda ninguna escondida.
+    const navLabels = ["Inicio", "Categorías", "Celulares", "Notebooks", "Gaming", "Monitores", "Audio", "TV", "Ofertas", "Marcas"];
+    const navMovilLabels = ["Inicio"].concat(CAT.map((c) => c.name)).concat(["Ofertas", "Novedades", "Destacados", "Marcas"]);
     // Las que son categoría real abren el catálogo filtrado; las demás son
     // secciones del inicio y saltan a su ancla.
     const CATS_NAV = CAT.map((c) => c.name);
-    const ANCLAS_NAV = { "Categorías": "cat-h", "Ofertas": "ofertas", "Marcas": "brand-h" };
+    const ANCLAS_NAV = { "Categorías": "cat-h", "Ofertas": "ofertas", "Novedades": "new-h", "Destacados": "feat-h", "Marcas": "brand-h" };
     // Todas las secciones del nav despliegan, salvo Inicio, que es un enlace
     // directo al home. Marcas y Categorías salen del catálogo real (BRAND_LIST
     // y CAT) para que no queden desfasadas al agregar productos.
-    const megaMap = {
-      "Categorías": [
-        { title: "Computación", items: ["Notebooks", "PC de escritorio", "Componentes", "Monitores"] },
-        { title: "Gaming", items: ["PC gamer", "Sillas", "Teclados", "Mouse gamer"] },
-        { title: "Movilidad", items: ["Celulares", "Tablets", "Smartwatch", "Cargadores"] },
-        { title: "Todas", items: CAT.map((c) => c.name).slice(4) }
-      ],
-      "Computación": [
-        { title: "Notebooks", items: ["Trabajo", "Estudio", "Gaming", "Ultralivianas"] },
-        { title: "PC y componentes", items: ["Placas de video", "Procesadores", "Motherboards", "Memorias RAM"] },
-        { title: "Monitores", items: ["Full HD", "QHD", "4K", "Curvos"] },
-        { title: "Oficina", items: ["Impresoras", "Redes", "UPS", "Almacenamiento"] }
-      ],
-      "Gaming": [
-        { title: "Equipos", items: ["PC gamer", "Notebooks gaming", "Consolas"] },
-        { title: "Periféricos", items: ["Teclados mecánicos", "Mouse", "Headsets", "Mousepads"] },
-        { title: "Setup", items: ["Sillas", "Escritorios", "Iluminación", "Soportes"] }
-      ],
-      "Celulares": [
-        { title: "Smartphones", items: ["Gama alta", "Gama media", "Gama de entrada", "Libres"] },
-        { title: "Accesorios", items: ["Fundas", "Vidrios templados", "Cargadores", "Power banks"] },
-        { title: "Más movilidad", items: ["Tablets", "Smartwatch", "Auriculares bluetooth"] }
-      ],
-      "Audio": [
-        { title: "Auriculares", items: ["In-ear", "Over-ear", "Gaming", "Con cancelación"] },
-        { title: "Parlantes", items: ["Bluetooth portátiles", "Barras de sonido", "Monitores de estudio"] },
-        { title: "Grabación", items: ["Micrófonos", "Interfaces", "Soportes y brazos"] }
-      ],
-      "Periféricos": [
-        { title: "Teclados", items: ["Mecánicos", "De membrana", "Inalámbricos", "Compactos"] },
-        { title: "Mouse", items: ["Gamer", "Oficina", "Inalámbricos", "Verticales"] },
-        { title: "Video y voz", items: ["Webcams", "Micrófonos", "Aros de luz"] },
-        { title: "Escritorio", items: ["Mousepads", "Hubs USB", "Soportes de monitor"] }
-      ],
-      "Accesorios": [
-        { title: "Conectividad", items: ["Cables", "Adaptadores", "Hubs USB", "Redes"] },
-        { title: "Almacenamiento", items: ["SSD externos", "Discos rígidos", "Pendrives", "Memorias"] },
-        { title: "Soportes", items: ["De monitor", "De notebook", "De celular"] },
-        { title: "Impresión", items: ["Impresoras", "Tintas y tóner", "Papel"] }
-      ],
-      "Ofertas": [
-        { title: "Por descuento", items: ["Hasta 10%", "10% a 20%", "Más de 20%"] },
-        { title: "Por categoría", items: ["Notebooks", "Periféricos", "Monitores", "Celulares"] },
-        { title: "Cómo comprar", items: ["Consultar por WhatsApp", "Ver todas las ofertas"] }
-      ],
-      "Marcas": [
-        { title: "Marcas", items: BRAND_LIST.slice(0, 4) },
-        { title: "\u00A0", items: BRAND_LIST.slice(4, 7) },
-        { title: "\u00A0", items: BRAND_LIST.slice(7) },
-        { title: "Ver más", items: ["Todas las marcas", "Consultar disponibilidad"] }
-      ]
+    // El mega-menú solo muestra cosas que existen y filtran de verdad: las 12
+    // categorías y las marcas del catálogo. Antes listaba subcategorías
+    // inventadas ("Sillas", "Aros de luz") que caían al catálogo sin filtrar.
+    const enColumnas = (lista, n) => {
+      const cols = [];
+      const porCol = Math.ceil(lista.length / n);
+      for (let i = 0; i < lista.length; i += porCol) cols.push(lista.slice(i, i + porCol));
+      return cols;
     };
+    const megaMap = {
+      "Categorías": enColumnas(CAT.map((c) => c.name), 4).map((grupo, i) => ({
+        title: i === 0 ? "Categorías" : "\u00A0",
+        items: grupo.map((nombre) => ({ label: nombre, abrir: this.irACat(nombre) }))
+      })),
+      "Marcas": enColumnas(BRAND_LIST, 3).map((grupo, i) => ({
+        title: i === 0 ? "Marcas" : "\u00A0",
+        items: grupo.map((marca) => ({ label: marca, abrir: this.irAMarca(marca) }))
+      })).concat([{
+        title: "Colecciones",
+        items: [
+          { label: "Ofertas", abrir: this.irAAncla("ofertas") },
+          { label: "Novedades", abrir: this.irAAncla("new-h") },
+          { label: "Destacados", abrir: this.irAAncla("feat-h") }
+        ]
+      }])
+    };
+    // Antes todo caía en el catálogo sin filtrar: desde el propio catálogo los
+    // botones no cambiaban nada y parecían rotos.
+    const accionNav = (label) => label === "Inicio" ? this.go("home")
+      : CATS_NAV.includes(label) ? this.irACat(label)
+      : ANCLAS_NAV[label] ? this.irAAncla(ANCLAS_NAV[label])
+      : this.go("catalog");
     const nav = navLabels.map((label, i) => ({
       label,
       // Relleno con el verde propio; el ítem con mega-menú abierto se invierte
@@ -1502,14 +1511,11 @@ class Component extends DCLogic {
       bg: s.mega === label ? "#171717" : NAV_GREENS[i],
       border: s.mega === label ? "#171717" : NAV_GREENS[i],
       color: s.mega === label ? NAV_GREENS[i] : "#0B1F12",
-      // Antes todo caía en el catálogo sin filtrar: desde el propio catálogo
-      // los botones no cambiaban nada y parecían rotos.
-      onClick: label === "Inicio" ? this.go("home")
-        : ANCLAS_NAV[label] ? this.irAAncla(ANCLAS_NAV[label])
-        : CATS_NAV.includes(label) ? this.irACat(label)
-        : this.go("catalog"),
+      onClick: accionNav(label),
       onEnter: () => this.setState({ mega: megaMap[label] && label !== "Inicio" ? label : null })
     }));
+    // El menú del teléfono lista las 12 categorías más las colecciones.
+    const navMovil = navMovilLabels.map((label) => ({ label, onClick: accionNav(label) }));
     // Cada producto lleva sus propias acciones de favorito y de consulta.
     const view = (arr) => arr.map((p) => {
       const i = PRODUCTS.indexOf(p);
@@ -1531,8 +1537,11 @@ class Component extends DCLogic {
     const uniq = (arr) => arr.filter((v, i) => arr.indexOf(v) === i);
     const picked = (sel, v) => sel.length === 0 || sel.includes(v);
     const term = s.q.trim().toLowerCase();
-    const coincide = (p) => !term || (p.brand + " " + p.name + " " + p.spec + " " + p.cat).toLowerCase().includes(term);
-    let found = PRODUCTS.filter((p, i) => (!s.onlyFav || s.fav.includes(i)) && coincide(p) && picked(s.fCat, p.cat) && picked(s.fBrand, p.brand) && picked(s.fStock, p.stock) && p.price <= s.fMax);
+    // La búsqueda mira también todas las categorías del producto, no solo una.
+    const coincide = (p) => !term || (p.brand + " " + p.name + " " + p.spec + " " + catsDe(p).join(" ")).toLowerCase().includes(term);
+    // Con varias categorías por producto alcanza con que una coincida.
+    const enCat = (p) => s.fCat.length === 0 || catsDe(p).some((c) => s.fCat.includes(c));
+    let found = PRODUCTS.filter((p, i) => (!s.onlyFav || s.fav.includes(i)) && coincide(p) && enCat(p) && picked(s.fBrand, p.brand) && picked(s.fStock, p.stock) && p.price <= s.fMax);
     if (s.sort === "asc") found = found.slice().sort((a, b) => a.price - b.price);
     else if (s.sort === "desc") found = found.slice().sort((a, b) => b.price - a.price);
     else if (s.sort === "new") found = found.slice().reverse();
@@ -1546,6 +1555,17 @@ class Component extends DCLogic {
         on: s[key].includes(v),
         toggle: this.toggle(key, v)
       }))
+    });
+    // Categorías: van en el orden definido por el cliente, no alfabético, y se
+    // cuentan por pertenencia. Las vacías no se listan: serían filtros muertos.
+    const grupoCat = () => ({
+      title: "Categoría",
+      items: CAT.map((c) => ({
+        label: c.name,
+        count: PRODUCTS.filter((p) => catsDe(p).includes(c.name)).length,
+        on: s.fCat.includes(c.name),
+        toggle: this.toggle("fCat", c.name)
+      })).filter((it) => it.count > 0 || s.fCat.includes(it.label))
     });
 
     return {
@@ -1562,6 +1582,7 @@ class Component extends DCLogic {
       burgerDisplay: s.narrow ? "grid" : "none",
       navDisplay: s.narrow ? "none" : "block",
       nav,
+      navMovil,
       heroFacts: ["Catálogo amplio de informática y tecnología.", "Asesoramiento directo antes de comprar.", "Atención por WhatsApp todos los días."],
       categories: CAT.map((c) => ({ ...c, tint: c.color + "2E", soft: c.color + "12", glow: c.color + "33", abrir: this.irACat(c.name) })),
       featured: view(PRODUCTS.slice(0, 8)),
@@ -1616,14 +1637,14 @@ class Component extends DCLogic {
         { icon: this.icon("shield", "#6D3BD1"), tint: "#F0EAFD", line: "#D7C7F7", title: "Compra simple y segura", text: "Proceso claro, sin pasos innecesarios ni sorpresas." },
         { icon: this.icon("clock", "#C97A06"), tint: "#FDF2E0", line: "#F2DCB3", title: "Atención directa por WhatsApp", text: "Consultas respondidas por personas, no por formularios." }
       ],
-      filters: [group("Categoría", "cat", "fCat"), group("Marca", "brand", "fBrand"), group("Disponibilidad", "stock", "fStock")],
+      filters: [grupoCat(), group("Marca", "brand", "fBrand"), group("Disponibilidad", "stock", "fStock")],
       current: { ...current, wa: waFor(current), price: P(current.price), sku: current.sku || "MX-0000", oldPrice: current.oldPrice ? P(current.oldPrice) : "", badge: current.badge || "",
         sinFoto: !current.foto,
         hayDesc: !!(current.desc && current.desc.length),
         desc: current.desc || [],
         // Los productos cargados traen su propia lista; el resto cae al texto generico.
         features: current.features || ["Pensado para uso intensivo diario.", "Compatible con accesorios estándar.", "Garantía según política del fabricante.", "Consultá disponibilidad antes de confirmar."],
-        specs: [{ k: "Marca", v: current.brand }, { k: "Modelo", v: current.name }, { k: "Especificación", v: current.spec }, { k: "Categoría", v: current.cat }, { k: "Disponibilidad", v: current.stock }, { k: "Código", v: current.sku || "MX-0000" }] },
+        specs: [{ k: "Marca", v: current.brand }, { k: "Modelo", v: current.name }, { k: "Especificación", v: current.spec }, { k: "Categoría", v: catsDe(current).join(" · ") }, { k: "Disponibilidad", v: current.stock }, { k: "Código", v: current.sku || "MX-0000" }] },
       hayGaleria: !current.foto,
       gallery: ["ángulo 2", "ángulo 3", "detalle", "en uso"],
       // `todo` no se renderiza: queda como registro de lo que falta confirmar
@@ -1635,8 +1656,8 @@ class Component extends DCLogic {
         { title: "Atención", color: "#16AE95", ink: "#0C6E60", text: "Respondemos por WhatsApp todos los días.", todo: "completar: horarios de atención" }
       ],
       footerCols: [
-        { title: "Productos", items: ["Computación", "Gaming", "Celulares", "Periféricos", "Ofertas"] },
-        { title: "Marcas", items: ["ASUS", "Samsung", "Logitech", "Lenovo"] },
+        { title: "Productos", items: ["Celulares", "Notebooks", "Gaming", "Monitores", "TV"] },
+        { title: "Marcas", items: BRAND_LIST.slice(0, 4) },
         { title: "Ayuda", items: ["Cómo comprar", "Preguntas frecuentes", "Contacto"] }
       ]
     };
