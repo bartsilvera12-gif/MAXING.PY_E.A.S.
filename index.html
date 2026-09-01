@@ -605,24 +605,6 @@ article:hover button { filter: brightness(1.08); }
     </div>
   </section>
 
-  <!-- Quiénes somos: la foto va a la izquierda para no repetir la composición
-       de la sección SEO, que lleva la imagen del lado derecho. -->
-  <section id="nosotros" aria-labelledby="nos-h" style="border-bottom:1px solid #CDE3D3;background:rgba(255,255,255,0.34)">
-    <div style="max-width:1320px;margin:0 auto;padding:clamp(36px,4.5vw,64px) 24px">
-      <div data-rb="nosotros" style="background:#FFFFFF;border:1.5px solid #40DF36;border-radius:16px;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:stretch">
-        <div data-rb="nosotros-foto" style="min-height:clamp(220px,26vw,360px);background:#FFFFFF">
-          <img src="./nosotros.jpg" alt="Equipo de MAXING.py en la oficina" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%">
-        </div>
-        <div style="padding:clamp(26px,3.2vw,44px);display:flex;flex-direction:column;justify-content:center;gap:16px">
-          <span data-rb="shiny" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">La empresa</span>
-          <h2 id="nos-h" style="margin:0;font-size:clamp(22px,2.4vw,32px);font-weight:800;letter-spacing:-0.03em;line-height:1.12;color:#1F8F19">¿Quiénes somos?</h2>
-          <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty"><strong style="color:#171717;font-weight:700">MAXING.PY E.A.S.</strong> es una empresa paraguaya fundada en 2025, especializada en soluciones tecnológicas para personas, profesionales y empresas.</p>
-          <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">Comercializamos equipos de informática, dispositivos móviles y soluciones personalizadas, acompañando a cada cliente con asesoramiento profesional, garantía y un servicio cercano.</p>
-          <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">Más que vender tecnología, buscamos construir relaciones de confianza mediante un acompañamiento antes, durante y después de cada compra.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <section aria-labelledby="ben-h" style="border-bottom:1px solid #E8E8E8">
     <div style="max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,72px) 24px">
@@ -691,6 +673,34 @@ article:hover button { filter: brightness(1.08); }
 <!-- Favoritos y la lista de consulta son paginas propias. Antes favoritos era
      el catalogo con un filtro encima y la consulta un panel desplegable en el
      encabezado: ninguno de los dos tenia direccion propia ni encabezado. -->
+<!-- Quienes somos es su propia pagina: no aparece en el inicio. -->
+<sc-if value="{{ isNosotros }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:1320px;margin:0 auto;padding:28px 24px 0">
+    <div aria-label="Ruta de navegación" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;font-weight:500;color:#5C6862">
+      <a href="#" onClick="{{ goHome }}">Inicio</a><span>/</span>
+      <span style="color:#171717">Quiénes somos</span>
+    </div>
+  </div>
+  <!-- Quiénes somos: la foto va a la izquierda para no repetir la composición
+       de la sección SEO, que lleva la imagen del lado derecho. -->
+  <section id="nosotros" aria-labelledby="nos-h" style="border-bottom:1px solid #CDE3D3;background:rgba(255,255,255,0.34)">
+    <div style="max-width:1320px;margin:0 auto;padding:clamp(36px,4.5vw,64px) 24px">
+      <div data-rb="nosotros" style="background:#FFFFFF;border:1.5px solid #40DF36;border-radius:16px;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:stretch">
+        <div data-rb="nosotros-foto" style="min-height:clamp(220px,26vw,360px);background:#FFFFFF">
+          <img src="./nosotros.jpg" alt="Equipo de MAXING.py en la oficina" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%">
+        </div>
+        <div style="padding:clamp(26px,3.2vw,44px);display:flex;flex-direction:column;justify-content:center;gap:16px">
+          <span data-rb="shiny" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">La empresa</span>
+          <h1 id="nos-h" style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:800;letter-spacing:-0.03em;line-height:1.12;color:#1F8F19">¿Quiénes somos?</h1>
+          <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty"><strong style="color:#171717;font-weight:700">MAXING.PY E.A.S.</strong> es una empresa paraguaya fundada en 2025, especializada en soluciones tecnológicas para personas, profesionales y empresas.</p>
+          <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">Comercializamos equipos de informática, dispositivos móviles y soluciones personalizadas, acompañando a cada cliente con asesoramiento profesional, garantía y un servicio cercano.</p>
+          <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">Más que vender tecnología, buscamos construir relaciones de confianza mediante un acompañamiento antes, durante y después de cada compra.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
 <sc-if value="{{ isFavs }}" hint-placeholder-val="{{ false }}">
   <div style="max-width:1320px;margin:0 auto;padding:28px 24px 10px">
     <div aria-label="Ruta de navegación" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;font-weight:500;color:#5C6862">
@@ -1807,16 +1817,16 @@ class Component extends DCLogic {
     // el orden del cliente. Por cantidad a secas, "Smartwatch & Wearables" con
     // un producto desplazaba a TV, que pesa mas comercialmente.
     const cuantos = (nombre) => PRODUCTS.filter((p) => catsDe(p).includes(nombre)).length;
-    // Cuatro categorías arriba: "Productos" ocupa el lugar de la quinta, y es
-    // el acceso que faltaba al catálogo completo sin pasar por una categoría.
-    const destacadasNav = CATS_VIS.slice().sort((a, b) => cuantos(b) - cuantos(a)).slice(0, 4);
+    // Tres categorías arriba: el resto del renglón lo ocupan los accesos que
+    // no son categoría (catálogo completo, colecciones, marcas y la empresa).
+    const destacadasNav = CATS_VIS.slice().sort((a, b) => cuantos(b) - cuantos(a)).slice(0, 3);
     const navLabels = ["Inicio", "Productos", "Categorías"]
       .concat(CATS_VIS.filter((c) => destacadasNav.includes(c)))
-      .concat([colecciones[0], "Marcas"]);
+      .concat([colecciones[0], "Marcas", "Nosotros"]);
     // El menú del teléfono lista las 12, igual que la grilla del inicio. Las
     // que todavía no tienen productos van marcadas y no abren nada: llevar a
     // un catálogo vacío es peor que decir que están en camino.
-    const navMovilLabels = ["Inicio", "Productos"].concat(CATS_NAV).concat(colecciones);
+    const navMovilLabels = ["Inicio", "Productos"].concat(CATS_NAV).concat(colecciones).concat(["Nosotros"]);
     // Las que son categoría real abren el catálogo filtrado; las demás son
     // secciones del inicio y saltan a su ancla.
     const ANCLAS_NAV = { "Categorías": "cat-h", "Ofertas": "ofertas", "Novedades": "new-h", "Destacados": "feat-h", "Marcas": "brand-h" };
@@ -1862,6 +1872,7 @@ class Component extends DCLogic {
     // botones no cambiaban nada y parecían rotos.
     const accionNav = (label) => label === "Inicio" ? this.go("home")
       : label === "Productos" ? this.go("catalog")
+      : label === "Nosotros" ? this.go("nosotros")
       : CATS_NAV.includes(label) ? this.irACat(label)
       : ANCLAS_NAV[label] ? this.irAAncla(ANCLAS_NAV[label])
       : this.go("catalog");
@@ -1942,7 +1953,7 @@ class Component extends DCLogic {
       // El boton flotante se esconde mientras el menu movil esta desplegado
       showWa: (this.props.showFloatingWhatsapp ?? true) && !(s.menuOpen && s.narrow),
       isHome: s.page === "home", isCatalog: s.page === "catalog", isProduct: s.page === "product",
-      isFavs: s.page === "favoritos", isCart: s.page === "carrito",
+      isFavs: s.page === "favoritos", isCart: s.page === "carrito", isNosotros: s.page === "nosotros",
       goHome: this.go("home"), goCatalog: this.go("catalog"), noop: (e) => e.preventDefault(),
       toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
       menuOpen: s.menuOpen && s.narrow,
@@ -2092,7 +2103,7 @@ class Component extends DCLogic {
         { title: "Ayuda", items: [
           { label: "Ver todo el catálogo", abrir: this.go("catalog") },
           { label: "Ofertas", abrir: this.irAAncla("ofertas") },
-          { label: "Quiénes somos", abrir: this.irAAncla("nosotros") },
+          { label: "Quiénes somos", abrir: this.go("nosotros") },
           { label: "Cómo comprar", abrir: this.irAAncla("ben-h") },
           { label: "Contacto", abrir: this.irAAncla("contacto") }
         ] }
