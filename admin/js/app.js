@@ -58,6 +58,11 @@
   /* --------------------------------------------------------------- */
   /* Iconos                                                           */
   /* --------------------------------------------------------------- */
+  // La misma rampa de verdes que ordena la grilla del inicio del sitio: va de
+  // lima a esmeralda. Cada sección del panel toma un tono, así el menú se lee
+  // como parte de MAXING.py y no como un panel genérico.
+  var VERDES = ["#86DC2C", "#6ADD2F", "#4EDE33", "#40DF36", "#2FD453", "#2FBF6B", "#24CA6B", "#1BBD83", "#16B092", "#14A28C"];
+
   function glifo(d) {
     return h("span", {
       class: "glifo",
@@ -91,17 +96,26 @@
       g.items.push({ clave: clave, def: m });
     });
 
+    // El tono se asigna por posición en el menú completo, no dentro del grupo,
+    // para que la rampa recorra la barra entera de arriba a abajo.
+    var n = 0;
+
     grupos.forEach(function (g) {
       var caja = h("div", { class: "nav-grupo" }, [
         g.nombre ? h("div", { class: "nav-grupo-titulo", text: g.nombre }) : null
       ]);
 
       g.items.forEach(function (it) {
+        var verde = VERDES[n % VERDES.length];
+        n++;
         var boton = h(
           "button",
           {
             class: "nav-item",
             type: "button",
+            // El velo es el mismo color con alfa: un hex de 8 dígitos evita
+            // tener que calcular la versión clara en JavaScript.
+            style: "--c:" + verde + ";--c-velo:" + verde + "1f",
             "aria-current": it.clave === actual ? "page" : null,
             onclick: function () {
               App.ir(it.clave);
