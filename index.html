@@ -610,13 +610,15 @@ article:hover button { filter: brightness(1.08); }
       <p style="margin:-18px 0 26px;font-size:15px;font-weight:500;color:#5C6862">Tocá una marca para ver todos sus productos.</p>
       <div data-rb="marcas-carril" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,142px),1fr));gap:14px">
         <sc-for list="{{ brands }}" as="b" hint-placeholder-count="10">
-          <a href="#" onClick="{{ b.abrir }}" aria-label="{{ b.aria }}" data-rb="marca" data-rb-reveal style="height:96px;display:grid;place-items:center;padding:0 18px;background:#FFFFFF;border:1px solid #E4EDE7;border-radius:14px">
-            <sc-if value="{{ b.hayLogo }}" hint-placeholder-val="{{ false }}">
-              <img src="{{ b.logo }}" alt="{{ b.name }}" loading="lazy" style="max-width:100%;max-height:42px;object-fit:contain">
+          <a href="#" onClick="{{ b.abrir }}" aria-label="{{ b.aria }}" data-rb="marca" data-rb-reveal style="height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:0 14px;background:#FFFFFF;border:1px solid #E4EDE7;border-radius:14px">
+            <sc-if value="{{ b.hayLogo }}" hint-placeholder-val="{{ true }}">
+              <img src="{{ b.logo }}" alt="" loading="lazy" style="max-width:100%;max-height:36px;object-fit:contain">
             </sc-if>
-            <sc-if value="{{ b.sinLogo }}" hint-placeholder-val="{{ true }}">
-              <span data-rb="marca-txt" style="font-size:15px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:#1B2A21">{{ b.name }}</span>
-            </sc-if>
+            <!-- El nombre va siempre, con logo o sin él: varios logos son solo
+                 símbolo y no todo el mundo los reconoce a primera vista. El alt
+                 de la imagen queda vacío para no repetir el nombre al lector de
+                 pantalla. -->
+            <span data-rb="marca-txt" style="font-size:12px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#1B2A21">{{ b.name }}</span>
           </a>
         </sc-for>
       </div>
