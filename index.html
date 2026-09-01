@@ -1142,9 +1142,14 @@ const CAT_VISIBLES = CAT.filter((c) => PRODUCTS.some((p) => catsDe(p).includes(c
 // El rango del slider sale del catálogo, no de valores fijos.
 // Marcas del catalogo, sin repetir: alimenta el mega-menu de Marcas.
 const BRAND_LIST = PRODUCTS.map((p) => p.brand).filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a.localeCompare(b, "es"));
-// Logos oficiales disponibles en ./marcas/. Agregar acá el slug cuando llegue
-// el archivo del cliente; sin eso la tarjeta cae al nombre tipografiado.
-const LOGOS_MARCA = [];
+// Logos que ya pasó el cliente, guardados en ./marcas/. Se listan con su
+// nombre de archivo y no solo el slug, porque no todos llegan en el mismo
+// formato. La marca que no esté acá cae al nombre tipografiado.
+const LOGOS_MARCA = {
+  apple: "apple.png",
+  hp: "hp.png",
+  msi: "msi.png"
+};
 
 const PRICES = PRODUCTS.map((p) => p.price);
 const PMIN = Math.min(...PRICES);
@@ -1790,7 +1795,7 @@ class Component extends DCLogic {
       // oficial la tarjeta muestra el nombre tipografiado.
       brands: BRAND_LIST.map((nombre) => {
         const slug = nombre.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-        const logo = LOGOS_MARCA.includes(slug) ? "./marcas/" + slug + ".svg" : "";
+        const logo = LOGOS_MARCA[slug] ? "./marcas/" + LOGOS_MARCA[slug] : "";
         return {
           name: nombre, logo, hayLogo: !!logo, sinLogo: !logo,
           aria: "Ver productos de " + nombre,
