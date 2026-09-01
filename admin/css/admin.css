@@ -1285,3 +1285,20 @@ fieldset.bloque legend {
     animation: none;
   }
 }
+
+/* Borrado desde la fila de la tabla. Va en gris y recien se pone rojo al
+   pasar por encima: es la unica accion que no se puede deshacer, y no
+   conviene que grite desde todos los renglones a la vez. */
+.tabla .btn-borrar {
+  color: var(--gris);
+}
+
+.tabla .btn-borrar:hover:not(:disabled) {
+  color: var(--peligro);
+  background: var(--peligro-velo);
+}
+
+/* Separador fino entre Editar y Eliminar. */
+.tabla .acciones .btn + .btn {
+  margin-left: 2px;
+}

@@ -228,7 +228,15 @@
             }
           },
           "Editar"
-        )
+        ),
+        // Al borrar el producto se van con él sus categorías, características,
+        // ficha técnica e imágenes: la base lo hace en cascada.
+        UI.botonEliminar({
+          nombre: p.name,
+          tabla: "products",
+          id: p.id,
+          alTerminar: function () { App.recargar(); }
+        })
       ])
     ]);
   }

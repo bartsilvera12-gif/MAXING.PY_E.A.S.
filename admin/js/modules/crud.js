@@ -116,7 +116,18 @@
                   "button",
                   { class: "btn btn-plano", type: "button", onclick: function () { abrir(f); } },
                   "Editar"
-                )
+                ),
+                // Las secciones de contenido no se borran: el sitio las busca
+                // por clave y el panel no podria volver a crearlas. Se ocultan.
+                def.sinBorrado
+                  ? null
+                  : UI.botonEliminar({
+                      nombre: def.nombreDe ? def.nombreDe(f) : f.name || f.title || f.label || "este registro",
+                      tabla: def.tabla,
+                      id: f[def.pk || "id"],
+                      pk: def.pk,
+                      alTerminar: function () { App.invalidar(); App.recargar(); }
+                    })
               ])
             );
             tbody.appendChild(h("tr", null, celdas));

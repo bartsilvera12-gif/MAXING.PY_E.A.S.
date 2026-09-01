@@ -479,6 +479,44 @@
     );
   }
 
+  // Boton de borrado para una fila de la tabla, sin tener que abrir el
+  // formulario. Va en gris y recien se pone rojo al pasar por encima: es la
+  // unica accion del panel que no se puede deshacer, y no conviene que grite
+  // desde todos los renglones.
+  function botonEliminar(opciones) {
+    return h(
+      "button",
+      {
+        class: "btn btn-plano btn-borrar",
+        type: "button",
+        title: "Eliminar",
+        onclick: async function (e) {
+          e.stopPropagation();
+          if (!confirmarBorrado("“" + opciones.nombre + "”")) return;
+
+          var boton = e.currentTarget;
+          boton.disabled = true;
+          boton.textContent = "Eliminando…";
+
+          var r = await window.sb
+            .from(opciones.tabla)
+            .delete()
+            .eq(opciones.pk || "id", opciones.id);
+
+          if (r.error) {
+            noti(explicar(r.error), "error");
+            boton.disabled = false;
+            boton.textContent = "Eliminar";
+            return;
+          }
+          noti("Eliminado.");
+          if (opciones.alTerminar) opciones.alTerminar();
+        }
+      },
+      "Eliminar"
+    );
+  }
+
   window.UI = {
     h: h,
     vaciar: vaciar,
@@ -495,6 +533,7 @@
     selectorImagen: selectorImagen,
     subirArchivo: subirArchivo,
     urlImagen: urlImagen,
-    confirmarBorrado: confirmarBorrado
+    confirmarBorrado: confirmarBorrado,
+    botonEliminar: botonEliminar
   };
 })();

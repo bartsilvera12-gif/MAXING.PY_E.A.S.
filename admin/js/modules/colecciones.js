@@ -95,7 +95,15 @@
                 "button",
                 { class: "btn btn-plano", type: "button", onclick: function () { editar(c); } },
                 "Editar"
-              )
+              ),
+              // Borrar la colección no toca los productos: sólo deshace la
+              // agrupación.
+              UI.botonEliminar({
+                nombre: c.name,
+                tabla: "collections",
+                id: c.id,
+                alTerminar: function () { App.recargar(); }
+              })
             ])
           ])
         );
