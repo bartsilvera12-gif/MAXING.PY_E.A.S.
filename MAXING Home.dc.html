@@ -245,6 +245,13 @@ article:hover button { filter: brightness(1.08); }
 /* En pantallas chicas el hover no existe: el toque marca el borde igual. */
 [data-rb~="marca"]:active { border-color: #40DF36 !important; }
 
+/* Quienes somos: en escritorio la foto va a la derecha y el texto a la
+   izquierda. En el marcado la foto viene primera para que en telefono, donde
+   la tarjeta se apila, la imagen quede arriba como entrada visual. */
+@media (min-width: 701px) {
+  [data-rb~="nosotros-foto"] { order: 2; }
+}
+
 /* Con foto real, una ficha de categoria a todo el ancho pasa de los 600px de
    alto: siete asi obligan a un scroll larguisimo. En telefono van de a dos. */
 @media (max-width: 700px) {
@@ -512,8 +519,7 @@ article:hover button { filter: brightness(1.08); }
         <a href="#" onClick="{{ goCatalog }}" style="margin-top:28px;height:52px;padding:0 28px;display:inline-flex;align-items:center;background:#40DF36;color:#000000;font-size:15px;font-weight:700;border-radius:10px;transition:filter 200ms" style-hover="filter:brightness(1.08)">Armar mi setup</a>
       </div>
       <div data-rb="spot" data-rb-reveal style="position:relative;aspect-ratio:16/10;background:#171717;border-radius:14px;display:grid;place-items:center;overflow:hidden">
-        <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#1F1F1F 0 10px,#171717 10px 20px)"></div>
-        <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:0.06em;color:#5C6862">foto real: setup escritorio · 16:10</span>
+        <div data-rb="zoom" style="position:absolute;inset:0"><img src="./setup.jpg" alt="Setup de escritorio con monitor, notebook, teclado y auriculares" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover"></div>
       </div>
     </div>
   </section>
@@ -620,7 +626,7 @@ article:hover button { filter: brightness(1.08); }
     <div style="max-width:1320px;margin:0 auto;padding:clamp(36px,4.5vw,64px) 24px">
       <div data-rb="nosotros" style="background:#FFFFFF;border:1.5px solid #40DF36;border-radius:16px;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:stretch">
         <div data-rb="nosotros-foto" style="min-height:clamp(220px,26vw,360px);background:#FFFFFF">
-          <img src="./nosotros.jpg" alt="Equipos Lenovo listos para entrega en las oficinas de MAXING.py" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover;object-position:60% 55%">
+          <img src="./nosotros.jpg" alt="Equipos Lenovo listos para entrega en las oficinas de MAXING.py" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover;object-position:62% 58%">
         </div>
         <div style="padding:clamp(26px,3.2vw,44px);display:flex;flex-direction:column;justify-content:center;gap:16px">
           <span data-rb="shiny" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">La empresa</span>
