@@ -859,7 +859,7 @@ article:hover button { filter: brightness(1.08); }
           </select>
         </div>
       </div>
-      <div style="padding-top:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:16px">
+      <div id="resultados" style="scroll-margin-top:88px;padding-top:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:16px">
         <sc-for list="{{ catalogItems }}" as="p" hint-placeholder-count="9">
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden">
             <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center">
@@ -1723,8 +1723,22 @@ class Component extends DCLogic {
         q: "", sort: "rel", onlyFav: false,
         menuOpen: false, mega: null, cartOpen: false, searchOpen: false
       });
-      window.scrollTo(0, 0);
+      this.verResultados();
     };
+  }
+
+  // Al filtrar desde el inicio, el catálogo abría arriba de todo y había que
+  // bajar pasando el título y los filtros para ver el primer producto. Esto
+  // deja la vista directamente sobre los resultados.
+  verResultados() {
+    setTimeout(() => {
+      const r = document.getElementById("resultados");
+      if (!r) { window.scrollTo(0, 0); return; }
+      const actual = window.pageYOffset || document.documentElement.scrollTop || 0;
+      const destino = Math.max(0, r.getBoundingClientRect().top + actual - 88);
+      try { window.scrollTo({ top: destino, behavior: "smooth" }); }
+      catch (err) { window.scrollTo(0, destino); }
+    }, 90);
   }
 
   // Igual que irACat pero por marca: la usan las tarjetas de marca y el
@@ -1737,7 +1751,7 @@ class Component extends DCLogic {
         q: "", sort: "rel", onlyFav: false,
         menuOpen: false, mega: null, cartOpen: false, searchOpen: false
       });
-      window.scrollTo(0, 0);
+      this.verResultados();
     };
   }
 
@@ -1793,14 +1807,16 @@ class Component extends DCLogic {
     // el orden del cliente. Por cantidad a secas, "Smartwatch & Wearables" con
     // un producto desplazaba a TV, que pesa mas comercialmente.
     const cuantos = (nombre) => PRODUCTS.filter((p) => catsDe(p).includes(nombre)).length;
-    const destacadasNav = CATS_VIS.slice().sort((a, b) => cuantos(b) - cuantos(a)).slice(0, 5);
-    const navLabels = ["Inicio", "Categorías"]
+    // Cuatro categorías arriba: "Productos" ocupa el lugar de la quinta, y es
+    // el acceso que faltaba al catálogo completo sin pasar por una categoría.
+    const destacadasNav = CATS_VIS.slice().sort((a, b) => cuantos(b) - cuantos(a)).slice(0, 4);
+    const navLabels = ["Inicio", "Productos", "Categorías"]
       .concat(CATS_VIS.filter((c) => destacadasNav.includes(c)))
       .concat([colecciones[0], "Marcas"]);
     // El menú del teléfono lista las 12, igual que la grilla del inicio. Las
     // que todavía no tienen productos van marcadas y no abren nada: llevar a
     // un catálogo vacío es peor que decir que están en camino.
-    const navMovilLabels = ["Inicio"].concat(CATS_NAV).concat(colecciones);
+    const navMovilLabels = ["Inicio", "Productos"].concat(CATS_NAV).concat(colecciones);
     // Las que son categoría real abren el catálogo filtrado; las demás son
     // secciones del inicio y saltan a su ancla.
     const ANCLAS_NAV = { "Categorías": "cat-h", "Ofertas": "ofertas", "Novedades": "new-h", "Destacados": "feat-h", "Marcas": "brand-h" };
@@ -1845,6 +1861,7 @@ class Component extends DCLogic {
     // Antes todo caía en el catálogo sin filtrar: desde el propio catálogo los
     // botones no cambiaban nada y parecían rotos.
     const accionNav = (label) => label === "Inicio" ? this.go("home")
+      : label === "Productos" ? this.go("catalog")
       : CATS_NAV.includes(label) ? this.irACat(label)
       : ANCLAS_NAV[label] ? this.irAAncla(ANCLAS_NAV[label])
       : this.go("catalog");
