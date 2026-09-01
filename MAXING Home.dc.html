@@ -611,7 +611,7 @@ article:hover button { filter: brightness(1.08); }
     <div style="max-width:1320px;margin:0 auto;padding:clamp(36px,4.5vw,64px) 24px">
       <div data-rb="nosotros" style="background:#FFFFFF;border:1.5px solid #40DF36;border-radius:16px;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:stretch">
         <div data-rb="nosotros-foto" style="min-height:clamp(220px,26vw,360px);background:#FFFFFF">
-          <img src="./nosotros.jpg" alt="Equipos Lenovo listos para entrega en las oficinas de MAXING.py" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover;object-position:62% 58%">
+          <img src="./nosotros.jpg" alt="Equipo de MAXING.py en la oficina" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%">
         </div>
         <div style="padding:clamp(26px,3.2vw,44px);display:flex;flex-direction:column;justify-content:center;gap:16px">
           <span data-rb="shiny" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">La empresa</span>
@@ -1235,6 +1235,37 @@ const PRODUCTOS_TODOS = [
       "Su elegante acabado Gray aporta un estilo moderno y sofisticado, mientras que su conectividad Wi-Fi permite mantenerte conectado en casa, la oficina o la universidad."
     ],
     features: ["Pantalla de 10,9\"", "8 GB de RAM", "128 GB de almacenamiento", "S Pen incluido", "Conectividad Wi-Fi", "Cámaras 13 + 12 MP", "Color Gray"] },
+
+  { brand: "Ajazz", name: "Teclado Gamer AF98 Nacodexx", spec: "RGB · USB · inglés · negro / gris", price: 185000, cats: ["Periféricos", "Gaming"], stock: "Disponible", sku: "AF98 Nacodexx", foto: "./productos/ajazz-af98-negro.jpg", img: "foto: Ajazz AF98 negro",
+    desc: [
+      "Dale personalidad y rendimiento a tu setup con el Ajazz AF98 Nacodexx, un teclado gamer diseñado para quienes buscan una experiencia cómoda, rápida y con estilo.",
+      "Su formato compacto permite aprovechar mejor el espacio del escritorio sin renunciar a una distribución completa de teclas. Además, su iluminación RGB aporta un toque gaming que podés adaptar a tu setup, convirtiéndolo en una excelente opción tanto para jugar como para trabajar o estudiar.",
+      "Cuenta con conexión USB, ofreciendo una conexión práctica y estable para disfrutarlo desde el primer momento."
+    ],
+    features: ["Diseño gamer", "Iluminación RGB", "Conexión USB", "Distribución en inglés", "Color negro / gris", "Ideal para gaming y productividad"] },
+
+  { brand: "Ajazz", name: "Teclado Gamer AF98 Nacodexx Azul", spec: "RGB · USB · inglés · azul", price: 185000, cats: ["Periféricos", "Gaming"], stock: "Disponible", sku: "AF98 Nacodexx Azul", foto: "./productos/ajazz-af98-azul.jpg", img: "foto: Ajazz AF98 azul",
+    desc: [
+      "Dale un toque único a tu setup con el Ajazz AF98 Nacodexx, un teclado gamer que combina diseño, iluminación RGB y comodidad en un formato compacto y moderno.",
+      "Su distribución está pensada para aprovechar el espacio del escritorio sin dejar de lado las funciones necesarias para gaming y uso diario. La iluminación RGB aporta personalidad a tu setup y crea una experiencia más inmersiva durante tus partidas.",
+      "Con su conexión USB, ofrece una conexión sencilla y estable, ideal para conectar directamente a tu PC y comenzar a utilizarlo."
+    ],
+    features: ["Diseño gaming", "Iluminación RGB", "Conexión USB", "Distribución en inglés", "Color azul", "Formato compacto", "Ideal para gaming, estudio y trabajo"] },
+
+  { brand: "Razer", name: "Tartarus V2 Chroma", spec: "32 teclas programables · Mecha-Membrane · RGB", price: 735000, cats: ["Periféricos", "Gaming"], stock: "Disponible", sku: "Tartarus V2", foto: "./productos/razer-tartarus-v2.jpg", img: "foto: Razer Tartarus V2",
+    desc: [
+      "Llevá tu experiencia gaming a otro nivel con el Razer Tartarus V2 Chroma, un teclado gamer diseñado para ofrecer control, precisión y personalización en cada partida.",
+      "Su formato de 32 teclas totalmente programables permite configurar comandos, atajos y funciones según tus preferencias, brindando un acceso rápido a las acciones más importantes durante el juego. Además, la tecnología Mecha-Membrane combina la respuesta táctil de un teclado mecánico con la comodidad de una membrana.",
+      "La iluminación Razer Chroma RGB completa el setup con una experiencia visual personalizable, ideal para crear un espacio gaming a tu medida."
+    ],
+    features: ["32 teclas totalmente programables", "Tecnología Mecha-Membrane", "Iluminación Razer Chroma RGB", "Diseño pensado para gaming", "Color Black", "Ideal para juegos competitivos y de acción"] },
+
+  { brand: "FTX", name: "Kit Teclado + Mouse GK03S Wireless", spec: "Inalámbrico · portugués · dorado", price: 135000, cats: ["Periféricos"], stock: "Disponible", sku: "GK03S", foto: "./productos/ftx-gk03s-dorado.jpg", img: "foto: kit FTX GK03S",
+    desc: [
+      "Combiná estilo, comodidad y libertad de movimiento con el kit inalámbrico FTX GK03S, que incluye teclado y mouse en un elegante acabado Dorado.",
+      "Su conexión inalámbrica permite mantener un escritorio más ordenado y disfrutar de una experiencia práctica tanto para trabajar como para estudiar o navegar. El diseño moderno y minimalista se adapta fácilmente a distintos espacios, aportando un toque sofisticado a tu setup."
+    ],
+    features: ["Teclado inalámbrico", "Mouse inalámbrico incluido", "Conexión Wireless", "Diseño moderno y elegante", "Color Dorado", "Distribución en portugués", "Ideal para PC, oficina y estudio"] },
 
   // --- Demo pendiente de reemplazo (ver README) ---
   { brand: "ASUS", name: "ROG Strix G16", spec: "RTX 4060 · 16 GB RAM · 512 GB SSD", price: 8250000, cats: ["Notebooks", "Gaming"], stock: "Disponible", img: "foto: notebook gamer", sku: "MX-NB-0142", badge: "" },
