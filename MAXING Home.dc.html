@@ -227,6 +227,13 @@ article:hover button { filter: brightness(1.08); }
 [data-rb~="benecard"] { padding: 1.6px; border-radius: 14px; background: linear-gradient(115deg, #86DC2C, #40DF36, #16AE95, #40DF36, #86DC2C); background-size: 300% 100%; animation: rb-borde 7s linear infinite; }
 [data-rb~="benecard-in"] { height: 100%; padding: 20px 18px 22px; border-radius: 12.4px; background: #FFFFFF; }
 @keyframes rb-borde { from { background-position: 0% 50%; } to { background-position: 300% 50%; } }
+/* Nav: entre 900 y 1200px las etiquetas nuevas (Notebooks, Monitores,
+   Novedades) suman mas ancho del que hay y el renglon se parte en dos.
+   Se aprietan los botones en ese tramo en vez de sacar categorias. */
+@media (min-width: 901px) and (max-width: 1200px) {
+  [data-rb~="navbtn"] { padding: 6px 8px !important; font-size: 12px !important; letter-spacing: -0.01em; }
+}
+
 /* --- Tarjetas de marca ---
    Minimalistas en reposo para que el logo mande; al pasar el cursor entra el
    verde de marca. La transicion se declara en la tarjeta y no en :hover, para
@@ -263,7 +270,7 @@ article:hover button { filter: brightness(1.08); }
   <nav aria-label="Categorías principales" style="flex:1 1 0;min-width:0;display:{{ navDisplay }}">
     <div style="min-width:0;display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
       <sc-for list="{{ nav }}" as="n" hint-placeholder-count="8">
-        <a href="#" onClick="{{ n.onClick }}" onMouseEnter="{{ n.onEnter }}" onMouseLeave="{{ closeMega }}" style="padding:7px 11px;font-size:13px;font-weight:700;color:{{ n.color }};background:{{ n.bg }};border:1.5px solid {{ n.border }};border-radius:9px;transition:color 180ms,border-color 180ms,background 180ms,filter 180ms" style-hover="background:#171717;color:#FFFFFF;border-color:#171717">{{ n.label }}</a>
+        <a href="#" data-rb="navbtn" onClick="{{ n.onClick }}" onMouseEnter="{{ n.onEnter }}" onMouseLeave="{{ closeMega }}" style="padding:7px 11px;font-size:13px;font-weight:700;color:{{ n.color }};background:{{ n.bg }};border:1.5px solid {{ n.border }};border-radius:9px;transition:color 180ms,border-color 180ms,background 180ms,filter 180ms" style-hover="background:#171717;color:#FFFFFF;border-color:#171717">{{ n.label }}</a>
       </sc-for>
     </div>
   </nav>
@@ -383,7 +390,7 @@ article:hover button { filter: brightness(1.08); }
         <p style="margin:18px 0 0;max-width:46ch;font-size:clamp(14.5px,1.2vw,17px);line-height:1.55;font-weight:500;color:#2E3B35;text-wrap:pretty">Encontrá tecnología, informática y accesorios para trabajar, crear, jugar y disfrutar más.</p>
         <div style="margin-top:28px;display:flex;flex-wrap:wrap;gap:12px">
           <a href="#" onClick="{{ goCatalog }}" style="height:52px;padding:0 28px;display:inline-flex;align-items:center;background:#40DF36;color:#0B1F12;font-size:15px;font-weight:700;border-radius:10px;transition:filter 200ms" style-hover="filter:brightness(1.08)">Explorar productos</a>
-          <a href="#ofertas" style="height:52px;padding:0 28px;display:inline-flex;align-items:center;border:1.5px solid rgba(11,31,18,0.30);color:#0B1F12;font-size:15px;font-weight:700;border-radius:10px;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:rgba(64,223,54,0.16)">Ver ofertas</a>
+          <a href="#" onClick="{{ ctaSec.abrir }}" style="height:52px;padding:0 28px;display:inline-flex;align-items:center;border:1.5px solid rgba(11,31,18,0.30);color:#0B1F12;font-size:15px;font-weight:700;border-radius:10px;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:rgba(64,223,54,0.16)">{{ ctaSec.label }}</a>
         </div>
       </div>
     </div>
@@ -394,7 +401,7 @@ article:hover button { filter: brightness(1.08); }
       <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:end;justify-content:space-between;margin-bottom:32px">
         <div>
           <h2 id="cat-h" style="margin:0;font-size:clamp(26px,3vw,38px);font-weight:800;letter-spacing:-0.03em;color:#000000">Encontrá lo que necesitás</h2>
-          <p style="margin:10px 0 0;font-size:15px;font-weight:500;color:#5C6862">Doce categorías: celulares, notebooks, gaming, monitores, TV y más.</p>
+          <p style="margin:10px 0 0;font-size:15px;font-weight:500;color:#5C6862">{{ catsResumen }}</p>
         </div>
         <a href="#" onClick="{{ goCatalog }}" style="font-size:14px;font-weight:700;color:#171717;border-bottom:2px solid #40DF36;padding-bottom:3px">Ver todas las categorías</a>
       </div>
@@ -472,6 +479,7 @@ article:hover button { filter: brightness(1.08); }
     </div>
   </section>
 
+  <sc-if value="{{ hayOfertas }}" hint-placeholder-val="{{ true }}">
   <section id="ofertas" aria-labelledby="off-h" style="border-bottom:1px solid #E8E8E8">
     <div style="max-width:1320px;margin:0 auto;padding:clamp(48px,6vw,80px) 24px">
       <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:end;justify-content:space-between;margin-bottom:32px">
@@ -511,6 +519,7 @@ article:hover button { filter: brightness(1.08); }
       </div>
     </div>
   </section>
+  </sc-if>
 
   <section aria-labelledby="new-h" style="border-bottom:1px solid #CDE3D3;background:rgba(255,255,255,0.34)">
     <div style="max-width:1320px;margin:0 auto;padding:clamp(48px,6vw,80px) 24px">
@@ -934,7 +943,7 @@ const CAT = [
 const catsDe = (p) => (Array.isArray(p.cats) && p.cats.length ? p.cats : p.cat ? [p.cat] : []);
 
 const NAV_GREENS = ["#2FBF6B", "#86DC2C", "#6ADD2F", "#4EDE33", "#40DF36", "#2FD453", "#24CA6B", "#1BBD83", "#16B092", "#14A28C"];
-const PRODUCTS = [
+const PRODUCTOS_TODOS = [
   // --- Catálogo real cargado con el cliente (agosto 2026) ---
   { brand: "MSI", name: "Katana 15 B14WEK-001US", spec: "Core i7-14650HX · RTX 5050 8 GB · 16 GB / 512 GB", price: 9200000, cats: ["Notebooks", "Gaming"], stock: "Disponible", sku: "B14WEK-001US", foto: "./productos/msi-katana-15.jpg", img: "foto: MSI Katana 15",
     desc: [
@@ -1057,6 +1066,14 @@ const PRODUCTS = [
   { brand: "Samsung", name: "Galaxy A55", spec: "8 GB RAM · 256 GB · 120 Hz", price: 2890000, cats: ["Celulares"], stock: "Disponible", img: "foto: smartphone frente", sku: "MX-CE-0119" },
   { brand: "Logitech", name: "Webcam C920", spec: "Full HD 1080p · micrófono estéreo", price: 520000, cats: ["Accesorios", "Periféricos"], stock: "Disponible", img: "foto: webcam", sku: "MX-AC-0136" }
 ];
+
+// El sitio solo muestra productos con foto real. Los demo quedan arriba, sin
+// foto, para no perder la estructura de ejemplo, pero no llegan a la pagina:
+// un precio inventado en una vidriera es peor que un catalogo mas corto.
+const PRODUCTS = PRODUCTOS_TODOS.filter((p) => p.foto);
+// Misma logica para las categorias: solo se muestran las que tienen algo que
+// mostrar. Al cargar productos nuevos vuelven a aparecer solas.
+const CAT_VISIBLES = CAT.filter((c) => PRODUCTS.some((p) => catsDe(p).includes(c.name)));
 
 // El rango del slider sale del catálogo, no de valores fijos.
 // Marcas del catalogo, sin repetir: alimenta el mega-menu de Marcas.
@@ -1479,15 +1496,25 @@ class Component extends DCLogic {
       "¿Está disponible?"
     );
     const accent = this.props.accent ?? "#40DF36";
-    // Las 12 categorías no entran en la barra del encabezado sin romper el
-    // renglón, así que arriba va una selección y el resto vive en el mega-menú
-    // "Categorías". En el teléfono, en cambio, el menú desplegable las lista
-    // todas: hay lugar de sobra y así no queda ninguna escondida.
-    const navLabels = ["Inicio", "Categorías", "Celulares", "Notebooks", "Gaming", "Monitores", "Audio", "TV", "Ofertas", "Marcas"];
-    const navMovilLabels = ["Inicio"].concat(CAT.map((c) => c.name)).concat(["Ofertas", "Novedades", "Destacados", "Marcas"]);
+    // El encabezado no entra con todas las categorías, así que arriba va una
+    // selección de las que hoy tienen productos y el resto vive en el mega-menú
+    // "Categorías". En el teléfono el menú las lista todas: hay lugar de sobra.
+    const CATS_NAV = CAT.map((c) => c.name);
+    const CATS_VIS = CAT_VISIBLES.map((c) => c.name);
+    // Ofertas solo aparece si hay algo rebajado; si no, seria una seccion vacia.
+    const hayOfertas = PRODUCTS.some((p) => p.badge);
+    const colecciones = (hayOfertas ? ["Ofertas"] : []).concat(["Novedades", "Destacados", "Marcas"]);
+    // Arriba entran cinco: se eligen las de mas productos, pero se muestran en
+    // el orden del cliente. Por cantidad a secas, "Smartwatch & Wearables" con
+    // un producto desplazaba a TV, que pesa mas comercialmente.
+    const cuantos = (nombre) => PRODUCTS.filter((p) => catsDe(p).includes(nombre)).length;
+    const destacadasNav = CATS_VIS.slice().sort((a, b) => cuantos(b) - cuantos(a)).slice(0, 5);
+    const navLabels = ["Inicio", "Categorías"]
+      .concat(CATS_VIS.filter((c) => destacadasNav.includes(c)))
+      .concat([colecciones[0], "Marcas"]);
+    const navMovilLabels = ["Inicio"].concat(CATS_VIS).concat(colecciones);
     // Las que son categoría real abren el catálogo filtrado; las demás son
     // secciones del inicio y saltan a su ancla.
-    const CATS_NAV = CAT.map((c) => c.name);
     const ANCLAS_NAV = { "Categorías": "cat-h", "Ofertas": "ofertas", "Novedades": "new-h", "Destacados": "feat-h", "Marcas": "brand-h" };
     // Todas las secciones del nav despliegan, salvo Inicio, que es un enlace
     // directo al home. Marcas y Categorías salen del catálogo real (BRAND_LIST
@@ -1502,7 +1529,7 @@ class Component extends DCLogic {
       return cols;
     };
     const megaMap = {
-      "Categorías": enColumnas(CAT.map((c) => c.name), 4).map((grupo, i) => ({
+      "Categorías": enColumnas(CATS_VIS, 4).map((grupo, i) => ({
         title: i === 0 ? "Categorías" : "\u00A0",
         items: grupo.map((nombre) => ({ label: nombre, abrir: this.irACat(nombre) }))
       })),
@@ -1512,7 +1539,6 @@ class Component extends DCLogic {
       })).concat([{
         title: "Colecciones",
         items: [
-          { label: "Ofertas", abrir: this.irAAncla("ofertas") },
           { label: "Novedades", abrir: this.irAAncla("new-h") },
           { label: "Destacados", abrir: this.irAAncla("feat-h") }
         ]
@@ -1604,8 +1630,15 @@ class Component extends DCLogic {
       nav,
       navMovil,
       heroFacts: ["Catálogo amplio de informática y tecnología.", "Asesoramiento directo antes de comprar.", "Atención por WhatsApp todos los días."],
-      categories: CAT.map((c) => ({ ...c, tint: c.color + "2E", soft: c.color + "12", glow: c.color + "33", abrir: this.irACat(c.name) })),
+      categories: CAT_VISIBLES.map((c) => ({ ...c, tint: c.color + "2E", soft: c.color + "12", glow: c.color + "33", abrir: this.irACat(c.name) })),
       featured: view(PRODUCTS.slice(0, 8)),
+      hayOfertas,
+      // El segundo botón del hero apuntaba fijo a #ofertas. Con la sección
+      // oculta por falta de rebajas, ese enlace no llevaba a ningún lado.
+      ctaSec: hayOfertas
+        ? { label: "Ver ofertas", abrir: this.irAAncla("ofertas") }
+        : { label: "Ver novedades", abrir: this.irAAncla("new-h") },
+      catsResumen: CAT_VISIBLES.length + " categorías: " + CATS_VIS.slice(0, 4).map((c) => c.toLowerCase()).join(", ") + " y más.",
       offers: view(PRODUCTS.filter((p) => p.badge).slice(0, 4)),
       novedades: view(PRODUCTS.slice(8, 12)),
       catalogItems: view(found),
@@ -1695,7 +1728,7 @@ class Component extends DCLogic {
       footerCols: [
         // Cada enlace del pie hace algo real. Antes todos llamaban a goCatalog:
         // "Corsair" y "Preguntas frecuentes" llevaban al mismo lado.
-        { title: "Productos", items: ["Celulares", "Notebooks", "Gaming", "Monitores", "TV"].map((c) => ({ label: c, abrir: this.irACat(c) })) },
+        { title: "Productos", items: CATS_VIS.slice(0, 5).map((c) => ({ label: c, abrir: this.irACat(c) })) },
         { title: "Marcas", items: BRAND_LIST.slice(0, 5).map((m) => ({ label: m, abrir: this.irAMarca(m) })) },
         { title: "Ayuda", items: [
           { label: "Ver todo el catálogo", abrir: this.go("catalog") },
