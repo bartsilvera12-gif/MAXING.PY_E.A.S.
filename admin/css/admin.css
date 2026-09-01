@@ -29,10 +29,11 @@
   --acento-tinta: #1c7a16;
   --acento-velo: #f0fcef;
 
-  /* Fondo del area de trabajo. Un verde muy lavado: las tarjetas siguen
-     siendo blancas y se despegan solas, sin necesidad de sombras. */
-  --fondo: #f3fbf2;
-  --fondo-barra: rgba(243, 251, 242, 0.86);
+  /* Fondo del area de trabajo: un tinte del verde de marca sobre blanco,
+     al 17%. Tiene cuerpo suficiente para que la pantalla se lea verde, y
+     las tarjetas blancas se despegan solas sin necesidad de sombras. */
+  --fondo: #e0f8dd;
+  --fondo-barra: rgba(224, 248, 221, 0.88);
 
   --peligro: #c0392b;
   --peligro-velo: #fdf2f1;

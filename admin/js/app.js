@@ -265,10 +265,17 @@
     document.body.appendChild(barraCarga);
 
     var mio = ++enCurso;
-    UI.vaciar(cuerpo);
+
+    // Se dibuja en un contenedor suelto y recien se cuelga si esta navegacion
+    // sigue siendo la vigente. Si el usuario cambia de seccion mientras una
+    // consulta esta en vuelo, la que llega tarde se descarta en vez de mezclar
+    // su contenido con el de la seccion nueva.
+    var destino = h("div");
 
     try {
-      await def.render(cuerpo, App);
+      await def.render(destino, App);
+      if (mio !== enCurso) return;
+      UI.vaciar(cuerpo).appendChild(destino);
     } catch (e) {
       if (mio === enCurso) {
         UI.vaciar(cuerpo).appendChild(
@@ -303,7 +310,10 @@
     }
     App.perfil = perfil;
     armarLayout(perfil);
-    if (!location.hash) location.replace("#/" + orden[0]);
+    // replaceState y no location.replace: cambiar el hash con location.replace
+    // dispara un hashchange, que ya llama a enrutar(), y la pantalla terminaba
+    // dibujandose dos veces en paralelo sobre el mismo contenedor.
+    if (!location.hash) history.replaceState(null, "", "#/" + orden[0]);
     await enrutar();
 
     // Si la sesion se cae (token vencido, cierre desde otra pestana), se
