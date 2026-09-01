@@ -190,11 +190,14 @@
       : h("div", { class: "miniatura vacia" }, "—");
 
     var precio = h("div", null, [
-      h("div", { text: UI.gs(p.price) }),
+      h("div", { class: "precio", text: UI.gs(p.price) }),
       p.is_on_sale
         ? h("div", { style: "font-size:11.5px;color:var(--gris);text-decoration:line-through", text: UI.gs(p.old_price) })
         : null
     ]);
+
+    // Verde disponible, ámbar a pedido, rojo sin stock.
+    var CLASE_STOCK = { "Disponible": "stock-ok", "Bajo pedido": "stock-espera", "Sin stock": "stock-agotado" };
 
     return h("tr", null, [
       h("td", null, [
@@ -206,9 +209,14 @@
           ])
         ])
       ]),
-      h("td", { text: (p.brand && p.brand.name) || "—" }),
+      h("td", null, [UI.chipColor((p.brand && p.brand.name) || "")]),
       h("td", { class: "num" }, [precio]),
-      h("td", null, [h("span", { class: "insignia sin-punto", text: p.stock_status })]),
+      h("td", null, [
+        h("span", {
+          class: "insignia " + (CLASE_STOCK[p.stock_status] || "sin-punto"),
+          text: p.stock_status
+        })
+      ]),
       h("td", null, [
         h("span", {
           class: "insignia " + (p.is_published ? "publicado" : "borrador"),

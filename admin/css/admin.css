@@ -1328,3 +1328,60 @@ fieldset.bloque legend {
 .tabla .acciones .btn + .btn {
   margin-left: 2px;
 }
+
+/* ------------------------------------------------------------------ */
+/* Color en las tablas                                                 */
+/* ------------------------------------------------------------------ */
+/* Encabezados de columna: verde sobre un velo del mismo verde, para que
+   la fila de titulos se lea como parte de la marca y no como una linea
+   gris mas. */
+.tabla thead th {
+  color: var(--acento-tinta);
+  background: var(--acento-velo);
+  border-bottom: 1px solid #cbeac8;
+}
+
+/* Etiqueta de marca. El tono lo elige UI.colorDe a partir del nombre, asi
+   la misma marca conserva su color en todas las pantallas. */
+.chip-color {
+  background: var(--c-velo, var(--humo));
+  color: var(--c-tinta, #14532d);
+  border: 1px solid var(--c, transparent);
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+/* Disponibilidad, con el color del significado: verde disponible, ambar a
+   pedido, rojo sin stock. Se lee de un vistazo cual necesita atencion. */
+.insignia.stock-ok {
+  color: var(--acento-tinta);
+  border-color: #c6ecc3;
+  background: var(--acento-velo);
+}
+
+.insignia.stock-espera {
+  color: var(--aviso);
+  border-color: #f0dfc0;
+  background: var(--aviso-velo);
+}
+
+.insignia.stock-agotado {
+  color: var(--peligro);
+  border-color: #ecd4d1;
+  background: var(--peligro-velo);
+}
+
+/* El precio es el dato que mas se busca en la fila. */
+.tabla .precio {
+  font-weight: 700;
+  color: var(--negro);
+}
+
+/* Borrador: ambar en vez de gris, para distinguirlo de lo publicado sin
+   tener que leer la palabra. */
+.insignia.borrador {
+  color: var(--aviso);
+  border-color: #f0dfc0;
+  background: var(--aviso-velo);
+}

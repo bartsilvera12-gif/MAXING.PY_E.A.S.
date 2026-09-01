@@ -58,10 +58,9 @@
   /* --------------------------------------------------------------- */
   /* Iconos                                                           */
   /* --------------------------------------------------------------- */
-  // La misma rampa de verdes que ordena la grilla del inicio del sitio: va de
-  // lima a esmeralda. Cada sección del panel toma un tono, así el menú se lee
-  // como parte de MAXING.py y no como un panel genérico.
-  var VERDES = ["#86DC2C", "#6ADD2F", "#4EDE33", "#40DF36", "#2FD453", "#2FBF6B", "#24CA6B", "#1BBD83", "#16B092", "#14A28C"];
+  // La rampa de verdes del sitio vive en ui.js: la comparten el menu lateral
+  // y las etiquetas de marca de las tablas.
+  var VERDES = UI.VERDES;
 
   function glifo(d) {
     return h("span", {

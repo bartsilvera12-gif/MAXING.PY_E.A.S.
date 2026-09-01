@@ -42,6 +42,34 @@
   }
 
   /* --------------------------------------------------------------- */
+  /* Color                                                            */
+  /* --------------------------------------------------------------- */
+  // La misma rampa de verdes que ordena la grilla del inicio del sitio, de
+  // lima a esmeralda. Se usa en el menu lateral y en las etiquetas de marca.
+  var VERDES = ["#86DC2C", "#6ADD2F", "#4EDE33", "#40DF36", "#2FD453", "#2FBF6B", "#24CA6B", "#1BBD83", "#16B092", "#14A28C"];
+
+  // Color estable para un texto: la misma marca siempre recibe el mismo tono,
+  // en esta y en cualquier otra pantalla. Se calcula del nombre en vez de
+  // guardarlo, asi una marca nueva ya viene con color sin tener que elegirlo.
+  function colorDe(texto) {
+    var t = String(texto || "");
+    var n = 0;
+    for (var i = 0; i < t.length; i++) n = (n * 31 + t.charCodeAt(i)) % 100000;
+    return VERDES[n % VERDES.length];
+  }
+
+  // Etiqueta de color para un valor de texto (marca, categoria).
+  function chipColor(texto) {
+    if (!texto) return h("span", { style: "color:var(--gris)" }, "—");
+    var c = colorDe(texto);
+    return h("span", {
+      class: "chip chip-color",
+      style: "--c:" + c + ";--c-velo:" + c + "24",
+      text: texto
+    });
+  }
+
+  /* --------------------------------------------------------------- */
   /* Formato                                                          */
   /* --------------------------------------------------------------- */
   // Guaranies: sin decimales y con punto de miles, como en el sitio.
@@ -534,6 +562,9 @@
     subirArchivo: subirArchivo,
     urlImagen: urlImagen,
     confirmarBorrado: confirmarBorrado,
+    VERDES: VERDES,
+    colorDe: colorDe,
+    chipColor: chipColor,
     botonEliminar: botonEliminar
   };
 })();
