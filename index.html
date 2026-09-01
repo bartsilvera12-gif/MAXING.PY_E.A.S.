@@ -276,6 +276,9 @@ article:hover button { filter: brightness(1.08); }
     /* el desborde del carrusel no debe empujar el ancho de la pagina */
     margin: 0 -24px;
     padding: 4px 24px;
+    /* sin esto la tarjeta encaja contra el borde de la pantalla y no contra
+       el margen de la seccion, y queda medio cortada a la izquierda */
+    scroll-padding-left: 24px;
   }
   [data-rb~="marcas-carril"]::-webkit-scrollbar { display: none; }
   [data-rb~="marcas-carril"] [data-rb~="marca"] {
@@ -1150,7 +1153,9 @@ const LOGOS_MARCA = {
   hp: "hp.png",
   msi: "msi.png",
   mtek: "mtek.png",
-  samsung: "samsung.png"
+  samsung: "samsung.png",
+  sony: "sony.png",
+  xiaomi: "xiaomi.png"
 };
 
 const PRICES = PRODUCTS.map((p) => p.price);
