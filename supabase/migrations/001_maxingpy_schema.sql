@@ -28,33 +28,8 @@ begin
 end;
 $$;
 
--- Slug a partir de un texto libre: minusculas, sin acentos, sin simbolos.
--- Se usa para proponer slugs desde el panel, no para forzarlos.
-create or replace function maxingpy.slugify(txt text)
-returns text
-language sql
-immutable
-as $$
-  select trim(both '-' from regexp_replace(
-    lower(unaccent_static(coalesce(txt, ''))),
-    '[^a-z0-9]+', '-', 'g'
-  ));
-$$;
-
--- unaccent() vive en una extension que no siempre esta instalada y que
--- ademas no es immutable. Se resuelve con una traduccion explicita de los
--- caracteres que realmente aparecen en catalogo en castellano.
-create or replace function maxingpy.unaccent_static(txt text)
-returns text
-language sql
-immutable
-as $$
-  select translate(
-    coalesce(txt, ''),
-    'áàäâãéèëêíìïîóòöôõúùüûñçÁÀÄÂÃÉÈËÊÍÌÏÎÓÒÖÔÕÚÙÜÛÑÇ',
-    'aaaaaeeeeiiiiooooouuuuncAAAAAEEEEIIIIOOOOOUUUUNC'
-  );
-$$;
+-- Los slugs los propone el panel en JavaScript (UI.slugificar), asi que
+-- aca no hace falta ninguna funcion de normalizacion de texto.
 
 -- =====================================================================
 -- 1. admin_profiles

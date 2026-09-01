@@ -65,6 +65,17 @@ grant execute on function maxingpy.has_role(text) to authenticated;
 -- ---------------------------------------------------------------------
 -- RLS activo en TODAS las tablas
 -- ---------------------------------------------------------------------
+-- Se usa ENABLE y NO force row level security, a proposito.
+--
+-- ENABLE ya cubre el modelo de amenaza: PostgREST se conecta y cambia al
+-- rol anon o authenticated, y ninguno de los dos es dueno de las tablas,
+-- asi que las politicas se les aplican siempre.
+--
+-- FORCE ademas se lo aplicaria al dueno (postgres), y eso romperia dos
+-- cosas: el seed de las migraciones 003 y 004, y sobre todo is_admin().
+-- Esa funcion es SECURITY DEFINER y lee admin_profiles; si el dueno
+-- tambien quedara sujeto a RLS, leer admin_profiles volveria a evaluar la
+-- politica que llama a is_admin(), y se caeria en recursion infinita.
 do $blk$
 declare
   t text;
@@ -73,7 +84,6 @@ begin
     select tablename from pg_tables where schemaname = 'maxingpy'
   loop
     execute format('alter table maxingpy.%I enable row level security', t);
-    execute format('alter table maxingpy.%I force row level security', t);
   end loop;
 end;
 $blk$;
