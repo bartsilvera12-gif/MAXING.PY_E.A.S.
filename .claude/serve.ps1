@@ -38,16 +38,27 @@ while ($listener.IsListening) {
   $req = $ctx.Request
   $res = $ctx.Response
   try {
-    $rel = [System.Uri]::UnescapeDataString($req.Url.AbsolutePath)
-    if ($rel -eq "/" -or $rel.EndsWith("/")) { $rel = $rel + "index.html" }
+    $ruta = [System.Uri]::UnescapeDataString($req.Url.AbsolutePath)
 
-    # Igual que el rewrite de vercel.json: una ruta sin extension prueba con .html
+    # Igual que los rewrites de vercel.json: una ruta sin extension prueba
+    # primero con .html (/politicadeprivacidad) y despues como carpeta
+    # (/admin -> /admin/index.html).
+    $candidatos = @()
+    if ($ruta -eq "/" -or $ruta.EndsWith("/")) {
+      $candidatos += ($ruta + "index.html")
+    } elseif (-not [System.IO.Path]::HasExtension($ruta)) {
+      $candidatos += ($ruta + ".html")
+      $candidatos += ($ruta + "/index.html")
+    } else {
+      $candidatos += $ruta
+    }
 
-    elseif (-not [System.IO.Path]::HasExtension($rel)) { $rel = $rel + ".html" }
-    $rel = $rel.TrimStart('/') -replace '/', '\'
-    $full = Join-Path $Root $rel
     $resolved = $null
-    try { $resolved = (Resolve-Path -LiteralPath $full -ErrorAction Stop).Path } catch { $resolved = $null }
+    foreach ($c in $candidatos) {
+      $full = Join-Path $Root ($c.TrimStart('/') -replace '/', '\')
+      try { $resolved = (Resolve-Path -LiteralPath $full -ErrorAction Stop).Path } catch { $resolved = $null }
+      if ($resolved) { break }
+    }
 
     if ($resolved -and $resolved.StartsWith($Root, [System.StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $resolved -PathType Leaf)) {
       $bytes = [System.IO.File]::ReadAllBytes($resolved)

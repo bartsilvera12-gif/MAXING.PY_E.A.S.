@@ -3,6 +3,18 @@
   "cleanUrls": false,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/politicadeprivacidad", "destination": "/politicadeprivacidad.html" }
+    { "source": "/politicadeprivacidad", "destination": "/politicadeprivacidad.html" },
+    { "source": "/admin", "destination": "/admin/index.html" },
+    { "source": "/admin/login", "destination": "/admin/login.html" }
+  ],
+  "headers": [
+    {
+      "source": "/admin/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Referrer-Policy", "value": "same-origin" },
+        { "key": "X-Frame-Options", "value": "DENY" }
+      ]
+    }
   ]
 }

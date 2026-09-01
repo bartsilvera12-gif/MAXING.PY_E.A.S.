@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel — MAXING.py</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<!-- Se pinta entero desde JS. Mientras tanto, una barra de carga para que
+     la pantalla no quede en blanco sin explicacion. -->
+<div id="app">
+  <div class="cargando"></div>
+</div>
+
+<noscript>
+  <div style="padding:32px;font-family:sans-serif">
+    <h1>Necesitás JavaScript</h1>
+    <p>El panel de administración no funciona sin JavaScript activado.</p>
+  </div>
+</noscript>
+
+<script src="/js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="/admin/js/supabase.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script src="/admin/js/ui.js"></script>
+<script src="/admin/js/app.js"></script>
+
+<!-- El orden de los modulos define el orden del menu lateral. -->
+<script src="/admin/js/modules/resumen.js"></script>
+<script src="/admin/js/modules/crud.js"></script>
+<script src="/admin/js/modules/productos.js"></script>
+<script src="/admin/js/modules/catalogo.js"></script>
+<script src="/admin/js/modules/colecciones.js"></script>
+<script src="/admin/js/modules/contenido.js"></script>
+<script src="/admin/js/modules/sitio.js"></script>
+
+<script>
+  App.iniciar().catch(function (e) {
+    document.getElementById("app").innerHTML =
+      '<div style="padding:40px;max-width:52ch;margin:0 auto;font-family:Manrope,sans-serif">' +
+      '<h1 style="font-size:20px;margin:0 0 8px">No se pudo abrir el panel</h1>' +
+      '<p style="color:#737373;margin:0 0 16px"></p>' +
+      '<a href="/admin/login" style="color:#1c7a16;font-weight:600">Volver al ingreso</a></div>';
+    // El mensaje se asigna como texto, nunca como HTML.
+    document.querySelector("#app p").textContent = (e && e.message) || String(e);
+    console.error("[panel] arranque", e);
+  });
+</script>
+</body>
+</html>

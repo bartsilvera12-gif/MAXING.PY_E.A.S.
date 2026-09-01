@@ -302,6 +302,30 @@ article:hover button { filter: brightness(1.08); }
 /* El ultimo item del menu movil no lleva separador colgando */
 [data-rb~="menu-movil"] a:last-child { border-bottom: 0 !important; }
 
+/* El header es sticky. Al abrir el menu pasa a medir mas que la pantalla
+   (132px de barra + 950px de items) y todo lo que sobra queda fuera de
+   alcance: un sticky pinneado en top:0 no se puede recorrer con scroll.
+   Se limita el header al alto de la ventana y el menu scrollea por dentro.
+   Con el menu cerrado el header mide 132px, asi que estas reglas no
+   cambian nada. */
+@media (max-width: 900px) {
+  header {
+    display: flex;
+    flex-direction: column;
+    max-height: 100vh;
+    max-height: 100dvh;
+  }
+  [data-rb~="menu-movil"] {
+    overflow-y: auto;
+    /* min-height:0 es lo que habilita que un item flex se achique por
+       debajo de su contenido; sin esto no scrollea, se desborda. */
+    min-height: 0;
+    /* Al llegar al final del menu no arrastra la pagina de atras. */
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-rb~="benecard"] { animation: none !important; background: #40DF36; }
 }

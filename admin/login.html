@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ingresar — Panel MAXING.py</title>
+<!-- El panel no se indexa nunca. -->
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<main class="ingreso">
+  <!-- Columna de marca. Se oculta en pantallas chicas: en el celular lo
+       unico que importa es el formulario. -->
+  <aside class="ingreso-arte" aria-hidden="true">
+    <span class="marca-panel">MAXING<span class="py">.py</span></span>
+    <div>
+      <h2>Panel de <span class="acento">administración</span></h2>
+      <p>Productos, categorías, marcas, colecciones y contenido del sitio, en un solo lugar.</p>
+    </div>
+    <p style="font-size:12px">Acceso restringido</p>
+  </aside>
+
+  <div>
+    <div class="ingreso-caja">
+      <span class="marca-panel" style="margin-bottom:26px">MAXING<span class="py">.py</span></span>
+      <h1>Ingresar al panel</h1>
+      <p>Usá la cuenta que te dieron para administrar el sitio.</p>
+
+      <div id="alerta" hidden></div>
+
+      <form id="form" novalidate>
+        <label class="campo">
+          <span>Correo</span>
+          <input type="email" id="email" name="email" autocomplete="username"
+                 required autocapitalize="off" spellcheck="false" placeholder="nombre@maxing.com">
+        </label>
+
+        <label class="campo">
+          <span>Contraseña</span>
+          <input type="password" id="password" name="password"
+                 autocomplete="current-password" required placeholder="••••••••">
+        </label>
+
+        <button class="btn btn-primario btn-bloque" id="enviar" type="submit" style="margin-top:6px;padding:12px">
+          Ingresar
+        </button>
+      </form>
+
+      <p style="margin-top:22px;font-size:12.5px;color:var(--gris)">
+        ¿Olvidaste la contraseña? Pedile a un administrador que la restablezca
+        desde Supabase.
+      </p>
+    </div>
+  </div>
+</main>
+
+<script src="/js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="/admin/js/supabase.js"></script>
+<script src="/admin/js/auth.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var form = document.getElementById("form");
+  var alerta = document.getElementById("alerta");
+  var boton = document.getElementById("enviar");
+
+  function avisar(texto, tipo) {
+    alerta.className = "aviso " + (tipo || "error");
+    alerta.textContent = texto;
+    alerta.hidden = false;
+  }
+
+  // A donde volver despues de entrar. Se acepta solo una ruta interna del
+  // panel: si se aceptara cualquier URL, un enlace preparado podria mandar
+  // al usuario a otro sitio despues de que ingrese.
+  function destino() {
+    var v = new URLSearchParams(location.search).get("volver") || "";
+    return /^\/admin(\/|#|$)/.test(v) && v.indexOf("//") === -1 ? v : "/admin";
+  }
+
+  // Si ya hay sesion valida, no tiene sentido mostrar el formulario.
+  MaxingAuth.verificar().then(function (perfil) {
+    if (perfil) location.replace(destino());
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var email = document.getElementById("email").value.trim();
+    var password = document.getElementById("password").value;
+
+    if (!email || !password) {
+      avisar("Completá el correo y la contraseña.");
+      return;
+    }
+
+    alerta.hidden = true;
+    boton.disabled = true;
+    boton.textContent = "Ingresando…";
+
+    MaxingAuth.ingresar(email, password)
+      .then(function (r) {
+        if (r.ok) {
+          location.replace(destino());
+          return;
+        }
+        avisar(r.mensaje);
+        boton.disabled = false;
+        boton.textContent = "Ingresar";
+      })
+      .catch(function (err) {
+        avisar("No se pudo conectar con el servidor. " + (err.message || ""));
+        boton.disabled = false;
+        boton.textContent = "Ingresar";
+      });
+  });
+})();
+</script>
+</body>
+</html>
