@@ -5,7 +5,10 @@
 # Uso: .\logo.ps1 "images.png" "apple"
 param(
   [Parameter(Mandatory = $true)][string]$Origen,
-  [Parameter(Mandatory = $true)][string]$Slug
+  [Parameter(Mandatory = $true)][string]$Slug,
+  # Para logos que son texto claro sobre un fondo de color: si se pasara el
+  # blanco a transparente se borrarian las letras y quedaria solo el recuadro.
+  [switch]$SinTransparencia
 )
 
 Add-Type -AssemblyName System.Drawing
@@ -65,6 +68,7 @@ $g.Dispose()
 
 # El blanco de fondo pasa a transparente, asi el logo se apoya sobre la
 # tarjeta sin dejar un recuadro visible.
+if (-not $SinTransparencia) {
 for ($y = 0; $y -lt $destH; $y++) {
   for ($x = 0; $x -lt $destW; $x++) {
     $p = $bmp.GetPixel($x, $y)
@@ -72,6 +76,7 @@ for ($y = 0; $y -lt $destH; $y++) {
       $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(0, $p.R, $p.G, $p.B))
     }
   }
+}
 }
 
 $ruta = Join-Path $destino "$Slug.png"
