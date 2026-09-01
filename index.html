@@ -252,6 +252,11 @@ article:hover button { filter: brightness(1.08); }
   [data-rb~="nosotros-foto"] { order: 2; }
 }
 
+/* Categoria sin productos todavia: se ve, pero no promete un listado que no
+   existe. Sin cursor de mano ni elevacion al pasar el cursor. */
+[data-rb~="cat"][data-vacia="true"] { cursor: default; }
+[data-rb~="cat"][data-vacia="true"]:hover { transform: none !important; border-color: #E8E8E8 !important; box-shadow: none !important; }
+
 /* Con foto real, una ficha de categoria a todo el ancho pasa de los 600px de
    alto: siete asi obligan a un scroll larguisimo. En telefono van de a dos. */
 @media (max-width: 700px) {
@@ -448,19 +453,19 @@ article:hover button { filter: brightness(1.08); }
       </div>
       <div data-rb="cat-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:16px">
         <sc-for list="{{ categories }}" as="c" hint-placeholder-count="8">
-          <a href="#" onClick="{{ c.abrir }}" data-rb="spot cat" data-rb-reveal style="display:block;border:1px solid #E8E8E8;border-radius:12px;overflow:hidden;background:#FFFFFF;transition:border-color 220ms,transform 220ms,box-shadow 220ms" style-hover="border-color:{{ c.color }};transform:translateY(-3px);box-shadow:0 10px 22px {{ c.glow }}">
+          <a href="#" onClick="{{ c.abrir }}" data-rb="spot cat" data-rb-reveal data-vacia="{{ c.vacia }}" aria-disabled="{{ c.vacia }}" style="display:block;border:1px solid #E8E8E8;border-radius:12px;overflow:hidden;background:#FFFFFF;transition:border-color 220ms,transform 220ms,box-shadow 220ms" style-hover="border-color:{{ c.color }};transform:translateY(-3px);box-shadow:0 10px 22px {{ c.glow }}">
             <div style="position:relative;aspect-ratio:4/3;background:{{ c.soft }};display:grid;place-items:center">
               <sc-if value="{{ c.hayFoto }}" hint-placeholder-val="{{ true }}">
                 <div data-rb="zoom" style="position:absolute;inset:0;background:#FFFFFF"><img src="{{ c.foto }}" alt="{{ c.name }}" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:6%"></div>
               </sc-if>
               <sc-if value="{{ c.sinFoto }}" hint-placeholder-val="{{ false }}">
-                <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,{{ c.tint }} 8px 16px)"></div>
-                <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.06em;color:#5C6660">{{ c.img }}</span>
+                <div style="position:absolute;inset:0;background:linear-gradient(150deg,{{ c.soft }},{{ c.tint }})"></div>
+                <div aria-hidden="true" style="position:relative;width:clamp(46px,32%,68px);aspect-ratio:1/1;background-image:{{ c.iconoCss }};background-repeat:no-repeat;background-position:center;background-size:contain;opacity:0.85"></div>
               </sc-if>
             </div>
             <div style="padding:16px 16px 18px;background:{{ c.color }}">
               <h3 style="margin:0;font-size:15px;font-weight:700;color:#000000">{{ c.name }}</h3>
-              <span style="display:block;margin-top:6px;font-size:12px;font-weight:600;color:rgba(0,0,0,0.72)">{{ c.count }}</span>
+              <span style="display:block;margin-top:6px;font-size:12px;font-weight:600;color:rgba(0,0,0,0.72)">{{ c.leyenda }}</span>
             </div>
           </a>
         </sc-for>
@@ -995,14 +1000,14 @@ const P = (n) => "Gs. " + n.toLocaleString("es-PY").replace(/,/g, ".");
 const CAT = [
   { name: "Celulares", count: "Smartphones y accesorios", img: "foto: celulares", foto: "./productos/apple-iphone-17-pro.jpg", color: "#86DC2C", ink: "#4E7F13" },
   { name: "Notebooks", count: "Trabajo, estudio y gaming", img: "foto: notebook abierta", foto: "./productos/hp-15-fd2050wm.jpg", color: "#6FDD2E", ink: "#3F7F15" },
-  { name: "PC & Componentes", count: "Placas, procesadores, RAM", img: "foto: PC gamer", color: "#5FDE31", ink: "#327F17" },
+  { name: "PC & Componentes", count: "Placas, procesadores, RAM", img: "foto: PC gamer", icono: "M7 7h10v10H7z M10 4v3 M14 4v3 M10 17v3 M14 17v3 M4 10h3 M4 14h3 M17 10h3 M17 14h3", color: "#5FDE31", ink: "#327F17" },
   { name: "Gaming", count: "Consolas y setups", img: "foto: consola", foto: "./productos/sony-ps5-pro-2tb.jpg", color: "#4EDE33", ink: "#2A8018" },
   { name: "Monitores", count: "Full HD a 4K", img: "foto: monitor", foto: "./productos/mtek-m27sfv280c.jpg", color: "#40DF36", ink: "#24801C" },
   { name: "Audio", count: "Auriculares y parlantes", img: "foto: auriculares", foto: "./productos/apple-airpods-pro-3.jpg", color: "#35D944", ink: "#1E7D26" },
-  { name: "Periféricos", count: "Teclados, mouse y webcams", img: "foto: teclado", color: "#2FD453", ink: "#187A32" },
-  { name: "Almacenamiento", count: "SSD, HDD y memorias", img: "foto: SSD", color: "#26CC62", ink: "#14783C" },
-  { name: "Accesorios", count: "Cables, soportes, impresoras", img: "foto: accesorios", color: "#22C86F", ink: "#12784A" },
-  { name: "Tablets", count: "iPad y Android", img: "foto: tablet", color: "#1DC17C", ink: "#107553" },
+  { name: "Periféricos", count: "Teclados, mouse y webcams", img: "foto: teclado", icono: "M3 7h18v10H3z M7 11h0.01 M11 11h0.01 M15 11h0.01 M8 14h8", color: "#2FD453", ink: "#187A32" },
+  { name: "Almacenamiento", count: "SSD, HDD y memorias", img: "foto: SSD", icono: "M4 7h16v10H4z M7 12h0.01 M10 12h7 M4 15h16", color: "#26CC62", ink: "#14783C" },
+  { name: "Accesorios", count: "Cables, soportes, impresoras", img: "foto: accesorios", icono: "M9 3v6 M15 3v6 M6 9h12v3a6 6 0 0 1-12 0V9z M12 18v3", color: "#22C86F", ink: "#12784A" },
+  { name: "Tablets", count: "iPad y Android", img: "foto: tablet", icono: "M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z M10 18h4", color: "#1DC17C", ink: "#107553" },
   { name: "Smartwatch & Wearables", count: "Relojes y pulseras", img: "foto: smartwatch", foto: "./productos/apple-watch-s11-42mm.jpg", color: "#1ABB86", ink: "#0E7358" },
   { name: "TV", count: "Smart TV 4K", img: "foto: smart TV", foto: "./productos/xiaomi-tv-a-2026-65.jpg", color: "#16AE95", ink: "#0C6E60" }
 ];
@@ -1739,7 +1744,25 @@ class Component extends DCLogic {
       nav,
       navMovil,
       heroFacts: ["Catálogo amplio de informática y tecnología.", "Asesoramiento directo antes de comprar.", "Atención por WhatsApp todos los días."],
-      categories: CAT_VISIBLES.map((c) => ({ ...c, tint: c.color + "2E", soft: c.color + "12", glow: c.color + "33", hayFoto: !!c.foto, sinFoto: !c.foto, abrir: this.irACat(c.name) })),
+      // Se muestran las 12: las que todavía no tienen productos salen con su
+      // ilustración y la etiqueta "Próximamente", y no llevan a ningún lado.
+      // Un enlace que abre un listado vacío es peor que una categoría marcada
+      // como pendiente.
+      // El ícono va como data-URI y no interpolado dentro del atributo d de un
+      // path: ahí el navegador intenta leer el texto crudo del template antes
+      // de que el runtime lo reemplace, y tira un error de SVG inválido.
+      categories: CAT.map((c) => {
+        const vacia = !CAT_VISIBLES.some((v) => v.name === c.name);
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="' + c.ink +
+          '" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"><path d="' + (c.icono || "") + '"/></svg>';
+        const iconoCss = c.icono ? 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")' : "none";
+        return { ...c, tint: c.color + "2E", soft: c.color + "12", glow: c.color + "33",
+          hayFoto: !!c.foto && !vacia,
+          sinFoto: vacia || !c.foto,
+          vacia, activa: !vacia, iconoCss,
+          leyenda: vacia ? "Próximamente" : c.count,
+          abrir: vacia ? this.noop : this.irACat(c.name) };
+      }),
       featured: view(PRODUCTS.slice(0, 8)),
       hayOfertas,
       // El segundo botón del hero apuntaba fijo a #ofertas. Con la sección
@@ -1747,7 +1770,7 @@ class Component extends DCLogic {
       ctaSec: hayOfertas
         ? { label: "Ver ofertas", abrir: this.irAAncla("ofertas") }
         : { label: "Ver novedades", abrir: this.irAAncla("new-h") },
-      catsResumen: CAT_VISIBLES.length + " categorías: " + CATS_VIS.slice(0, 4).map((c) => c.toLowerCase()).join(", ") + " y más.",
+      catsResumen: CAT.length + " categorías: " + CATS_VIS.slice(0, 4).map((c) => c.toLowerCase()).join(", ") + " y más.",
       offers: view(PRODUCTS.filter((p) => p.badge).slice(0, 4)),
       novedades: view(PRODUCTS.slice(8, 12)),
       catalogItems: view(found),
