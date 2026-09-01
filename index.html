@@ -245,6 +245,40 @@ article:hover button { filter: brightness(1.08); }
 /* En pantallas chicas el hover no existe: el toque marca el borde igual. */
 [data-rb~="marca"]:active { border-color: #40DF36 !important; }
 
+/* Con foto real, una ficha de categoria a todo el ancho pasa de los 600px de
+   alto: siete asi obligan a un scroll larguisimo. En telefono van de a dos. */
+@media (max-width: 700px) {
+  [data-rb~="cat-grid"] { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+  [data-rb~="cat-grid"] h3 { font-size: 15px !important; }
+  [data-rb~="cat-grid"] p { font-size: 12.5px !important; }
+}
+
+/* En telefono las marcas pasan de grilla a carrusel horizontal. El ancho de
+   42% deja la tercera tarjeta asomando: sin ese recorte nada indica que se
+   pueda deslizar. El scroll es nativo, asi que conserva la inercia del
+   sistema y las tarjetas siguen siendo tocables. */
+@media (max-width: 700px) {
+  [data-rb~="marcas-carril"] {
+    display: flex !important;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* el desborde del carrusel no debe empujar el ancho de la pagina */
+    margin: 0 -24px;
+    padding: 4px 24px;
+  }
+  [data-rb~="marcas-carril"]::-webkit-scrollbar { display: none; }
+  [data-rb~="marcas-carril"] [data-rb~="marca"] {
+    flex: 0 0 42%;
+    scroll-snap-align: start;
+    /* la elevacion del hover descuadraria el carril */
+    transform: none !important;
+  }
+}
+
 /* El ultimo item del menu movil no lleva separador colgando */
 [data-rb~="menu-movil"] a:last-child { border-bottom: 0 !important; }
 
@@ -405,12 +439,17 @@ article:hover button { filter: brightness(1.08); }
         </div>
         <a href="#" onClick="{{ goCatalog }}" style="font-size:14px;font-weight:700;color:#171717;border-bottom:2px solid #40DF36;padding-bottom:3px">Ver todas las categorías</a>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:16px">
+      <div data-rb="cat-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:16px">
         <sc-for list="{{ categories }}" as="c" hint-placeholder-count="8">
           <a href="#" onClick="{{ c.abrir }}" data-rb="spot cat" data-rb-reveal style="display:block;border:1px solid #E8E8E8;border-radius:12px;overflow:hidden;background:#FFFFFF;transition:border-color 220ms,transform 220ms,box-shadow 220ms" style-hover="border-color:{{ c.color }};transform:translateY(-3px);box-shadow:0 10px 22px {{ c.glow }}">
             <div style="position:relative;aspect-ratio:4/3;background:{{ c.soft }};display:grid;place-items:center">
-              <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,{{ c.tint }} 8px 16px)"></div>
-              <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.06em;color:#5C6660">{{ c.img }}</span>
+              <sc-if value="{{ c.hayFoto }}" hint-placeholder-val="{{ true }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background:#FFFFFF"><img src="{{ c.foto }}" alt="{{ c.name }}" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:6%"></div>
+              </sc-if>
+              <sc-if value="{{ c.sinFoto }}" hint-placeholder-val="{{ false }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,{{ c.tint }} 8px 16px)"></div>
+                <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:0.06em;color:#5C6660">{{ c.img }}</span>
+              </sc-if>
             </div>
             <div style="padding:16px 16px 18px;background:{{ c.color }}">
               <h3 style="margin:0;font-size:15px;font-weight:700;color:#000000">{{ c.name }}</h3>
@@ -560,7 +599,7 @@ article:hover button { filter: brightness(1.08); }
     <div style="max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,72px) 24px">
       <h2 id="brand-h" style="margin:0 0 28px;font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-0.03em;color:#000000">Las marcas que buscás</h2>
       <p style="margin:-18px 0 26px;font-size:15px;font-weight:500;color:#5C6862">Tocá una marca para ver todos sus productos.</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,142px),1fr));gap:14px">
+      <div data-rb="marcas-carril" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,142px),1fr));gap:14px">
         <sc-for list="{{ brands }}" as="b" hint-placeholder-count="10">
           <a href="#" onClick="{{ b.abrir }}" aria-label="{{ b.aria }}" data-rb="marca" data-rb-reveal style="height:96px;display:grid;place-items:center;padding:0 18px;background:#FFFFFF;border:1px solid #E4EDE7;border-radius:14px">
             <sc-if value="{{ b.hayLogo }}" hint-placeholder-val="{{ false }}">
@@ -925,18 +964,18 @@ const P = (n) => "Gs. " + n.toLocaleString("es-PY").replace(/,/g, ".");
 // de verdes va de lima a esmeralda y ordena visualmente la grilla del inicio.
 // Ofertas, Novedades y Más vendidos NO están acá: son colecciones, no categorías.
 const CAT = [
-  { name: "Celulares", count: "Smartphones y accesorios", img: "foto: celulares", color: "#86DC2C", ink: "#4E7F13" },
-  { name: "Notebooks", count: "Trabajo, estudio y gaming", img: "foto: notebook abierta", color: "#6FDD2E", ink: "#3F7F15" },
+  { name: "Celulares", count: "Smartphones y accesorios", img: "foto: celulares", foto: "./productos/apple-iphone-17-pro.jpg", color: "#86DC2C", ink: "#4E7F13" },
+  { name: "Notebooks", count: "Trabajo, estudio y gaming", img: "foto: notebook abierta", foto: "./productos/hp-15-fd2050wm.jpg", color: "#6FDD2E", ink: "#3F7F15" },
   { name: "PC & Componentes", count: "Placas, procesadores, RAM", img: "foto: PC gamer", color: "#5FDE31", ink: "#327F17" },
-  { name: "Gaming", count: "Consolas y setups", img: "foto: consola", color: "#4EDE33", ink: "#2A8018" },
-  { name: "Monitores", count: "Full HD a 4K", img: "foto: monitor", color: "#40DF36", ink: "#24801C" },
-  { name: "Audio", count: "Auriculares y parlantes", img: "foto: auriculares", color: "#35D944", ink: "#1E7D26" },
+  { name: "Gaming", count: "Consolas y setups", img: "foto: consola", foto: "./productos/sony-ps5-pro-2tb.jpg", color: "#4EDE33", ink: "#2A8018" },
+  { name: "Monitores", count: "Full HD a 4K", img: "foto: monitor", foto: "./productos/mtek-m27sfv280c.jpg", color: "#40DF36", ink: "#24801C" },
+  { name: "Audio", count: "Auriculares y parlantes", img: "foto: auriculares", foto: "./productos/apple-airpods-pro-3.jpg", color: "#35D944", ink: "#1E7D26" },
   { name: "Periféricos", count: "Teclados, mouse y webcams", img: "foto: teclado", color: "#2FD453", ink: "#187A32" },
   { name: "Almacenamiento", count: "SSD, HDD y memorias", img: "foto: SSD", color: "#26CC62", ink: "#14783C" },
   { name: "Accesorios", count: "Cables, soportes, impresoras", img: "foto: accesorios", color: "#22C86F", ink: "#12784A" },
   { name: "Tablets", count: "iPad y Android", img: "foto: tablet", color: "#1DC17C", ink: "#107553" },
-  { name: "Smartwatch & Wearables", count: "Relojes y pulseras", img: "foto: smartwatch", color: "#1ABB86", ink: "#0E7358" },
-  { name: "TV", count: "Smart TV 4K", img: "foto: smart TV", color: "#16AE95", ink: "#0C6E60" }
+  { name: "Smartwatch & Wearables", count: "Relojes y pulseras", img: "foto: smartwatch", foto: "./productos/apple-watch-s11-42mm.jpg", color: "#1ABB86", ink: "#0E7358" },
+  { name: "TV", count: "Smart TV 4K", img: "foto: smart TV", foto: "./productos/xiaomi-tv-a-2026-65.jpg", color: "#16AE95", ink: "#0C6E60" }
 ];
 // Un producto puede vivir en más de una categoría: una notebook gamer entra por
 // Notebooks y por Gaming. `cats` es la fuente; `cat` queda como respaldo viejo.
@@ -1401,13 +1440,45 @@ class Component extends DCLogic {
       });
       this.rbMO.observe(document.body, { childList: true, subtree: true });
       this.velarisInit();
+      this.marcasInit();
     } catch (err) {
       revealAll();
     }
   }
 
+  // Carrusel de marcas: en teléfono avanza solo, de a una tarjeta, y se detiene
+  // apenas el visitante lo toca. Las tarjetas son enlaces, así que seguir
+  // moviéndose después de una interacción convertiría el toque en una lotería.
+  marcasInit() {
+    if (this.rbReduce || this.marcasTimer) return;
+    // El carril no existe todavía cuando corre esto: el runtime dibuja después.
+    // Por eso la comprobación va en cada tick y no una sola vez al arrancar.
+    // De paso cubre el cambio de tamaño: en grilla no hay desborde y no hace
+    // nada; al pasar a carrusel empieza a avanzar solo.
+    this.marcasTimer = setInterval(() => {
+      const carril = document.querySelector('[data-rb~="marcas-carril"]');
+      if (!carril || this.marcasQuieto) return;
+      if (!carril.dataset.rbAuto) {
+        carril.dataset.rbAuto = "1";
+        const frenar = () => { this.marcasQuieto = true; };
+        carril.addEventListener("pointerdown", frenar, { passive: true });
+        carril.addEventListener("touchstart", frenar, { passive: true });
+        carril.addEventListener("wheel", frenar, { passive: true });
+      }
+      const fin = carril.scrollWidth - carril.clientWidth;
+      if (fin <= 8) return; // vista de grilla: no hay nada que desplazar
+      const tarjeta = carril.querySelector('[data-rb~="marca"]');
+      if (!tarjeta) return;
+      const paso = tarjeta.getBoundingClientRect().width + 12;
+      // La animación la hace scroll-behavior en CSS: scrollTo con behavior
+      // suave pelea con scroll-snap en varios navegadores.
+      carril.scrollLeft = carril.scrollLeft + paso >= fin - 4 ? 0 : carril.scrollLeft + paso;
+    }, 2600);
+  }
+
   rbDestroy() {
     this.velarisDestroy();
+    if (this.marcasTimer) clearInterval(this.marcasTimer);
     if (this.rbFallback) clearTimeout(this.rbFallback);
     if (this.rbMO) this.rbMO.disconnect();
     if (this.rbIO) this.rbIO.disconnect();
@@ -1630,7 +1701,7 @@ class Component extends DCLogic {
       nav,
       navMovil,
       heroFacts: ["Catálogo amplio de informática y tecnología.", "Asesoramiento directo antes de comprar.", "Atención por WhatsApp todos los días."],
-      categories: CAT_VISIBLES.map((c) => ({ ...c, tint: c.color + "2E", soft: c.color + "12", glow: c.color + "33", abrir: this.irACat(c.name) })),
+      categories: CAT_VISIBLES.map((c) => ({ ...c, tint: c.color + "2E", soft: c.color + "12", glow: c.color + "33", hayFoto: !!c.foto, sinFoto: !c.foto, abrir: this.irACat(c.name) })),
       featured: view(PRODUCTS.slice(0, 8)),
       hayOfertas,
       // El segundo botón del hero apuntaba fijo a #ofertas. Con la sección
