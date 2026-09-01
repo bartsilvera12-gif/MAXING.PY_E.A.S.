@@ -13,7 +13,18 @@ param(
   # con un color fijo. Sirve cuando el fondo tiene degradado o vineteado: uno
   # parejo se resuelve mejor sin esto, porque el modo local puede filtrarse por
   # un borde de bajo contraste.
-  [switch]$Local
+  [switch]$Local,
+  # Con -Umbral N el fondo se define por luminancia: se rellena desde el borde
+  # todo lo que sea mas claro que N. Sirve para fondos oscuros con vineteado,
+  # donde la distancia a un color fijo no alcanza.
+  [int]$Umbral = 0,
+  # Techo del umbral: el fondo vive en una banda de luminancia, no en "todo lo
+  # mas claro que N". Sin esto un objeto plateado se toma por fondo.
+  [int]$UmbralMax = 255,
+  # Vueltas de limpieza de sombra alrededor del producto.
+  [int]$Sombra = 0,
+  # Piso de esa limpieza: por debajo se considera producto y no se toca.
+  [int]$SombraMin = 12
 )
 
 Add-Type -AssemblyName System.Drawing
@@ -72,12 +83,17 @@ while ($pila.Count -gt 0) {
   $px = $p % $w
   $py = [int](($p - $px) / $w)
   $i = Idx $px $py
-  if ($Local) {
-    $db = $bytes[$i] - $refB[$p]; $dg = $bytes[$i + 1] - $refG[$p]; $dr = $bytes[$i + 2] - $refR[$p]
+  if ($Umbral -gt 0) {
+    $lum = ($bytes[$i] + $bytes[$i + 1] + $bytes[$i + 2]) / 3
+    if ($lum -lt $Umbral -or $lum -gt $UmbralMax) { continue }
   } else {
-    $db = $bytes[$i] - $fb; $dg = $bytes[$i + 1] - $fg; $dr = $bytes[$i + 2] - $fr
+    if ($Local) {
+      $db = $bytes[$i] - $refB[$p]; $dg = $bytes[$i + 1] - $refG[$p]; $dr = $bytes[$i + 2] - $refR[$p]
+    } else {
+      $db = $bytes[$i] - $fb; $dg = $bytes[$i + 1] - $fg; $dr = $bytes[$i + 2] - $fr
+    }
+    if (($db * $db + $dg * $dg + $dr * $dr) -gt $tol2) { continue }
   }
-  if (($db * $db + $dg * $dg + $dr * $dr) -gt $tol2) { continue }
   $marca[$p] = $true
   if ($Local) {
     $cb = $bytes[$i]; $cg = $bytes[$i + 1]; $cr = $bytes[$i + 2]
@@ -90,6 +106,28 @@ while ($pila.Count -gt 0) {
   if ($px -lt $w - 1) { $pila.Push($p + 1) }
   if ($py -gt 0) { $pila.Push($p - $w) }
   if ($py -lt $h - 1) { $pila.Push($p + $w) }
+}
+
+# Limpieza de sombra: el contorno de la sombra queda mas oscuro que el fondo,
+# asi que el relleno no lo alcanza y sobrevive como un borde sucio. Se come de
+# a un pixel por vuelta, solo lo que esta pegado al fondo y no es negro pleno:
+# el producto en si es mucho mas oscuro y no se toca.
+if ($Sombra -gt 0) {
+  for ($vuelta = 0; $vuelta -lt $Sombra; $vuelta++) {
+    $nuevos = New-Object System.Collections.Generic.List[int]
+    for ($py = 1; $py -lt $h - 1; $py++) {
+      for ($px = 1; $px -lt $w - 1; $px++) {
+        $p = $py * $w + $px
+        if ($marca[$p]) { continue }
+        if (-not ($marca[$p - 1] -or $marca[$p + 1] -or $marca[$p - $w] -or $marca[$p + $w])) { continue }
+        $i = Idx $px $py
+        $lum = ($bytes[$i] + $bytes[$i + 1] + $bytes[$i + 2]) / 3
+        if ($lum -gt $SombraMin -and $lum -lt $UmbralMax) { $nuevos.Add($p) }
+      }
+    }
+    if ($nuevos.Count -eq 0) { break }
+    foreach ($p in $nuevos) { $marca[$p] = $true }
+  }
 }
 
 # El fondo pasa a blanco.
