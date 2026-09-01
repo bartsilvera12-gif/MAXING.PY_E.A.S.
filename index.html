@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
+<!-- Catálogo y contenido: se leen de Supabase con la anon key, que es pública
+     por diseño. Lo que impide escribir no es esconderla, sino las políticas
+     RLS de Postgres (supabase/migrations/002_maxingpy_rls.sql). -->
+<script src="./js/config.js"></script>
+<script src="./js/supabase-client.js"></script>
+<script src="./js/data-api.js"></script>
 </head>
 <body>
 <x-dc>
@@ -302,6 +308,14 @@ article:hover button { filter: brightness(1.08); }
 /* El ultimo item del menu movil no lleva separador colgando */
 [data-rb~="menu-movil"] a:last-child { border-bottom: 0 !important; }
 
+/* Latido de los bloques grises mientras se carga el catalogo. */
+@keyframes latido { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+[data-rb~="lat"] { animation: latido 1.25s ease-in-out infinite; }
+[data-rb~="esqueleto"]:nth-child(even) [data-rb~="lat"] { animation-delay: 0.18s; }
+@media (prefers-reduced-motion: reduce) {
+  [data-rb~="lat"] { animation: none; }
+}
+
 /* El header es sticky. Al abrir el menu pasa a medir mas que la pantalla
    (132px de barra + 950px de items) y todo lo que sobra queda fuera de
    alcance: un sticky pinneado en top:0 no se puede recorrer con scroll.
@@ -413,6 +427,53 @@ article:hover button { filter: brightness(1.08); }
     </div>
   </sc-if>
 </header>
+
+<!-- Mientras llega el catálogo: unas fichas grises con la forma de las reales,
+     para que la página no salte cuando se llenan. -->
+<sc-if value="{{ cargando }}" hint-placeholder-val="{{ false }}">
+<main>
+  <section aria-label="Cargando el catálogo" style="max-width:1320px;margin:0 auto;padding:56px 24px 72px">
+    <p style="margin:0 0 26px;font-size:14px;color:#5C6862" role="status">Cargando el catálogo…</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:18px">
+      <sc-for list="{{ esqueletos }}" as="k" hint-placeholder-count="8">
+        <div data-rb="esqueleto" style="border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden">
+          <div data-rb="lat" style="aspect-ratio:1/1;background:#F1F3F1"></div>
+          <div style="padding:14px">
+            <div data-rb="lat" style="height:11px;width:44%;background:#F1F3F1;border-radius:5px"></div>
+            <div data-rb="lat" style="height:13px;width:82%;background:#F1F3F1;border-radius:5px;margin-top:9px"></div>
+            <div data-rb="lat" style="height:15px;width:56%;background:#F1F3F1;border-radius:5px;margin-top:14px"></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</main>
+</sc-if>
+
+<!-- No se pudo llegar a la base. Se dice qué pasó y se ofrece reintentar, en
+     vez de dejar una página vacía sin explicación. -->
+<sc-if value="{{ hayError }}" hint-placeholder-val="{{ false }}">
+<main>
+  <section aria-label="Error de carga" style="max-width:640px;margin:0 auto;padding:76px 24px 96px;text-align:center">
+    <h1 style="margin:0 0 10px;font-size:22px;font-weight:800;letter-spacing:-0.02em">No pudimos cargar el catálogo</h1>
+    <p style="margin:0 0 6px;font-size:15px;line-height:1.6;color:#5C6862">Puede ser una caída momentánea de la conexión. Probá de nuevo en unos segundos.</p>
+    <p style="margin:0 0 24px;font-size:12px;color:#8A948E">Detalle técnico: {{ errorDetalle }}</p>
+    <a href="#" onClick="{{ reintentar }}" style="display:inline-flex;align-items:center;gap:8px;background:#000000;color:#FFFFFF;border-radius:10px;padding:12px 22px;font-size:14px;font-weight:700">Reintentar</a>
+    <p style="margin:22px 0 0;font-size:14px">O escribinos por <a href="{{ waLink }}" target="_blank" rel="noopener" style="color:#1F8F19;font-weight:700">WhatsApp</a> y te ayudamos.</p>
+  </section>
+</main>
+</sc-if>
+
+<!-- Cargó bien pero no hay nada publicado todavía. -->
+<sc-if value="{{ sinCatalogo }}" hint-placeholder-val="{{ false }}">
+<main>
+  <section aria-label="Catálogo vacío" style="max-width:640px;margin:0 auto;padding:76px 24px 96px;text-align:center">
+    <h1 style="margin:0 0 10px;font-size:22px;font-weight:800;letter-spacing:-0.02em">Estamos cargando los productos</h1>
+    <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#5C6862">En breve vas a ver el catálogo completo acá. Mientras tanto, contanos qué buscás y te lo conseguimos.</p>
+    <a href="{{ waLink }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:#40DF36;color:#000000;border-radius:10px;padding:12px 22px;font-size:14px;font-weight:700">Consultar por WhatsApp</a>
+  </section>
+</main>
+</sc-if>
 
 <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
 <main>
@@ -1115,271 +1176,105 @@ article:hover button { filter: brightness(1.08); }
 <script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#40DF36&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#40DF36&quot;,&quot;#000000&quot;,&quot;#737373&quot;],&quot;section&quot;:&quot;Marca&quot;},&quot;showFloatingWhatsapp&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Contacto&quot;}}">
 const P = (n) => "Gs. " + n.toLocaleString("es-PY").replace(/,/g, ".");
 
-// Las 12 categorías del catálogo, en el orden que definió el cliente. La rampa
-// de verdes va de lima a esmeralda y ordena visualmente la grilla del inicio.
-// Ofertas, Novedades y Más vendidos NO están acá: son colecciones, no categorías.
-const CAT = [
-  { name: "Celulares", count: "Smartphones y accesorios", img: "foto: celulares", foto: "./productos/apple-iphone-17-pro.jpg", color: "#86DC2C", ink: "#4E7F13" },
-  { name: "Notebooks", count: "Trabajo, estudio y gaming", img: "foto: notebook abierta", foto: "./productos/hp-15-fd2050wm.jpg", color: "#6FDD2E", ink: "#3F7F15" },
-  { name: "PC & Componentes", count: "Placas, procesadores, RAM", img: "foto: PC gamer", foto: "./categorias/pc-componentes.jpg", icono: "M7 7h10v10H7z M10 4v3 M14 4v3 M10 17v3 M14 17v3 M4 10h3 M4 14h3 M17 10h3 M17 14h3", color: "#5FDE31", ink: "#327F17" },
-  { name: "Gaming", count: "Consolas y setups", img: "foto: consola", foto: "./productos/sony-ps5-pro-2tb.jpg", color: "#4EDE33", ink: "#2A8018" },
-  { name: "Monitores", count: "Full HD a 4K", img: "foto: monitor", foto: "./productos/mtek-m27sfv280c.jpg", color: "#40DF36", ink: "#24801C" },
-  { name: "Audio", count: "Auriculares y parlantes", img: "foto: auriculares", foto: "./productos/apple-airpods-pro-3.jpg", color: "#35D944", ink: "#1E7D26" },
-  { name: "Periféricos", count: "Teclados, mouse y webcams", img: "foto: teclado", foto: "./categorias/perifericos.jpg", icono: "M3 7h18v10H3z M7 11h0.01 M11 11h0.01 M15 11h0.01 M8 14h8", color: "#2FD453", ink: "#187A32" },
-  { name: "Almacenamiento", count: "SSD, HDD y memorias", img: "foto: SSD", foto: "./categorias/almacenamiento.jpg", icono: "M4 7h16v10H4z M7 12h0.01 M10 12h7 M4 15h16", color: "#26CC62", ink: "#14783C" },
-  { name: "Accesorios", count: "Cables, soportes, impresoras", img: "foto: accesorios", foto: "./categorias/accesorios.jpg", icono: "M9 3v6 M15 3v6 M6 9h12v3a6 6 0 0 1-12 0V9z M12 18v3", color: "#22C86F", ink: "#12784A" },
-  { name: "Tablets", count: "iPad y Android", img: "foto: tablet", foto: "./categorias/tablets.jpg", icono: "M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z M10 18h4", color: "#1DC17C", ink: "#107553" },
-  { name: "Smartwatch & Wearables", count: "Relojes y pulseras", img: "foto: smartwatch", foto: "./productos/apple-watch-s11-42mm.jpg", color: "#1ABB86", ink: "#0E7358" },
-  { name: "TV", count: "Smart TV 4K", img: "foto: smart TV", foto: "./productos/xiaomi-tv-a-2026-65.jpg", color: "#16AE95", ink: "#0C6E60" }
-];
+// ---------------------------------------------------------------------
+// Origen de los datos
+// ---------------------------------------------------------------------
+// El catalogo y el contenido editable viven en Supabase (schema maxingpy)
+// y los administra el panel en /admin. Antes estaban escritos a mano aca.
+//
+// Se conservan los mismos nombres y la misma forma que tenian los arrays
+// escritos a mano, para que el render no tenga que cambiar: lo unico que
+// cambia es de donde salen los datos. Se llenan en componentDidMount y la
+// pantalla se vuelve a dibujar cuando llegan.
+
 // Un producto puede vivir en más de una categoría: una notebook gamer entra por
 // Notebooks y por Gaming. `cats` es la fuente; `cat` queda como respaldo viejo.
 const catsDe = (p) => (Array.isArray(p.cats) && p.cats.length ? p.cats : p.cat ? [p.cat] : []);
 
 const NAV_GREENS = ["#2FBF6B", "#86DC2C", "#6ADD2F", "#4EDE33", "#40DF36", "#2FD453", "#24CA6B", "#1BBD83", "#16B092", "#14A28C"];
-const PRODUCTOS_TODOS = [
-  // --- Catálogo real cargado con el cliente (agosto 2026) ---
-  { brand: "MSI", name: "Katana 15 B14WEK-001US", spec: "Core i7-14650HX · RTX 5050 8 GB · 16 GB / 512 GB", price: 9200000, cats: ["Notebooks", "Gaming"], stock: "Disponible", sku: "B14WEK-001US", foto: "./productos/msi-katana-15.jpg", img: "foto: MSI Katana 15",
-    desc: [
-      "Potencia gaming lista para llevarla al siguiente nivel. El MSI Katana 15 combina un potente Intel Core i7-14650HX, 16 GB de memoria RAM y 512 GB de almacenamiento SSD, ofreciendo el rendimiento que necesitás para jugar, trabajar y crear sin complicaciones.",
-      "Su pantalla de 15,6\" brinda una experiencia cómoda para tus partidas y tareas diarias, mientras que la NVIDIA GeForce RTX 5050 de 8 GB aporta la potencia gráfica necesaria para disfrutar de juegos exigentes, edición de contenido y aplicaciones que requieren alto rendimiento.",
-      "Con Windows 11 y el característico diseño gaming de MSI, el Katana 15 es una excelente opción para quienes buscan rendimiento, velocidad y versatilidad en un solo equipo."
-    ],
-    features: ["Intel Core i7-14650HX", "NVIDIA GeForce RTX 5050 8 GB", "16 GB de RAM", "SSD de 512 GB", "Pantalla de 15,6\"", "Windows 11"] },
 
-  { brand: "HP", name: "15-FD2050WM", spec: "Core Ultra 5 225U · 15,6\" táctil · 8 GB / 512 GB", price: 4000000, cats: ["Notebooks"], stock: "Disponible", sku: "15-FD2050WM", foto: "./productos/hp-15-fd2050wm.jpg", img: "foto: HP 15-FD2050WM",
-    desc: [
-      "Elegancia, versatilidad y rendimiento para acompañarte todos los días. El HP 15-FD2050WM cuenta con una pantalla de 15,6\" táctil y un diseño en color Silver, combinando comodidad y funcionalidad en un equipo ideal para estudio, trabajo y entretenimiento.",
-      "Su procesador Intel Core Ultra 5 225U, acompañado de 8 GB de RAM y 512 GB de almacenamiento SSD, ofrece una experiencia rápida y fluida para realizar múltiples tareas, trabajar con documentos, navegar, estudiar y utilizar tus aplicaciones favoritas.",
-      "La pantalla táctil permite interactuar de forma intuitiva con el equipo, mientras que Windows 11 brinda una experiencia moderna y sencilla desde el primer momento."
-    ],
-    features: ["Intel Core Ultra 5 225U", "Pantalla táctil de 15,6\"", "8 GB de RAM", "SSD de 512 GB", "Windows 11", "Diseño Silver"] },
+let CAT = [];
+let PRODUCTS = [];
+let MARCAS = [];
+let COLECCIONES = [];
+let CONTENIDO = {};
+let AJUSTES = {};
+let PIE = { operativo: [], columnas: {} };
+let REDES = {};
+let BENEFICIOS = [];
+let HERO = null;
+let SEO = {};
 
-  { brand: "Apple", name: "AirPods Pro 3", spec: "MagSafe · USB-C · inalámbrico", price: 1800000, cats: ["Audio"], stock: "Disponible", sku: "MFHP4ZA/A", foto: "./productos/apple-airpods-pro-3.jpg", img: "foto: AirPods Pro 3",
-    desc: [
-      "Sumergite en una experiencia de audio premium con los Apple AirPods Pro 3, diseñados para ofrecer un sonido envolvente, comodidad y una conexión inalámbrica fluida. Su formato compacto y ergonómico permite disfrutarlos cómodamente durante el día, ya sea para escuchar música, realizar llamadas o consumir contenido.",
-      "Incorporan estuche de carga MagSafe con conexión USB-C, brindando una forma práctica de mantener tus AirPods siempre listos para usar. Su diseño elegante y minimalista los convierte en el complemento ideal para tus dispositivos Apple."
-    ],
-    features: ["Audio de alta calidad", "Conexión inalámbrica", "Estuche de carga MagSafe", "Puerto USB-C", "Diseño compacto y elegante", "Integración con el ecosistema Apple"] },
-
-  { brand: "Mtek", name: "Monitor Gamer 27\" M27SFV280C", spec: "Curvo · Full HD · 280 Hz · 1 ms", price: 1400000, cats: ["Monitores", "Gaming"], stock: "Disponible", sku: "M27SFV280C", foto: "./productos/mtek-m27sfv280c.jpg", img: "foto: Mtek M27SFV280C",
-    desc: [
-      "Llevá tu experiencia visual al siguiente nivel con el Mtek M27SFV280C, un monitor curvo de 27\" diseñado para ofrecer velocidad, fluidez y una experiencia inmersiva, especialmente en gaming.",
-      "Su panel VA con resolución Full HD (1920 × 1080) ofrece imágenes nítidas y colores vibrantes, mientras que sus 280 Hz de frecuencia de actualización y 1 ms de tiempo de respuesta permiten disfrutar de movimientos más fluidos y una respuesta rápida en partidas competitivas.",
-      "Además, incorpora tecnologías Flicker Free y Blue Light Reduction, pensadas para brindar mayor comodidad durante largas jornadas frente a la pantalla. Su conectividad incluye 2 puertos HDMI, 1 DisplayPort y salida de audio, junto con cables HDMI y DisplayPort incluidos."
-    ],
-    features: ["Pantalla curva de 27\"", "Frecuencia de actualización de 280 Hz", "Tiempo de respuesta de 1 ms", "Panel VA Full HD (1920 × 1080)", "Flicker Free y Blue Light Reduction", "2 HDMI, 1 DisplayPort y salida de audio", "Cables HDMI y DisplayPort incluidos"] },
-
-  { brand: "MSI", name: "Monitor Gamer 24\" MAG 242C", spec: "Curvo · Full HD · 180 Hz · 1 ms", price: 1100000, cats: ["Monitores", "Gaming"], stock: "Disponible", sku: "MAG 242C", foto: "./productos/msi-mag-242c.jpg", img: "foto: MSI MAG 242C",
-    desc: [
-      "Llevá tus partidas a otro nivel con el MSI MAG 242C, un monitor gaming de 24\" con pantalla curva, diseñado para ofrecer una experiencia fluida e inmersiva.",
-      "Su resolución Full HD proporciona imágenes nítidas, mientras que su frecuencia de actualización de 180 Hz permite disfrutar de movimientos más fluidos, especialmente en juegos competitivos y de acción. Además, su tiempo de respuesta de 1 ms ayuda a mantener una respuesta rápida durante las escenas más dinámicas.",
-      "Con su diseño curvo y estética gaming, el MAG 242C es una excelente opción para complementar tu setup, ya sea para jugar, disfrutar de contenido multimedia o trabajar."
-    ],
-    features: ["Pantalla curva de 24\"", "Resolución Full HD", "Frecuencia de actualización de 180 Hz", "Tiempo de respuesta de 1 ms", "Diseño gaming MSI", "Ideal para gaming competitivo"] },
-
-  { brand: "Apple", name: "iPhone 17 Pro 256 GB", spec: "6,3\" · eSIM · 48+48+48 MP · Deep Blue", price: 8300000, cats: ["Celulares"], stock: "Disponible", sku: "LL/A3256", foto: "./productos/apple-iphone-17-pro.jpg", img: "foto: iPhone 17 Pro",
-    desc: [
-      "Descubrí el nuevo iPhone 17 Pro, un smartphone diseñado para quienes buscan potencia, tecnología y una experiencia premium en cada momento. Su elegante acabado Deep Blue y sus 256 GB de almacenamiento ofrecen el equilibrio perfecto entre estilo y espacio para tus fotos, videos, aplicaciones y archivos.",
-      "Con eSIM, disfrutás de una conectividad práctica y moderna, ideal para mantenerte comunicado estés donde estés. Su rendimiento permite disfrutar de tus aplicaciones, juegos, contenido multimedia y herramientas de trabajo con una experiencia fluida."
-    ],
-    features: ["256 GB de almacenamiento", "Color Deep Blue", "Tecnología eSIM", "Cámaras 48+48+48 MP", "Frontal de 18 MP", "Pantalla de 6,3\""] },
-
-  { brand: "Apple", name: "iPhone 17 Pro Max 256 GB", spec: "6,9\" · 48+48+48 MP · 18 MP · Silver", price: 9100000, cats: ["Celulares"], stock: "Disponible", sku: "BE/A3526", foto: "./productos/apple-iphone-17-pro-max.jpg", img: "foto: iPhone 17 Pro Max",
-    desc: [
-      "Potencia, elegancia y una experiencia premium en un solo equipo. El iPhone 17 Pro Max cuenta con 256 GB de almacenamiento, ofreciendo espacio de sobra para tus fotos, videos, aplicaciones y archivos, mientras su diseño en acabado Silver aporta un estilo sofisticado.",
-      "Pensado para quienes buscan un smartphone capaz de acompañar un uso exigente, es ideal para crear contenido, editar videos, trabajar, disfrutar de entretenimiento y gestionar tus tareas diarias con comodidad. Su formato Pro Max ofrece una experiencia especialmente atractiva para quienes priorizan una pantalla amplia y una experiencia móvil completa."
-    ],
-    features: ["256 GB de almacenamiento", "Color Silver", "Rendimiento de gama Pro", "Cámaras 48+48+48 MP", "Frontal de 18 MP", "Pantalla de 6,9\""] },
-
-  { brand: "Apple", name: "MacBook Neo 13\"", spec: "Chip A18 Pro · 8 GB / 256 GB · Silver", price: 5600000, cats: ["Notebooks"], stock: "Disponible", sku: "MHFA4LL/A", foto: "./productos/apple-macbook-neo-13.jpg", img: "foto: MacBook Neo 13",
-    desc: [
-      "Elegancia, portabilidad y rendimiento en un solo equipo. El MacBook Neo combina un diseño compacto en color Silver con la potencia y eficiencia del chip Apple A18 Pro, ofreciendo una experiencia fluida para acompañarte tanto en el trabajo como en el estudio.",
-      "Cuenta con 8 GB de memoria y 256 GB de almacenamiento, ideales para gestionar documentos, navegar, utilizar aplicaciones, realizar videollamadas y disfrutar de contenido multimedia. Su formato de 13\" facilita llevarlo a cualquier lugar sin renunciar a una experiencia cómoda de uso.",
-      "Además, forma parte del ecosistema Apple, permitiendo una integración práctica con otros dispositivos y servicios de la marca."
-    ],
-    features: ["Pantalla de 13\"", "Chip Apple A18 Pro", "8 GB de memoria", "256 GB de almacenamiento", "Color Silver", "Ecosistema Apple", "Diseño compacto y portátil"] },
-
-  { brand: "Sony", name: "PlayStation 5 Pro 2 TB Digital", spec: "2 TB · Digital Edition · DualSense · White", price: 8200000, cats: ["Gaming"], stock: "Disponible", sku: "CFI-7119/7019", foto: "./productos/sony-ps5-pro-2tb.jpg", img: "foto: PlayStation 5 Pro",
-    desc: [
-      "Llevá tu experiencia gaming al siguiente nivel con la PlayStation 5 Pro, una consola diseñada para quienes buscan mayor potencia, calidad gráfica y rendimiento. Su almacenamiento de 2 TB te permite disfrutar de una amplia biblioteca de juegos sin preocuparte constantemente por el espacio.",
-      "La edición Digital ofrece una experiencia completamente enfocada en juegos descargables, mientras que su diseño en color White mantiene la estética moderna y característica de PlayStation."
-    ],
-    features: ["2 TB de almacenamiento", "Alto rendimiento para gaming", "Experiencia visual de nueva generación", "Edición Digital", "Color White", "Incluye control inalámbrico DualSense"] },
-
-  { brand: "Sony", name: "PlayStation 5 Slim 825 GB Digital", spec: "825 GB · Digital Edition · DualSense · White", price: 4650000, cats: ["Gaming"], stock: "Disponible", sku: "CFI-2115 B01X", foto: "./productos/sony-ps5-slim-825gb.jpg", img: "foto: PlayStation 5 Slim",
-    desc: [
-      "Disfrutá de una nueva generación de gaming con la PlayStation 5 Slim, una consola que combina potencia, velocidad y un diseño más compacto. Su almacenamiento de 825 GB te permite tener tus títulos favoritos siempre listos para jugar.",
-      "Esta Digital Edition está pensada para quienes prefieren descargar y disfrutar sus juegos directamente desde la consola. Además, incluye el control inalámbrico DualSense, que ofrece una experiencia de juego más inmersiva gracias a sus funciones de respuesta háptica y gatillos adaptativos.",
-      "Su diseño Slim en color blanco aporta un estilo moderno que se adapta perfectamente a cualquier setup o espacio de entretenimiento."
-    ],
-    features: ["825 GB de almacenamiento", "Alto rendimiento y carga rápida", "Edición Digital", "Control inalámbrico DualSense incluido", "Color White", "Modelo CFI-2115 B01X", "Diseño compacto Slim"] },
-
-  { brand: "Apple", name: "iPhone 17 256 GB", spec: "6,3\" · 48+48 MP · 18 MP · Black", price: 6700000, cats: ["Celulares"], stock: "Disponible", sku: "BE/A3520", foto: "./productos/apple-iphone-17.jpg", img: "foto: iPhone 17",
-    desc: [
-      "Descubrí el iPhone 17, un smartphone que combina potencia, diseño y versatilidad para acompañarte en cada momento. Su elegante acabado Black le brinda un estilo moderno y sofisticado, mientras que sus 256 GB de almacenamiento ofrecen amplio espacio para tus fotos, videos, aplicaciones y archivos.",
-      "Pensado para el día a día, es una excelente opción tanto para trabajo como para entretenimiento. Disfrutá de tus contenidos, capturá tus mejores momentos y mantenete conectado estés donde estés, con una experiencia fluida y práctica."
-    ],
-    features: ["256 GB de almacenamiento", "Color Black", "Alto rendimiento", "Cámaras 48+48 MP", "Frontal de 18 MP", "Pantalla de 6,3\""] },
-
-  // Provisorio en Monitores: no hay categoria de TV todavia (ver README).
-  { brand: "Samsung", name: "Smart TV LED 55\" UN55U8000FGXPR", spec: "55\" · UHD 4K · Crystal · Smart TV", price: 3200000, cats: ["TV"], stock: "Disponible", sku: "UN55U8000FGXPR", foto: "./productos/samsung-tv-55-un55u8000.jpg", img: "foto: Samsung Smart TV 55",
-    desc: [
-      "Disfrutá de una experiencia de entretenimiento más inmersiva con el Samsung Smart TV de 55\", que combina un diseño elegante con la calidad de imagen UHD 4K y la tecnología Crystal para ofrecer imágenes nítidas, colores vibrantes y gran nivel de detalle.",
-      "Su pantalla de 55 pulgadas es ideal para disfrutar películas, series, deportes y videojuegos con una experiencia visual envolvente. Gracias a sus funciones Smart, podés acceder fácilmente a tus plataformas y contenidos favoritos desde un solo lugar.",
-      "Perfecto para convertir tu sala en un verdadero espacio de entretenimiento, ya sea para una noche de películas, disfrutar de tus series favoritas o vivir tus partidas en una pantalla de gran tamaño."
-    ],
-    features: ["Pantalla de 55\"", "Resolución UHD 4K", "Tecnología Crystal", "Smart TV", "Ideal para películas, series y streaming", "Excelente opción para gaming y entretenimiento"] },
-
-  { brand: "Xiaomi", name: "Smart TV LED 65\" A 2026 L65MB-APH", spec: "65\" · 4K UHD · Google TV · LED", price: 3750000, cats: ["TV"], stock: "Disponible", sku: "L65MB-APH", foto: "./productos/xiaomi-tv-a-2026-65.jpg", img: "foto: Xiaomi Smart TV 65",
-    desc: [
-      "Llevá el entretenimiento a otro nivel con la Xiaomi Smart TV A 2026 de 65\", una pantalla de gran formato que combina resolución 4K, tecnología LED y Google TV para ofrecer una experiencia completa en tu hogar.",
-      "Su pantalla de 65 pulgadas permite disfrutar películas, series, deportes y videojuegos con gran nivel de detalle, mientras que Google TV facilita el acceso a tus aplicaciones y plataformas de streaming favoritas desde una interfaz práctica y moderna.",
-      "Ideal para convertir tu sala en un verdadero centro de entretenimiento, disfrutar noches de cine en familia o vivir tus contenidos favoritos con una experiencia más inmersiva."
-    ],
-    features: ["Pantalla LED de 65\"", "Resolución 4K UHD", "Google TV", "Ideal para streaming y películas", "Excelente para deportes", "Ideal para gaming casual", "Diseño moderno y elegante", "Conectividad inteligente"] },
-
-  { brand: "Apple", name: "Watch Series 11 42 mm GPS", spec: "42 mm · GPS · Sport Band · Jet Black", price: 2550000, cats: ["Smartwatch & Wearables"], stock: "Disponible", sku: "MEQT4LW", foto: "./productos/apple-watch-s11-42mm.jpg", img: "foto: Apple Watch Series 11",
-    desc: [
-      "Tecnología, estilo y funcionalidad en tu muñeca. El Apple Watch Series 11 de 42 mm combina un diseño elegante en color Jet Black con una correa Sport Band, ofreciendo un look moderno que se adapta tanto a tu rutina diaria como a tus momentos de entrenamiento.",
-      "Su conectividad GPS te permite disfrutar de funciones de ubicación y seguimiento durante tus actividades, mientras que su integración con el ecosistema Apple facilita mantenerte conectado, consultar información y gestionar diferentes funciones directamente desde tu muñeca."
-    ],
-    features: ["Caja de 42 mm", "GPS", "Color Jet Black", "Correa Sport Band, talle S/M", "Integración con el ecosistema Apple", "Diseño moderno y elegante"] },
-
-  { brand: "Apple", name: "iPad 11\" 128 GB Wi-Fi", spec: "11\" · A16 · 128 GB · 12+12 MP · Blue", price: 3300000, cats: ["Tablets"], stock: "Disponible", sku: "MD4A4LL/A", foto: "./productos/apple-ipad-11-128gb.jpg", img: "foto: iPad 11",
-    desc: [
-      "El iPad 11\" MD4A4LL/A es una tablet de 11\" en color azul, con conectividad Wi-Fi y 128 GB de almacenamiento. Combina un diseño ligero y una pantalla amplia para que puedas leer, crear y disfrutar contenido con fluidez, ideal para quienes buscan un equipo versátil para el día a día.",
-      "Es especialmente útil para estudiar y trabajar en movilidad: tomá notas, revisá documentos y organizá tareas desde cualquier lugar. También funciona muy bien para entretenimiento y creatividad, como ver series en casa y editar o diseñar contenido en aplicaciones compatibles. Su formato de 11\" facilita el uso tanto en modo vertical como horizontal.",
-      "Para una experiencia consistente, usalo con tu cuenta Apple y sincronizá tus apps y archivos según tu flujo de trabajo. Mantené la pantalla limpia con un paño suave y evitá golpes o presión en el borde. La instalación es sencilla: encendé, seguí el asistente de configuración y conectá a tu red Wi-Fi."
-    ],
-    features: ["Pantalla de 11\"", "Chip A16", "128 GB de almacenamiento", "Conectividad Wi-Fi", "Cámaras de 12 MP", "Color Blue"] },
-
-  { brand: "Xiaomi", name: "Redmi Pad 2 11\" 256 GB", spec: "11\" · 8 GB RAM · 256 GB · Wi-Fi · Gray", price: 1620000, cats: ["Tablets"], stock: "Disponible", sku: "Redmi Pad 2", foto: "./productos/xiaomi-redmi-pad-2.jpg", img: "foto: Redmi Pad 2",
-    desc: [
-      "Potencia, comodidad y entretenimiento en un solo dispositivo. La Xiaomi Redmi Pad 2 cuenta con una amplia pantalla de 11\", 8 GB de RAM y 256 GB de almacenamiento, ofreciendo espacio y fluidez para tus aplicaciones, archivos, fotos y contenido favorito.",
-      "Su conectividad Wi-Fi la convierte en una excelente compañera para estudiar, trabajar o disfrutar de entretenimiento desde cualquier lugar. Es ideal para tomar notas, revisar documentos, navegar, seguir clases, ver series y disfrutar de contenido multimedia con mayor comodidad.",
-      "El acabado Graphite Gray aporta un estilo moderno y sofisticado, mientras que su formato permite utilizarla cómodamente tanto en casa como en movimiento."
-    ],
-    features: ["Pantalla de 11\"", "8 GB de RAM", "256 GB de almacenamiento", "Conectividad Wi-Fi", "Cámaras 8 + 5 MP", "Color Graphite Gray", "Ideal para entretenimiento y streaming"] },
-
-  { brand: "Samsung", name: "Galaxy Tab S10 FE 10,9\" 128 GB", spec: "10,9\" · 8 GB RAM · 128 GB · S Pen · Gray", price: 2900000, cats: ["Tablets"], stock: "Disponible", sku: "X520", foto: "./productos/samsung-galaxy-tab-s10-fe.jpg", img: "foto: Galaxy Tab S10 FE",
-    desc: [
-      "Potencia, versatilidad y creatividad en un solo dispositivo. La Samsung Galaxy Tab S10 FE cuenta con una pantalla de 10,9\", 8 GB de RAM y 128 GB de almacenamiento, ofreciendo una experiencia fluida para estudiar, trabajar, crear y disfrutar de tu contenido favorito.",
-      "Su gran diferencial es el S Pen incluido, que permite tomar apuntes, escribir, dibujar y trabajar sobre documentos de manera natural y precisa. Es una excelente compañera para estudiantes, profesionales y creadores que buscan la comodidad de una tablet sin renunciar a productividad.",
-      "Su elegante acabado Gray aporta un estilo moderno y sofisticado, mientras que su conectividad Wi-Fi permite mantenerte conectado en casa, la oficina o la universidad."
-    ],
-    features: ["Pantalla de 10,9\"", "8 GB de RAM", "128 GB de almacenamiento", "S Pen incluido", "Conectividad Wi-Fi", "Cámaras 13 + 12 MP", "Color Gray"] },
-
-  { brand: "Ajazz", name: "Teclado Gamer AF98 Nacodexx", spec: "RGB · USB · inglés · negro / gris", price: 185000, cats: ["Periféricos", "Gaming"], stock: "Disponible", sku: "AF98 Nacodexx", foto: "./productos/ajazz-af98-negro.jpg", img: "foto: Ajazz AF98 negro",
-    desc: [
-      "Dale personalidad y rendimiento a tu setup con el Ajazz AF98 Nacodexx, un teclado gamer diseñado para quienes buscan una experiencia cómoda, rápida y con estilo.",
-      "Su formato compacto permite aprovechar mejor el espacio del escritorio sin renunciar a una distribución completa de teclas. Además, su iluminación RGB aporta un toque gaming que podés adaptar a tu setup, convirtiéndolo en una excelente opción tanto para jugar como para trabajar o estudiar.",
-      "Cuenta con conexión USB, ofreciendo una conexión práctica y estable para disfrutarlo desde el primer momento."
-    ],
-    features: ["Diseño gamer", "Iluminación RGB", "Conexión USB", "Distribución en inglés", "Color negro / gris", "Ideal para gaming y productividad"] },
-
-  { brand: "Ajazz", name: "Teclado Gamer AF98 Nacodexx Azul", spec: "RGB · USB · inglés · azul", price: 185000, cats: ["Periféricos", "Gaming"], stock: "Disponible", sku: "AF98 Nacodexx Azul", foto: "./productos/ajazz-af98-azul.jpg", img: "foto: Ajazz AF98 azul",
-    desc: [
-      "Dale un toque único a tu setup con el Ajazz AF98 Nacodexx, un teclado gamer que combina diseño, iluminación RGB y comodidad en un formato compacto y moderno.",
-      "Su distribución está pensada para aprovechar el espacio del escritorio sin dejar de lado las funciones necesarias para gaming y uso diario. La iluminación RGB aporta personalidad a tu setup y crea una experiencia más inmersiva durante tus partidas.",
-      "Con su conexión USB, ofrece una conexión sencilla y estable, ideal para conectar directamente a tu PC y comenzar a utilizarlo."
-    ],
-    features: ["Diseño gaming", "Iluminación RGB", "Conexión USB", "Distribución en inglés", "Color azul", "Formato compacto", "Ideal para gaming, estudio y trabajo"] },
-
-  { brand: "Razer", name: "Tartarus V2 Chroma", spec: "32 teclas programables · Mecha-Membrane · RGB", price: 735000, cats: ["Periféricos", "Gaming"], stock: "Disponible", sku: "Tartarus V2", foto: "./productos/razer-tartarus-v2.jpg", img: "foto: Razer Tartarus V2",
-    desc: [
-      "Llevá tu experiencia gaming a otro nivel con el Razer Tartarus V2 Chroma, un teclado gamer diseñado para ofrecer control, precisión y personalización en cada partida.",
-      "Su formato de 32 teclas totalmente programables permite configurar comandos, atajos y funciones según tus preferencias, brindando un acceso rápido a las acciones más importantes durante el juego. Además, la tecnología Mecha-Membrane combina la respuesta táctil de un teclado mecánico con la comodidad de una membrana.",
-      "La iluminación Razer Chroma RGB completa el setup con una experiencia visual personalizable, ideal para crear un espacio gaming a tu medida."
-    ],
-    features: ["32 teclas totalmente programables", "Tecnología Mecha-Membrane", "Iluminación Razer Chroma RGB", "Diseño pensado para gaming", "Color Black", "Ideal para juegos competitivos y de acción"] },
-
-  { brand: "FTX", name: "Kit Teclado + Mouse GK03S Wireless", spec: "Inalámbrico · portugués · dorado", price: 135000, cats: ["Periféricos"], stock: "Disponible", sku: "GK03S", foto: "./productos/ftx-gk03s-dorado.jpg", img: "foto: kit FTX GK03S",
-    desc: [
-      "Combiná estilo, comodidad y libertad de movimiento con el kit inalámbrico FTX GK03S, que incluye teclado y mouse en un elegante acabado Dorado.",
-      "Su conexión inalámbrica permite mantener un escritorio más ordenado y disfrutar de una experiencia práctica tanto para trabajar como para estudiar o navegar. El diseño moderno y minimalista se adapta fácilmente a distintos espacios, aportando un toque sofisticado a tu setup."
-    ],
-    features: ["Teclado inalámbrico", "Mouse inalámbrico incluido", "Conexión Wireless", "Diseño moderno y elegante", "Color Dorado", "Distribución en portugués", "Ideal para PC, oficina y estudio"] },
-
-  { brand: "ADATA", name: "XPG Lancer Blade DDR5 16 GB 6000 MHz", spec: "DDR5 · 16 GB · 6000 MHz · RGB · perfil bajo", price: 2200000, cats: ["PC & Componentes", "Gaming"], stock: "Disponible", sku: "AX5U6000C4816G-SLABRBK", foto: "./productos/adata-xpg-lancer-blade-16gb.jpg", img: "foto: ADATA XPG Lancer Blade",
-    desc: [
-      "Potenciá el rendimiento de tu PC con la ADATA XPG Lancer Blade DDR5, una memoria RAM diseñada para ofrecer velocidad, fluidez y una estética gaming que destaca en cualquier setup.",
-      "Con 16 GB de capacidad y una velocidad de 6000 MHz, es una excelente opción para mejorar la respuesta del sistema, disfrutar de gaming, multitarea y aplicaciones exigentes. Su diseño de perfil bajo facilita su integración en diferentes configuraciones, mientras que la iluminación RGB aporta un toque personalizable a tu equipo."
-    ],
-    features: ["16 GB de memoria RAM", "Tecnología DDR5", "Velocidad de 6000 MHz", "Iluminación RGB", "Diseño de perfil bajo", "Color negro", "Ideal para gaming y multitarea"] },
-
-  { brand: "Seagate", name: "Constellation ES.3 3 TB SAS 3,5\"", spec: "3 TB · SAS · 7200 RPM · 3,5\"", price: 700000, cats: ["Almacenamiento", "PC & Componentes"], stock: "Disponible", sku: "ST3000NM0023", foto: "./productos/seagate-constellation-es3-3tb.jpg", img: "foto: Seagate Constellation ES.3",
-    desc: [
-      "Potenciá el almacenamiento de tus equipos con el Seagate Constellation ES.3, un disco duro de 3 TB diseñado para ofrecer capacidad y rendimiento en entornos que requieren un almacenamiento confiable.",
-      "Su formato de 3,5\" y conexión SAS lo convierten en una alternativa ideal para servidores, estaciones de trabajo y sistemas de almacenamiento compatibles. Con 7.200 RPM, ofrece un desempeño adecuado para gestionar grandes volúmenes de información y mantener un acceso ágil a tus datos.",
-      "Una excelente opción para ampliar la capacidad de almacenamiento de sistemas profesionales y equipos compatibles con tecnología SAS."
-    ],
-    features: ["3 TB de capacidad", "7.200 RPM", "Interfaz SAS", "Formato 3,5\"", "Diseñado para entornos profesionales", "Ideal para servidores y almacenamiento de datos"] },
-
-  { brand: "Redragon", name: "Mouse Gamer K1NG M916W-PRO-4K", spec: "Inalámbrico · 4K Pro · 5 botones · blanco", price: 450000, cats: ["Periféricos", "Gaming"], stock: "Disponible", sku: "M916W-PRO-4K", foto: "./productos/redragon-m916w-pro-4k.jpg", img: "foto: Redragon K1NG",
-    desc: [
-      "Llevá tu precisión al siguiente nivel con el Redragon M916W-PRO-4K K1NG, un mouse gamer inalámbrico diseñado para quienes buscan velocidad, control y libertad de movimiento en cada partida.",
-      "Su diseño liviano y ergonómico permite jugar cómodamente durante largas sesiones, mientras que sus 5 botones programables ofrecen la posibilidad de personalizar comandos y accesos según tu estilo de juego. Su conectividad Wireless brinda una experiencia más limpia, sin cables que limiten tus movimientos.",
-      "El acabado Blanco aporta un look moderno que combina perfectamente con setups minimalistas o gaming."
-    ],
-    features: ["Tecnología 4K Pro", "Conexión inalámbrica", "5 botones programables", "Diseño gamer ergonómico", "Color White", "Ideal para gaming competitivo"] },
-
-  // --- Demo pendiente de reemplazo (ver README) ---
-  { brand: "ASUS", name: "ROG Strix G16", spec: "RTX 4060 · 16 GB RAM · 512 GB SSD", price: 8250000, cats: ["Notebooks", "Gaming"], stock: "Disponible", img: "foto: notebook gamer", sku: "MX-NB-0142", badge: "" },
-  { brand: "Logitech", name: "MX Master 3S", spec: "Inalámbrico · 8000 DPI · silencioso", price: 695000, oldPrice: 820000, badge: "-15%", cats: ["Periféricos"], stock: "Disponible", img: "foto: mouse", sku: "MX-PE-0207" },
-  { brand: "Samsung", name: "Monitor Odyssey G5 27\"", spec: "QHD · 165 Hz · 1 ms", price: 2190000, cats: ["Monitores", "Gaming"], stock: "Disponible", img: "foto: monitor curvo", sku: "MX-MO-0311" },
-  { brand: "Kingston", name: "SSD NV2 1 TB", spec: "NVMe M.2 · lectura 3500 MB/s", price: 485000, cats: ["Almacenamiento"], stock: "Disponible", img: "foto: SSD M.2", sku: "MX-AL-0128" },
-  { brand: "Lenovo", name: "IdeaPad Slim 5", spec: "Ryzen 7 · 16 GB RAM · 1 TB SSD", price: 5490000, oldPrice: 5990000, badge: "-8%", cats: ["Notebooks"], stock: "Disponible", img: "foto: notebook slim", sku: "MX-NB-0163" },
-  { brand: "Corsair", name: "Teclado K70 RGB", spec: "Mecánico · switches rojos · USB-C", price: 920000, cats: ["Periféricos", "Gaming"], stock: "A pedido", img: "foto: teclado mecánico", sku: "MX-PE-0245" },
-  { brand: "MSI", name: "GeForce RTX 4070 Ventus", spec: "12 GB GDDR6X · triple fan", price: 6350000, cats: ["PC & Componentes", "Gaming"], stock: "A pedido", img: "foto: placa de video", sku: "MX-CO-0189" },
-  { brand: "Apple", name: "AirPods Pro", spec: "Cancelación activa · USB-C", price: 1690000, cats: ["Audio"], stock: "Disponible", img: "foto: auriculares in-ear", sku: "MX-AU-0102" },
-  { brand: "HP", name: "Impresora Smart Tank", spec: "Multifunción · Wi-Fi · sistema continuo", price: 1450000, cats: ["Accesorios"], stock: "A pedido", img: "foto: impresora", sku: "MX-AC-0154" },
-  { brand: "Acer", name: "Nitro V15", spec: "RTX 3050 · 16 GB RAM · 512 GB SSD", price: 5150000, oldPrice: 5650000, badge: "-9%", cats: ["Notebooks", "Gaming"], stock: "Disponible", img: "foto: notebook gaming", sku: "MX-NB-0171" },
-  { brand: "Samsung", name: "Galaxy A55", spec: "8 GB RAM · 256 GB · 120 Hz", price: 2890000, cats: ["Celulares"], stock: "Disponible", img: "foto: smartphone frente", sku: "MX-CE-0119" },
-  { brand: "Logitech", name: "Webcam C920", spec: "Full HD 1080p · micrófono estéreo", price: 520000, cats: ["Accesorios", "Periféricos"], stock: "Disponible", img: "foto: webcam", sku: "MX-AC-0136" }
-];
-
-// El sitio solo muestra productos con foto real. Los demo quedan arriba, sin
-// foto, para no perder la estructura de ejemplo, pero no llegan a la pagina:
-// un precio inventado en una vidriera es peor que un catalogo mas corto.
-const PRODUCTS = PRODUCTOS_TODOS.filter((p) => p.foto);
-// Misma logica para las categorias: solo se muestran las que tienen algo que
-// mostrar. Al cargar productos nuevos vuelven a aparecer solas.
-const CAT_VISIBLES = CAT.filter((c) => PRODUCTS.some((p) => catsDe(p).includes(c.name)));
-
-// El rango del slider sale del catálogo, no de valores fijos.
-// Marcas del catalogo, sin repetir: alimenta el mega-menu de Marcas.
-const BRAND_LIST = PRODUCTS.map((p) => p.brand).filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a.localeCompare(b, "es"));
-// Logos que ya pasó el cliente, guardados en ./marcas/. Se listan con su
-// nombre de archivo y no solo el slug, porque no todos llegan en el mismo
-// formato. La marca que no esté acá cae al nombre tipografiado.
-const LOGOS_MARCA = {
-  adata: "adata.png",
-  ajazz: "ajazz.png",
-  apple: "apple.png",
-  ftx: "ftx.png",
-  hp: "hp.png",
-  msi: "msi.png",
-  mtek: "mtek.png",
-  razer: "razer.png",
-  redragon: "redragon.png",
-  samsung: "samsung.png",
-  seagate: "seagate.png",
-  sony: "sony.png",
-  xiaomi: "xiaomi.png"
-};
-
-const PRICES = PRODUCTS.map((p) => p.price);
-const PMIN = Math.min(...PRICES);
-const PMAX = Math.max(...PRICES);
+// Derivados del catalogo. Se recalculan cada vez que llegan datos nuevos.
+let CAT_VISIBLES = [];
+let BRAND_LIST = [];
+let LOGOS_MARCA = {};
+let PMIN = 0;
+let PMAX = 0;
 const PSTEP = 5000;
 
-class Component extends DCLogic {
-  state = { page: "home", pid: 0, menuOpen: false, mega: null, narrow: false, fCat: [], fBrand: [], fStock: [], fMax: PMAX, sort: "rel", q: "", fav: [], cart: [], onlyFav: false, cartOpen: false, searchOpen: false, filtrosOpen: false };
+// Indice por id. Favoritos y lista de consulta guardan el UUID del producto,
+// no su posicion en el array: si el admin agrega, borra o reordena productos,
+// la posicion cambia y los favoritos de un visitante pasarian a apuntar a otro
+// producto. El UUID no cambia nunca.
+let POR_ID = {};
 
-  // Favoritos y lista de consulta sobreviven al recargar. Sin backend, el
-  // unico lugar donde persistir es el navegador del visitante.
-  ALMACEN = "maxing.py/v1";
+function aplicarDatos(d) {
+  PRODUCTS = d.productos || [];
+  CAT = d.categorias || [];
+  MARCAS = d.marcas || [];
+  COLECCIONES = d.colecciones || [];
+  CONTENIDO = d.secciones || {};
+  AJUSTES = d.ajustes || {};
+  PIE = d.pie || { operativo: [], columnas: {} };
+  REDES = d.redes || {};
+  BENEFICIOS = d.beneficios || [];
+  HERO = d.hero || null;
+  SEO = d.seo || {};
+
+  POR_ID = {};
+  PRODUCTS.forEach((p) => { POR_ID[p.id] = p; });
+
+  // Una categoria se muestra solo si tiene algo que mostrar. Cuando el admin
+  // publica el primer producto de una categoria vacia, aparece sola; cuando se
+  // queda sin productos, se oculta sola.
+  CAT_VISIBLES = CAT.filter((c) => PRODUCTS.some((p) => catsDe(p).includes(c.name)));
+
+  // Marcas que realmente tienen producto publicado, en el orden del panel.
+  const conProducto = {};
+  PRODUCTS.forEach((p) => { conProducto[p.brand] = true; });
+  BRAND_LIST = MARCAS.filter((m) => conProducto[m.name]).map((m) => m.name);
+  LOGOS_MARCA = {};
+  MARCAS.forEach((m) => { if (m.logo) LOGOS_MARCA[m.name] = m.logo; });
+
+  // El rango del filtro de precio sale del catálogo, no de valores fijos.
+  const precios = PRODUCTS.map((p) => p.price);
+  PMIN = precios.length ? Math.min.apply(null, precios) : 0;
+  PMAX = precios.length ? Math.max.apply(null, precios) : 0;
+}
+
+// Busca la coleccion por slug y devuelve sus productos ya resueltos, sea que
+// se llene sola por regla (Ofertas sale de old_price > price) o que el panel
+// haya elegido los productos a mano.
+function coleccion(slug) {
+  const c = COLECCIONES.filter((x) => x.slug === slug)[0];
+  return c ? { def: c, items: MaxingData.productosDe(c, PRODUCTS) } : { def: null, items: [] };
+}
+
+class Component extends DCLogic {
+  // `pslug` identifica al producto abierto por su slug, no por su posicion en
+  // el array: la posicion cambia cada vez que el admin agrega, borra o
+  // reordena, y un enlace compartido terminaria abriendo otro producto.
+  state = { page: "home", pslug: "", menuOpen: false, mega: null, narrow: false, fCat: [], fBrand: [], fStock: [], fMax: Infinity, sort: "rel", q: "", fav: [], cart: [], onlyFav: false, cartOpen: false, searchOpen: false, filtrosOpen: false, cargando: true, errorCarga: "" };
+
+  // Favoritos y lista de consulta sobreviven al recargar. Son del visitante,
+  // no del negocio, asi que el unico lugar donde persistirlos es su navegador.
+  //
+  // v2 guarda UUID de producto. v1 guardaba la POSICION en el array, que dejo
+  // de servir cuando el catalogo pasó a ser administrable: al reordenar, un
+  // favorito pasaba a apuntar a otro producto.
+  ALMACEN = "maxing.py/v2";
+  ALMACEN_V1 = "maxing.py/v1";
 
   guardar(patch) {
     this.setState(patch);
@@ -1390,13 +1285,37 @@ class Component extends DCLogic {
     } catch (e) { /* modo privado o storage lleno: se pierde al recargar, nada mas */ }
   }
 
+  // Se llama despues de cargar los datos: hace falta conocer los productos
+  // para descartar los ids que ya no existen.
   recuperar() {
+    const soloValidos = (a) => Array.isArray(a) ? a.filter((id) => typeof id === "string" && POR_ID[id]) : [];
+    let fav = [], cart = [];
+
     try {
       const guardado = JSON.parse(localStorage.getItem(this.ALMACEN) || "{}");
-      const limpiar = (a) => Array.isArray(a) ? a.filter((i) => Number.isInteger(i) && PRODUCTS[i]) : [];
-      const fav = limpiar(guardado.fav), cart = limpiar(guardado.cart);
-      if (fav.length || cart.length) this.setState({ fav, cart });
+      fav = soloValidos(guardado.fav);
+      cart = soloValidos(guardado.cart);
     } catch (e) { /* dato corrupto: se arranca vacio */ }
+
+    // Migracion desde v1. Las posiciones guardadas se traducen al producto que
+    // ocupaba ese lugar, que es el que sigue teniendo ese `orden`. Solo corre
+    // si v2 todavia esta vacio, para no pisar lo que el visitante ya guardó.
+    if (!fav.length && !cart.length) {
+      try {
+        const viejo = JSON.parse(localStorage.getItem(this.ALMACEN_V1) || "{}");
+        const traducir = (a) => Array.isArray(a)
+          ? a.map((i) => (PRODUCTS.filter((p) => p.orden === i + 1)[0] || {}).id).filter(Boolean)
+          : [];
+        fav = traducir(viejo.fav);
+        cart = traducir(viejo.cart);
+        if (fav.length || cart.length) {
+          localStorage.setItem(this.ALMACEN, JSON.stringify({ fav, cart }));
+          localStorage.removeItem(this.ALMACEN_V1);
+        }
+      } catch (e) { /* sin datos viejos que migrar */ }
+    }
+
+    if (fav.length || cart.length) this.setState({ fav, cart });
   }
 
   toggle(key, value) {
@@ -1406,13 +1325,46 @@ class Component extends DCLogic {
     };
   }
 
+  // Trae de Supabase el catalogo y todo el contenido editable. Una sola vez,
+  // al abrir la pagina: la navegacion entre secciones es local.
+  cargarDatos() {
+    MaxingData.cargar()
+      .then((d) => {
+        if (!d.ok) {
+          this.setState({ cargando: false, errorCarga: (d.error && d.error.message) || "sin detalle" });
+          return;
+        }
+        if (d.aviso) console.warn("[MAXING] una tabla secundaria no cargó:", d.aviso);
+        aplicarDatos(d);
+        // El tope del filtro de precio recien se conoce con el catalogo cargado.
+        this.setState({ cargando: false, errorCarga: "", fMax: PMAX });
+        this.recuperar();
+        this.aplicarSeo();
+      })
+      .catch((e) => {
+        this.setState({ cargando: false, errorCarga: e.message || String(e) });
+      });
+  }
+
+  // El titulo y la descripcion de la portada tambien se administran desde el
+  // panel. El resto del SEO ya viene servido en el HTML.
+  aplicarSeo() {
+    try {
+      const s = SEO.home;
+      if (!s) return;
+      if (s.title) document.title = s.title;
+      const meta = document.querySelector('meta[name="description"]');
+      if (meta && s.meta_description) meta.setAttribute("content", s.meta_description);
+    } catch (e) { /* el SEO del HTML sigue siendo valido */ }
+  }
+
   componentDidMount() {
     this.mq = window.matchMedia("(max-width: 900px)");
     this.onMq = () => this.setState({ narrow: this.mq.matches });
     this.mq.addEventListener("change", this.onMq);
     this.onMq();
     this.rbInit();
-    this.recuperar();
+    this.cargarDatos();
   }
   componentWillUnmount() {
     if (this.mq) this.mq.removeEventListener("change", this.onMq);
@@ -1738,10 +1690,10 @@ class Component extends DCLogic {
     }
   }
 
-  go(page, pid) {
+  go(page, pslug) {
     return (e) => {
       if (e) e.preventDefault();
-      this.setState({ page, pid: pid == null ? this.state.pid : pid, menuOpen: false, mega: null });
+      this.setState({ page, pslug: pslug == null ? this.state.pslug : pslug, menuOpen: false, mega: null });
       window.scrollTo(0, 0);
     };
   }
@@ -1817,7 +1769,14 @@ class Component extends DCLogic {
 
   renderVals() {
     const s = this.state;
-    const WA = "https://wa.me/595984127274?text=";
+    // "listo" = ya se sabe qué hay que mostrar, aunque no haya nada.
+    // "hayDatos" = además hay catálogo para dibujar las páginas.
+    const listo = !s.cargando && !s.errorCarga;
+    const hayDatos = listo && PRODUCTS.length > 0;
+    // El numero y el saludo inicial se editan en el panel, en Ajustes. Los
+    // valores de respaldo son los que tenia el sitio antes, para que un ajuste
+    // borrado por error no deje los botones de WhatsApp rotos.
+    const WA = "https://wa.me/" + (AJUSTES.whatsapp_phone || "595984127274") + "?text=";
     const wa = WA + encodeURIComponent("Hola MAXING.py, estoy viendo la página web y quisiera consultar por un producto.");
     // Modelo vidriera: el cierre es por WhatsApp, así que el mensaje tiene que
     // llegar con el producto identificado y no obligar a repreguntar.
@@ -1922,20 +1881,28 @@ class Component extends DCLogic {
     });
     // Cada producto lleva sus propias acciones de favorito y de consulta.
     const view = (arr) => arr.map((p) => {
-      const i = PRODUCTS.indexOf(p);
-      const esFav = s.fav.includes(i);
-      const enLista = s.cart.includes(i);
+      // La identidad del producto es su UUID, no su lugar en el array.
+      const id = p.id;
+      const esFav = s.fav.includes(id);
+      const enLista = s.cart.includes(id);
       return { ...p, price: P(p.price), oldPrice: p.oldPrice ? P(p.oldPrice) : "", badge: p.badge || "", sinFoto: !p.foto,
-        open: this.go("product", i),
+        open: this.go("product", p.slug),
         favColor: esFav ? "#E0245E" : "#A3A3A3",
         favFill: esFav ? "#E0245E" : "none",
         favLabel: esFav ? "Quitar de favoritos" : "Agregar a favoritos",
-        toggleFav: (e) => { if (e) { e.preventDefault(); e.stopPropagation(); } this.guardar({ fav: esFav ? s.fav.filter((x) => x !== i) : s.fav.concat(i) }); },
+        toggleFav: (e) => { if (e) { e.preventDefault(); e.stopPropagation(); } this.guardar({ fav: esFav ? s.fav.filter((x) => x !== id) : s.fav.concat(id) }); },
         addLabel: enLista ? "En la consulta" : "Agregar a la consulta",
-        addCart: (e) => { if (e) e.preventDefault(); this.guardar({ cart: enLista ? s.cart : s.cart.concat(i) }); this.setState({ cartOpen: true }); },
-        quitarCart: (e) => { if (e) e.preventDefault(); this.guardar({ cart: s.cart.filter((x) => x !== i) }); } };
+        addCart: (e) => { if (e) e.preventDefault(); this.guardar({ cart: enLista ? s.cart : s.cart.concat(id) }); this.setState({ cartOpen: true }); },
+        quitarCart: (e) => { if (e) e.preventDefault(); this.guardar({ cart: s.cart.filter((x) => x !== id) }); } };
     });
-    const current = PRODUCTS[s.pid] || PRODUCTS[0];
+    // El producto abierto se busca por slug. Si el slug ya no existe —porque el
+    // admin lo cambió o dio de baja el producto— cae al primero en vez de
+    // romper la ficha.
+    // Mientras el catálogo se está cargando, o si quedara vacío, `current` cae
+    // a un producto en blanco: renderVals lee sus campos sin condicionales y
+    // un null haría reventar toda la pantalla, no solo la ficha.
+    const VACIO = { id: "", slug: "", name: "", brand: "", spec: "", price: 0, oldPrice: null, badge: "", cats: [], stock: "", sku: "", foto: "", img: "", desc: [], features: [] };
+    const current = PRODUCTS.filter((p) => p.slug === s.pslug)[0] || PRODUCTS[0] || VACIO;
 
     // --- Filtros del catálogo: se aplican sobre PRODUCTS, no sobre una lista fija ---
     const uniq = (arr) => arr.filter((v, i) => arr.indexOf(v) === i);
@@ -1945,7 +1912,7 @@ class Component extends DCLogic {
     const coincide = (p) => !term || (p.brand + " " + p.name + " " + p.spec + " " + catsDe(p).join(" ")).toLowerCase().includes(term);
     // Con varias categorías por producto alcanza con que una coincida.
     const enCat = (p) => s.fCat.length === 0 || catsDe(p).some((c) => s.fCat.includes(c));
-    let found = PRODUCTS.filter((p, i) => (!s.onlyFav || s.fav.includes(i)) && coincide(p) && enCat(p) && picked(s.fBrand, p.brand) && picked(s.fStock, p.stock) && p.price <= s.fMax);
+    let found = PRODUCTS.filter((p) => (!s.onlyFav || s.fav.includes(p.id)) && coincide(p) && enCat(p) && picked(s.fBrand, p.brand) && picked(s.fStock, p.stock) && p.price <= s.fMax);
     if (s.sort === "asc") found = found.slice().sort((a, b) => a.price - b.price);
     else if (s.sort === "desc") found = found.slice().sort((a, b) => b.price - a.price);
     else if (s.sort === "new") found = found.slice().reverse();
@@ -1976,8 +1943,20 @@ class Component extends DCLogic {
       waLink: wa,
       // El boton flotante se esconde mientras el menu movil esta desplegado
       showWa: (this.props.showFloatingWhatsapp ?? true) && !(s.menuOpen && s.narrow),
-      isHome: s.page === "home", isCatalog: s.page === "catalog", isProduct: s.page === "product",
-      isFavs: s.page === "favoritos", isCart: s.page === "carrito", isNosotros: s.page === "nosotros",
+      // Ninguna página se dibuja hasta que llegan los datos. Sin esto se vería
+      // por un instante un catálogo vacío con precios en cero, que es peor que
+      // esperar.
+      cargando: s.cargando,
+      esqueletos: [1, 2, 3, 4, 5, 6, 7, 8],
+      hayError: !!s.errorCarga,
+      errorDetalle: s.errorCarga,
+      reintentar: (e) => { if (e) e.preventDefault(); this.setState({ cargando: true, errorCarga: "" }); this.cargarDatos(); },
+      // Cargó bien pero no hay nada publicado: el sitio no está roto, todavía
+      // no hay productos.
+      sinCatalogo: listo && PRODUCTS.length === 0,
+
+      isHome: hayDatos && s.page === "home", isCatalog: hayDatos && s.page === "catalog", isProduct: hayDatos && s.page === "product",
+      isFavs: hayDatos && s.page === "favoritos", isCart: hayDatos && s.page === "carrito", isNosotros: hayDatos && s.page === "nosotros",
       goHome: this.go("home"), goCatalog: this.go("catalog"), noop: (e) => e.preventDefault(),
       toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
       menuOpen: s.menuOpen && s.narrow,
@@ -2008,7 +1987,11 @@ class Component extends DCLogic {
           leyenda: vacia ? "Próximamente" : c.count,
           abrir: vacia ? this.noop : this.irACat(c.name) };
       }),
-      featured: view(PRODUCTS.slice(0, 8)),
+      // Antes eran slice(0, 8) y slice(8, 12): el "destacado" era simplemente
+      // el orden de carga. Ahora sale de las colecciones que administra el
+      // panel — Ofertas se llena sola con los precios rebajados, Destacados lo
+      // elige el cliente a mano.
+      featured: view(coleccion("destacados").items),
       hayOfertas,
       // El segundo botón del hero apuntaba fijo a #ofertas. Con la sección
       // oculta por falta de rebajas, ese enlace no llevaba a ningún lado.
@@ -2016,8 +1999,8 @@ class Component extends DCLogic {
         ? { label: "Ver ofertas", abrir: this.irAAncla("ofertas") }
         : { label: "Ver novedades", abrir: this.irAAncla("new-h") },
       catsResumen: CAT.length + " categorías: " + CATS_VIS.slice(0, 4).map((c) => c.toLowerCase()).join(", ") + " y más.",
-      offers: view(PRODUCTS.filter((p) => p.badge).slice(0, 4)),
-      novedades: view(PRODUCTS.slice(8, 12)),
+      offers: view(coleccion("ofertas").items),
+      novedades: view(coleccion("novedades").items),
       catalogItems: view(found),
       // --- Buscador ---
       searchOpen: s.searchOpen,
@@ -2039,7 +2022,7 @@ class Component extends DCLogic {
       favCount: s.fav.length,
       hayFav: s.fav.length > 0,
       goFavs: this.go("favoritos"),
-      favItems: view(s.fav.map((i) => PRODUCTS[i]).filter(Boolean)),
+      favItems: view(s.fav.map((id) => POR_ID[id]).filter(Boolean)),
       sinFav: s.fav.length === 0,
       favBajada: s.fav.length
         ? "Estos son los productos que guardaste. Consultalos por WhatsApp cuando quieras."
@@ -2056,13 +2039,13 @@ class Component extends DCLogic {
         : "Acá se juntan los productos que quieras consultar de una sola vez.",
       cerrarCart: () => this.setState({ cartOpen: false }),
       vaciarCart: () => this.guardar({ cart: [] }),
-      cartItems: view(s.cart.map((i) => PRODUCTS[i]).filter(Boolean)),
-      cartTotal: P(s.cart.reduce((t, i) => t + (PRODUCTS[i] ? PRODUCTS[i].price : 0), 0)),
+      cartItems: view(s.cart.map((id) => POR_ID[id]).filter(Boolean)),
+      cartTotal: P(s.cart.reduce((t, id) => t + (POR_ID[id] ? POR_ID[id].price : 0), 0)),
       // Un solo mensaje con toda la lista, en vez de preguntar producto por producto.
       cartWa: WA + encodeURIComponent(
         "Hola MAXING.py, quisiera consultar por estos productos:\n\n" +
-        s.cart.map((i) => PRODUCTS[i]).filter(Boolean).map((p) => "· " + p.brand + " " + p.name + " (" + (p.sku || "MX-0000") + ") — " + P(p.price)).join("\n") +
-        "\n\nTotal publicado: " + P(s.cart.reduce((t, i) => t + (PRODUCTS[i] ? PRODUCTS[i].price : 0), 0))
+        s.cart.map((id) => POR_ID[id]).filter(Boolean).map((p) => "· " + p.brand + " " + p.name + " (" + (p.sku || "MX-0000") + ") — " + P(p.price)).join("\n") +
+        "\n\nTotal publicado: " + P(s.cart.reduce((t, id) => t + (POR_ID[id] ? POR_ID[id].price : 0), 0))
       ),
       resultCount: found.length,
       isEmpty: found.length === 0,
@@ -2087,20 +2070,25 @@ class Component extends DCLogic {
       // El logo se busca en ./marcas/<slug>.svg; mientras no esté el archivo
       // oficial la tarjeta muestra el nombre tipografiado.
       brands: BRAND_LIST.map((nombre) => {
-        const slug = nombre.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-        const logo = LOGOS_MARCA[slug] ? "./marcas/" + LOGOS_MARCA[slug] : "";
+        // El logo lo carga el panel; la marca que todavía no tenga uno cae al
+        // nombre tipografiado, igual que antes.
+        const logo = LOGOS_MARCA[nombre] || "";
         return {
           name: nombre, logo, hayLogo: !!logo, sinLogo: !logo,
           aria: "Ver productos de " + nombre,
           abrir: this.irAMarca(nombre)
         };
       }),
-      benefits: [
-        { icon: this.icon("check", "#1F8F19"), tint: "#E9FBE7", line: "#BCEDB7", title: "Productos seleccionados", text: "Elegimos equipos y accesorios por rendimiento real, no por catálogo." },
-        { icon: this.icon("chat", "#1E6FE8"), tint: "#E8F1FE", line: "#C1D8FB", title: "Asesoramiento personalizado", text: "Te ayudamos a definir el equipo según tu uso y presupuesto." },
-        { icon: this.icon("shield", "#6D3BD1"), tint: "#F0EAFD", line: "#D7C7F7", title: "Compra simple y segura", text: "Proceso claro, sin pasos innecesarios ni sorpresas." },
-        { icon: this.icon("clock", "#C97A06"), tint: "#FDF2E0", line: "#F2DCB3", title: "Atención directa por WhatsApp", text: "Consultas respondidas por personas, no por formularios." }
-      ],
+      // Los cuatro beneficios se editan en el panel. El icono se guarda como
+      // clave ("check", "chat"...) y se dibuja aca: en la base va el dato, no
+      // el markup.
+      benefits: BENEFICIOS.map((b) => ({
+        icon: this.icon(b.icon_key || "check", b.icon_color || "#1F8F19"),
+        tint: b.tint_color || "#E9FBE7",
+        line: b.line_color || "#BCEDB7",
+        title: b.title,
+        text: b.text || ""
+      })),
       filters: [grupoCat(), group("Marca", "brand", "fBrand"), group("Disponibilidad", "stock", "fStock")],
       current: { ...current, wa: waFor(current), price: P(current.price), sku: current.sku || "MX-0000", oldPrice: current.oldPrice ? P(current.oldPrice) : "", badge: current.badge || "",
         sinFoto: !current.foto,
@@ -2113,12 +2101,13 @@ class Component extends DCLogic {
       gallery: ["ángulo 2", "ángulo 3", "detalle", "en uso"],
       // `todo` no se renderiza: queda como registro de lo que falta confirmar
       // con el cliente (ver README). Para mostrarlo, agregar un parrafo con op.todo.
-      footerOps: [
-        { title: "Envíos", color: "#86DC2C", ink: "#4E7F13", text: "Coordinamos el envío al confirmar la compra.", todo: "completar: cobertura y transportadoras" },
-        { title: "Retiro en local", color: "#40DF36", ink: "#24801C", text: "Retiro coordinado por WhatsApp.", todo: "completar: dirección y cómo llegar" },
-        { title: "Garantía", color: "#22C86F", ink: "#12784A", text: "Garantía según política del fabricante.", todo: "completar: plazo y cómo se tramita" },
-        { title: "Atención", color: "#16AE95", ink: "#0C6E60", text: "Respondemos por WhatsApp todos los días.", todo: "completar: horarios de atención" }
-      ],
+      footerOps: PIE.operativo.map((f) => ({
+        title: f.title,
+        color: f.color || "#40DF36",
+        ink: f.ink_color || "#24801C",
+        text: f.text || "",
+        todo: f.is_pending ? (f.pending_note || "") : ""
+      })),
       footerCols: [
         // Cada enlace del pie hace algo real. Antes todos llamaban a goCatalog:
         // "Corsair" y "Preguntas frecuentes" llevaban al mismo lado.
