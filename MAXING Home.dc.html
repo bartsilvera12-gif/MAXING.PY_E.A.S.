@@ -1340,10 +1340,91 @@ class Component extends DCLogic {
         this.setState({ cargando: false, errorCarga: "", fMax: PMAX });
         this.recuperar();
         this.aplicarSeo();
+        this.vigilar();
       })
       .catch((e) => {
         this.setState({ cargando: false, errorCarga: e.message || String(e) });
       });
+  }
+
+  // Mantiene la vidriera al dia con lo que se edita en el panel, sin que
+  // haga falta recargar a mano.
+  //
+  // Se hace preguntando por un hash del contenido (32 caracteres) en vez de
+  // bajar el catalogo entero: solo cuando ese hash cambia se vuelve a pedir
+  // todo. Lo natural seria un websocket de Realtime, pero hoy el servidor
+  // rechaza esa conexion (ver la migracion 007).
+  //
+  // Se pregunta al volver a la pestaña —que es el caso real: se edita en el
+  // panel y se pasa al sitio a mirar— y cada 20 segundos mientras la pestaña
+  // esta a la vista. Con la pestaña de fondo no se pregunta nada.
+  vigilar() {
+    if (this.vigilando) return;
+    this.vigilando = true;
+
+    // `hayVersion` queda en false si la migracion 007 todavia no corrio. En
+    // ese caso el sondeo por reloj se apaga —preguntar sin poder comparar
+    // significaria bajar el catalogo entero cada 20 segundos— y solo se
+    // refresca al volver a la pestaña.
+    MaxingData.version().then((v) => {
+      this.versionContenido = v;
+      this.hayVersion = !!v;
+    });
+
+    this.alVolver = () => { if (!document.hidden) this.verSiCambio(true); };
+    document.addEventListener("visibilitychange", this.alVolver);
+    window.addEventListener("focus", this.alVolver);
+    this.reloj = setInterval(() => {
+      if (!document.hidden && this.hayVersion) this.verSiCambio(false);
+    }, 20000);
+  }
+
+  // `alVolver` distingue el regreso a la pestaña del sondeo periodico: sin
+  // señal de version, solo el regreso justifica volver a pedir los datos.
+  verSiCambio(alVolver) {
+    if (this.comprobando) return;
+    if (this.hayVersion === false) {
+      if (alVolver) this.refrescar();
+      return;
+    }
+    this.comprobando = true;
+    MaxingData.version()
+      .then((v) => {
+        this.comprobando = false;
+        if (!v) {
+          this.hayVersion = false;
+          if (alVolver) this.refrescar();
+          return;
+        }
+        this.hayVersion = true;
+        if (!this.versionContenido) { this.versionContenido = v; return; }
+        if (v !== this.versionContenido) {
+          this.versionContenido = v;
+          this.refrescar();
+        }
+      })
+      .catch(() => { this.comprobando = false; });
+  }
+
+  // Vuelve a traer los datos y los aplica SIN mover al visitante de donde
+  // estaba: no se toca la pagina abierta, ni los filtros, ni la busqueda.
+  refrescar() {
+    MaxingData.cargar().then((d) => {
+      // Si falla, se deja lo que ya estaba en pantalla: es mejor un catalogo
+      // de hace un minuto que una pantalla de error.
+      if (!d.ok) return;
+      aplicarDatos(d);
+      const s = this.state;
+      this.setState({
+        // Si el filtro de precio estaba al tope, sigue al tope aunque el
+        // maximo haya cambiado.
+        fMax: s.fMax >= PMAX || s.fMax === Infinity ? PMAX : s.fMax,
+        // Un favorito de un producto que el admin dio de baja se descarta.
+        fav: s.fav.filter((id) => POR_ID[id]),
+        cart: s.cart.filter((id) => POR_ID[id])
+      });
+      this.aplicarSeo();
+    });
   }
 
   // El titulo y la descripcion de la portada tambien se administran desde el
@@ -1368,6 +1449,11 @@ class Component extends DCLogic {
   }
   componentWillUnmount() {
     if (this.mq) this.mq.removeEventListener("change", this.onMq);
+    if (this.reloj) clearInterval(this.reloj);
+    if (this.alVolver) {
+      document.removeEventListener("visibilitychange", this.alVolver);
+      window.removeEventListener("focus", this.alVolver);
+    }
     this.rbDestroy();
   }
 

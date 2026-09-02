@@ -200,6 +200,16 @@
       });
     },
 
+    // Hash del estado del contenido. Sirve para saber si el panel cambió
+    // algo sin volver a bajar todo el catalogo. Devuelve null si la funcion
+    // todavia no existe en la base (migracion 007 sin correr), y en ese caso
+    // el sitio se limita a recargar cuando el visitante vuelve a la pestaña.
+    version: function () {
+      return db.rpc("contenido_version").then(function (r) {
+        return r.error ? null : r.data;
+      });
+    },
+
     // Resuelve una coleccion a la lista de productos que le toca, ya sea
     // por regla automatica o por el curado manual del panel.
     productosDe: function (coleccion, productos) {

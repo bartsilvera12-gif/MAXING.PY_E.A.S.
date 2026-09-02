@@ -135,6 +135,32 @@
       return new Consulta(tabla);
     },
 
+    // Llama a una funcion de Postgres expuesta por PostgREST. La usa la
+    // señal de version del contenido: una respuesta de 32 caracteres, mucho
+    // mas barata que volver a bajar el catalogo para ver si cambio algo.
+    rpc: function (nombre) {
+      return fetch(BASE + "rpc/" + nombre, {
+        method: "POST",
+        headers: {
+          apikey: cfg.SUPABASE_ANON_KEY,
+          Authorization: "Bearer " + cfg.SUPABASE_ANON_KEY,
+          "Content-Profile": cfg.SCHEMA,
+          "Content-Type": "application/json"
+        },
+        body: "{}",
+        credentials: "omit"
+      })
+        .then(function (r) {
+          if (!r.ok) return { data: null, error: { status: r.status } };
+          return r.json().then(function (d) {
+            return { data: d, error: null };
+          });
+        })
+        .catch(function (e) {
+          return { data: null, error: { status: 0, message: e.message } };
+        });
+    },
+
     // URL publica de un archivo del bucket. Acepta tambien las rutas
     // relativas del catalogo viejo (./productos/...), que siguen viviendo
     // en el repositorio.
