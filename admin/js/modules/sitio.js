@@ -67,7 +67,13 @@
               pista: f.description,
               tipo: f.value_type === "url" ? "url" : "text"
             });
-            c.leer = function () { return c.control.value.trim(); };
+            // Sin trim, a proposito. Hay ajustes cuyo espacio final es parte
+            // del dato: el prefijo de precio es "Gs. " y el saludo de WhatsApp
+            // termina en ": ", porque despues se les pega el numero o el
+            // nombre del producto. Recortarlos los rompia, y ademas hacia que
+            // el panel los diera por modificados y los reescribiera cada vez
+            // que alguien entraba a Ajustes y tocaba Guardar.
+            c.leer = function () { return c.control.value; };
           }
           controles[f.key] = c;
           cuerpo.appendChild(c);
