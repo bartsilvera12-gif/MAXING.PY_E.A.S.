@@ -271,6 +271,36 @@ article:hover button { filter: brightness(1.08); }
 [data-rb~="cat"][data-vacia="true"] { cursor: default; }
 [data-rb~="cat"][data-vacia="true"]:hover { transform: none !important; border-color: #E8E8E8 !important; box-shadow: none !important; }
 
+/* En la portada las categorias entran en una sola fila y el resto vive detras
+   de "Ver todas las categorias".
+
+   La cantidad de columnas y la cantidad de fichas visibles salen del MISMO
+   breakpoint a proposito. Si una la decidiera `auto-fill` (que mide el ancho
+   real, barra de desplazamiento incluida) y la otra una consulta de medios
+   (que mide la ventana), en los anchos justos podian no coincidir y quedaba
+   una ficha sola en una segunda fila. Los numeros son los que ya venia
+   eligiendo `auto-fill`, asi que la portada se ve igual que antes.
+
+   Se ocultan con display:none y no con un recorte visual para que las fichas
+   de mas tampoco esten en el orden de tabulacion ni las lea un lector de
+   pantalla. El !important es porque cada ficha trae su propio display:flex
+   en el atributo style; lo mismo con las columnas, que tambien vienen ahi. */
+@media (min-width: 1112px) {
+  [data-rb~="cat-grid"] { grid-template-columns: repeat(5, 1fr) !important; }
+  [data-rb~="cat-grid"] > a:nth-child(n+6) { display: none !important; }
+}
+@media (min-width: 896px) and (max-width: 1111px) {
+  [data-rb~="cat-grid"] { grid-template-columns: repeat(4, 1fr) !important; }
+  [data-rb~="cat-grid"] > a:nth-child(n+5) { display: none !important; }
+}
+@media (min-width: 701px) and (max-width: 895px) {
+  [data-rb~="cat-grid"] { grid-template-columns: repeat(3, 1fr) !important; }
+  [data-rb~="cat-grid"] > a:nth-child(n+4) { display: none !important; }
+}
+@media (max-width: 700px) {
+  [data-rb~="cat-grid"] > a:nth-child(n+3) { display: none !important; }
+}
+
 /* Con foto real, una ficha de categoria a todo el ancho pasa de los 600px de
    alto: siete asi obligan a un scroll larguisimo. En telefono van de a dos. */
 @media (max-width: 700px) {
