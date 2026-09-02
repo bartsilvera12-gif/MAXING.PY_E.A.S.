@@ -711,6 +711,14 @@ select {
   overflow-x: auto;
 }
 
+/* Accesos rapidos del Resumen. La maquetacion vive aca y no en un style= en
+   linea, para que la consulta de medios del final pueda apilarlos. */
+.atajos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
 table.tabla {
   width: 100%;
   border-collapse: collapse;
@@ -765,6 +773,10 @@ table.tabla {
 .miniatura {
   flex: none;
   width: 40px;
+  /* El `img { max-width: 100% }` de más arriba la encogía junto con la celda:
+     en el teléfono la tabla apretaba esa columna a 34px y la foto quedaba en
+     6px, una rayita gris que ni llegaba a cargarse. */
+  min-width: 40px;
   height: 40px;
   border-radius: var(--r-chico);
   border: 1px solid var(--linea);
@@ -1519,4 +1531,30 @@ fieldset.bloque legend {
   padding: 10px;
   font-size: 12.5px;
   color: var(--gris);
+}
+
+/* --------------------------------------------------------------------- */
+/* Teléfono                                                               */
+/* --------------------------------------------------------------------- */
+
+/* Las tablas tienen más columnas de las que entran en una pantalla angosta.
+   Con `width: 100%` nunca desbordaban, así que el `overflow-x` del marco no
+   se activaba y el navegador apretaba cada columna hasta dejarlas ilegibles.
+   Con un ancho mínimo, la tabla se desliza en horizontal y cada columna
+   conserva su tamaño. */
+@media (max-width: 700px) {
+  table.tabla {
+    min-width: 520px;
+  }
+
+  /* Los accesos rápidos del Resumen, uno abajo del otro y a todo el ancho.
+     Envueltos quedaban desparejos —dos en una fila, uno solo en la
+     siguiente— y ninguno era cómodo de tocar. */
+  .atajos {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .atajos .btn {
+    width: 100%;
+  }
 }

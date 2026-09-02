@@ -148,7 +148,7 @@
       cont.appendChild(
         h("div", { class: "tarjeta" }, [
           h("div", { class: "tarjeta-cab" }, [h("h2", null, "Accesos rápidos")]),
-          h("div", { class: "tarjeta-cuerpo", style: "display:flex;gap:9px;flex-wrap:wrap" }, [
+          h("div", { class: "tarjeta-cuerpo atajos" }, [
             atajo("Cargar un producto", "productos"),
             atajo("Editar “Quiénes somos”", "secciones"),
             atajo("Cambiar el hero", "hero"),
