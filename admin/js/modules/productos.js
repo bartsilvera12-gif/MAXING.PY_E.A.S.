@@ -270,8 +270,7 @@
     var p = {
       name: "", slug: "", sku: "", brand_id: "", short_spec: "", description: "",
       price: "", old_price: "", stock_status: "Disponible", main_image_url: "",
-      image_alt: "", is_published: false, is_featured: false, sort_order: 0,
-      meta_title: "", meta_description: ""
+      image_alt: "", is_published: false, is_featured: false, sort_order: 0
     };
     var catsElegidas = [];
     var features = [];
@@ -425,8 +424,6 @@
     var swPublicado = UI.interruptor("Publicado en el sitio", p.is_published);
     var swDestacado = UI.interruptor("Marcar como destacado", p.is_featured);
 
-    var fMetaTitulo = UI.campo({ label: "Título SEO", valor: p.meta_title, pista: "Si lo dejás vacío se usa el nombre." });
-    var fMetaDesc = UI.campo({ label: "Descripción SEO", tipo: "textarea", filas: 3, valor: p.meta_description });
 
     refrescarOferta();
 
@@ -458,10 +455,6 @@
       h("fieldset", { class: "bloque" }, [
         h("legend", null, "Publicación"),
         swPublicado, swDestacado
-      ]),
-      h("fieldset", { class: "bloque" }, [
-        h("legend", null, "SEO"),
-        fMetaTitulo, fMetaDesc
       ])
     ];
 
@@ -518,9 +511,10 @@
         image_alt: null,
         is_published: swPublicado.control.checked,
         is_featured: swDestacado.control.checked,
-        sort_order: Number(fOrden.control.value) || 0,
-        meta_title: fMetaTitulo.control.value.trim() || null,
-        meta_description: fMetaDesc.control.value.trim() || null
+        sort_order: Number(fOrden.control.value) || 0
+        // El SEO del producto no se pide: el sitio arma el titulo con la marca
+        // y el nombre, que para 24 productos alcanza. Los campos de la base
+        // siguen ahi por si algun dia hace falta afinar alguno a mano.
       };
 
       if (!datos.name) { UI.noti("Falta el nombre.", "error"); fNombre.control.focus(); return; }
