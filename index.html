@@ -791,7 +791,7 @@ article:hover button { filter: brightness(1.08); }
 
 <!-- Preguntas frecuentes. Solo aparece si hay alguna cargada y respondida
      desde el panel: una seccion vacia es peor que ninguna. -->
-<sc-if value="{{ hayFaqs }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ hayFaqsInicio }}" hint-placeholder-val="{{ false }}">
   <section id="faq" aria-labelledby="faq-h" style="border-bottom:1px solid #E8E8E8">
     <div style="max-width:920px;margin:0 auto;padding:clamp(48px,6vw,80px) 24px">
       <h2 id="faq-h" style="margin:0 0 8px;font-size:clamp(22px,2.6vw,34px);font-weight:800;letter-spacing:-0.03em;color:#000000">Preguntas frecuentes</h2>
@@ -1175,6 +1175,35 @@ article:hover button { filter: brightness(1.08); }
   </section>
 </sc-if>
 </main>
+</sc-if>
+
+
+<!-- La misma seccion de preguntas, para el catalogo filtrado por una categoria
+     y para la ficha de producto. Va duplicada a proposito: en el inicio tiene
+     que quedar ARRIBA del bloque negro de contacto (primero las dudas, despues
+     el "escribinos") y ese bloque es solo del inicio, asi que una sola copia
+     compartida terminaria en el lugar equivocado en una de las dos partes.
+     Las dos copias nunca se encienden juntas. -->
+<sc-if value="{{ hayFaqsPagina }}" hint-placeholder-val="{{ false }}">
+  <section id="faq" aria-labelledby="faq-h" style="border-bottom:1px solid #E8E8E8">
+    <div style="max-width:920px;margin:0 auto;padding:clamp(48px,6vw,80px) 24px">
+      <h2 id="faq-h" style="margin:0 0 8px;font-size:clamp(22px,2.6vw,34px);font-weight:800;letter-spacing:-0.03em;color:#000000">Preguntas frecuentes</h2>
+      <p style="margin:0 0 26px;font-size:15px;font-weight:500;color:#5C6862">Lo que más nos consultan. Si tu duda no está acá, escribinos por WhatsApp.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ faqs }}" as="f" hint-placeholder-count="4">
+          <div style="border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden">
+            <a href="#" onClick="{{ f.alterna }}" aria-expanded="{{ f.aria }}" style="display:flex;align-items:center;gap:16px;padding:16px 18px;cursor:pointer;font-size:16px;font-weight:700;color:#171717;text-wrap:pretty">
+              <span style="flex:1">{{ f.pregunta }}</span>
+              <span aria-hidden="true" style="flex:0 0 auto;width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:#F1FBEF;color:#1F8F19;font-size:16px;font-weight:700;line-height:1">{{ f.signo }}</span>
+            </a>
+            <sc-if value="{{ f.abierta }}" hint-placeholder-val="{{ false }}">
+              <p style="margin:0;padding:0 18px 18px;font-size:15px;line-height:1.7;font-weight:500;color:#525252;text-wrap:pretty">{{ f.respuesta }}</p>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
 </sc-if>
 
 
@@ -2674,7 +2703,13 @@ class Component extends DCLogic {
         signo: s.faqAbierta === f.id ? "−" : "+",
         aria: s.faqAbierta === f.id ? "true" : "false"
       })),
-      hayFaqs: faqsPagina.length > 0,
+      // La seccion de preguntas esta dos veces en la plantilla y cada copia
+      // se enciende por separado, para que nunca aparezcan las dos juntas.
+      // Sin esto, marcarle una categoria a una pregunta la hacia desaparecer:
+      // dejaba de ser general (asi que se iba del inicio) y el catalogo, que
+      // era su destino, no tenia donde mostrarla.
+      hayFaqsInicio: faqsPagina.length > 0 && s.page === "home",
+      hayFaqsPagina: faqsPagina.length > 0 && s.page !== "home",
       // Sale de BRAND_LIST, que se arma con los productos cargados: nunca
       // aparece una marca que no tenga nada que mostrar al hacer clic.
       // El logo se busca en ./marcas/<slug>.svg; mientras no esté el archivo
