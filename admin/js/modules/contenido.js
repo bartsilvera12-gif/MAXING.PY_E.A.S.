@@ -231,19 +231,15 @@
         // items de la columna de ayuda llevan destino.
         mostrarSi: function (f) { return f.group_key !== "operativo"; }
       },
-      // Se llamaba "Color de fondo" y no lo era: el fondo de la tarjeta es
-      // blanco fijo y este color pinta el borde.
-      {
-        k: "color", label: "Color del borde", tipo: "color", grupo: "Apariencia",
-        pista: "El marco de la tarjeta en el pie del sitio."
-      },
-      {
-        k: "ink_color", label: "Color del título", tipo: "color", grupo: "Apariencia",
-        pista: "El título de la tarjeta. El texto de abajo va siempre en gris."
-      },
-      // No se ven en el sitio, pero no son de adorno: encienden el aviso
-      // "Faltan datos del pie de página" del Resumen. Sin ellos ese aviso
-      // quedaría prendido para siempre, sin forma de apagarlo.
+      // Los dos colores de la tarjeta (el borde y el título) salieron del
+      // formulario, igual que en Beneficios: ya vienen elegidos y a tono con
+      // la marca, y retocarlos es trabajo de diseño, no de carga de
+      // contenido. Las columnas siguen en la base y el guardado no las toca,
+      // así que el pie se sigue viendo igual.
+
+      // El estado del dato no se ve en el sitio, pero no es de adorno:
+      // enciende el aviso "Faltan datos del pie de página" del Resumen. Sin
+      // él, ese aviso quedaría prendido para siempre, sin forma de apagarlo.
       {
         k: "is_pending", label: "Falta el dato definitivo", tipo: "switch", pordefecto: false,
         grupo: "Estado del dato",
