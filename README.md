@@ -21,7 +21,32 @@ es el artboard editable del design canvas y `support.js` el runtime que lo rende
 ## Deploy en Vercel
 
 Sitio estático, sin build. Framework: **Other** / Static. Vercel sirve `index.html`
-en la raíz automáticamente (ver `vercel.json`).
+en la raíz automáticamente (ver `vercel.json`), resuelve las rutas de producto y
+categoría con sus rewrites, y genera `/sitemap.xml` con la función `api/sitemap.js`.
+
+## Deploy en Hostinger
+
+```bash
+powershell -ExecutionPolicy Bypass -File scripts\build.ps1
+```
+
+Deja el paquete en `dist/`. Se sube el **contenido** de esa carpeta a
+`public_html`, incluidos los `.htaccess` —que el explorador de Windows oculta
+por empezar con punto—. Con `-Zip` además arma `dist.zip` para arrastrar al
+hPanel.
+
+El build resuelve las dos cosas que en Vercel hace la plataforma y en Hostinger
+no existen:
+
+- Los rewrites de `vercel.json` se traducen a `.htaccess`. Sin eso, entrar
+  directo a `/productos/msi-katana-15` da 404: ese archivo no existe, la ruta
+  la resuelve `index.html` leyendo la URL.
+- `/api/sitemap` es una función serverless y Hostinger no ejecuta Node, así que
+  el sitemap se congela en un `sitemap.xml` generado durante el build.
+
+**Consecuencia:** cuando se cargan productos nuevos desde el panel, el sitio los
+muestra al instante, pero el sitemap sigue con la lista vieja hasta que se
+vuelva a correr el build y se suba. En Vercel esto no pasa.
 
 ## Ver localmente
 
