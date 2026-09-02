@@ -45,7 +45,10 @@
       placeholder: campo.placeholder,
       pista: campo.pista,
       min: campo.min,
-      opciones: campo.opciones
+      // Un modulo puede pasar las opciones como funcion cuando dependen de
+      // algo que se carga al entrar a la pantalla, como los temas de la FAQ.
+      // Sin resolverla aca llegaba la funcion cruda y el cajon no abria.
+      opciones: typeof campo.opciones === "function" ? campo.opciones() : campo.opciones
     });
     campoUI.leer = function () {
       var v = campoUI.control.value;
