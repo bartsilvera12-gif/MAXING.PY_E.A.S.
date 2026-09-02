@@ -155,7 +155,6 @@
 
     columnas: [
       { label: "Beneficio", render: celda.principal("title", "text") },
-      { label: "Ícono", render: celda.texto("icon_key") },
       { label: "Orden", clase: "num", render: celda.texto("sort_order") },
       { label: "Estado", render: celda.estado("is_active", "Activo", "Oculto") }
     ],
@@ -163,18 +162,11 @@
     campos: [
       { k: "title", label: "Título", grupo: "Textos", placeholder: "Productos seleccionados" },
       { k: "text", label: "Texto", tipo: "textarea", filas: 3, grupo: "Textos" },
-      {
-        k: "icon_key", label: "Ícono", tipo: "select", grupo: "Apariencia",
-        opciones: [
-          { valor: "check", label: "Tilde" },
-          { valor: "chat", label: "Conversación" },
-          { valor: "shield", label: "Escudo" },
-          { valor: "clock", label: "Reloj" }
-        ]
-      },
-      { k: "icon_color", label: "Color del ícono", tipo: "color", grupo: "Apariencia" },
-      { k: "tint_color", label: "Color de fondo", tipo: "color", grupo: "Apariencia" },
-      { k: "line_color", label: "Color del borde", tipo: "color", grupo: "Apariencia" },
+      // El grupo Apariencia se sacó del formulario: el ícono y sus tres
+      // colores ya vienen elegidos y a tono con la marca, y retocarlos es
+      // trabajo de diseño, no de carga de contenido. Las columnas siguen en
+      // la base y el guardado no las toca, así que las tarjetas se siguen
+      // dibujando igual que hasta ahora.
       { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },
       { k: "is_active", label: "Beneficio activo", tipo: "switch", grupo: "Publicación" }
     ],
