@@ -80,17 +80,13 @@
       { k: "ink_color", label: "Color del texto", tipo: "color", grupo: "Apariencia" },
 
       { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },
-      { k: "is_active", label: "Categoría activa", tipo: "switch", grupo: "Publicación" },
+      { k: "is_active", label: "Categoría activa", tipo: "switch", grupo: "Publicación" }
 
-      {
-        k: "seo_title", label: "Título SEO", grupo: "SEO",
-        pista: "Vacío: se usa “<nombre> — MAXING.py”."
-      },
-      { k: "seo_description", label: "Descripción SEO", tipo: "textarea", filas: 3, grupo: "SEO" },
-      {
-        k: "canonical_url", label: "URL canónica", tipo: "url", grupo: "SEO",
-        pista: "Vacío: se usa https://maxing.py/categorias/<slug>"
-      }
+      // El grupo SEO se sacó del formulario, igual que en la ficha de
+      // producto: el sitio ya arma solo el título con el nombre de la
+      // categoría, la descripción con su bajada y la URL canónica con
+      // /categorias/<slug>. Las columnas siguen en la base y el guardado no
+      // las toca, así que un valor cargado se sigue respetando.
     ],
 
     validar: function (d) {
