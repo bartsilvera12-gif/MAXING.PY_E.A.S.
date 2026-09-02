@@ -2,6 +2,17 @@
 (function () {
   "use strict";
 
+  // Secciones que el sitio dibuja con una imagen al lado. "redes" no está:
+  // en el inicio es un bloque de titulo, bajada y enlaces, sin lugar para una
+  // foto. Si algun dia el sitio le agrega uno, se suma su clave acá.
+  var SECCIONES_CON_IMAGEN = ["setup", "nosotros", "seo_editorial"];
+  function CON_IMAGEN(fila) {
+    // En una seccion nueva todavia no hay clave: se muestran los campos y
+    // sera el sitio el que decida si la dibuja.
+    if (!fila.section_key) return true;
+    return SECCIONES_CON_IMAGEN.indexOf(fila.section_key) !== -1;
+  }
+
   /* ---------------------------------------------------------------- */
   crudSimple({
     clave: "hero",
@@ -94,10 +105,14 @@
         pista: "Separá los párrafos con una línea en blanco."
       },
 
-      { k: "image_url", label: "Imagen", tipo: "imagen", carpeta: "sections", grupo: "Imagen" },
-      { k: "image_alt", label: "Texto alternativo", grupo: "Imagen" },
+      // Los campos de imagen solo aparecen en las secciones que el sitio
+      // dibuja CON imagen. En las demás ofrecer una subida seria mentir: la
+      // foto se guardaria y no se veria en ningun lado.
+      { k: "image_url", label: "Imagen", tipo: "imagen", carpeta: "sections", grupo: "Imagen", mostrarSi: CON_IMAGEN },
+      { k: "image_alt", label: "Texto alternativo", grupo: "Imagen", mostrarSi: CON_IMAGEN },
       {
         k: "image_side", label: "Lado de la imagen", tipo: "select", grupo: "Imagen",
+        mostrarSi: CON_IMAGEN,
         opciones: [
           { valor: "right", label: "Derecha" },
           { valor: "left", label: "Izquierda" },

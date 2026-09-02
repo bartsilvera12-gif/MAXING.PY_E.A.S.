@@ -162,7 +162,12 @@
           var contGrupo = null;
 
           def.campos.forEach(function (campo) {
-            if (campo.grupo !== grupoActual) {
+            // Un campo puede no aplicar a este registro. Se usa para no
+            // ofrecer subir una imagen en una seccion que el sitio dibuja sin
+            // imagen: seria una foto que nunca se ve.
+            if (campo.mostrarSi && !campo.mostrarSi(fila || {})) return;
+
+            if (campo.grupo !== grupoActual || !contGrupo) {
               grupoActual = campo.grupo;
               contGrupo = h("fieldset", { class: "bloque" }, [
                 grupoActual ? h("legend", null, grupoActual) : null
@@ -172,6 +177,12 @@
             var c = control(campo, fila ? fila[campo.k] : undefined);
             controles[campo.k] = c;
             contGrupo.appendChild(c);
+          });
+
+          // Un grupo puede quedar sin ningun campo visible; en ese caso se
+          // saca, para no dejar un titulo suelto sobre la nada.
+          bloques = bloques.filter(function (b) {
+            return b.querySelector(".campo, .interruptor");
           });
 
           var acciones = [
@@ -211,6 +222,9 @@
             var datos = {};
             def.campos.forEach(function (campo) {
               if (campo.soloLectura) return;
+              // Un campo oculto para este registro no se toca: se deja como
+              // esta en la base en vez de escribirle null.
+              if (!controles[campo.k]) return;
               datos[campo.k] = controles[campo.k].leer();
             });
 

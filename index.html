@@ -585,7 +585,7 @@ article:hover button { filter: brightness(1.08); }
         <a href="#" onClick="{{ setup.abrirCta }}" style="margin-top:28px;height:52px;padding:0 28px;display:inline-flex;align-items:center;background:#40DF36;color:#000000;font-size:15px;font-weight:700;border-radius:10px;transition:filter 200ms" style-hover="filter:brightness(1.08)">{{ setup.cta }}</a>
       </div>
       <div data-rb="spot" data-rb-reveal style="position:relative;aspect-ratio:16/10;background:#171717;border-radius:14px;display:grid;place-items:center;overflow:hidden">
-        <div data-rb="zoom" style="position:absolute;inset:0"><img src="./setup.jpg" alt="Setup de escritorio con monitor, notebook, teclado y auriculares" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover"></div>
+        <div data-rb="zoom" style="position:absolute;inset:0"><img src="{{ setup.foto }}" alt="{{ setup.alt }}" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover"></div>
       </div>
     </div>
   </section>
@@ -718,7 +718,7 @@ article:hover button { filter: brightness(1.08); }
           </sc-for>
         </div>
         <div style="min-height:clamp(200px,22vw,300px);background:#FFFFFF">
-          <img src="./seccion.jpg" alt="Setup de escritorio con PC, monitor, teclado y auriculares" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 50%">
+          <img src="{{ editorial.foto }}" alt="{{ editorial.alt }}" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 50%">
         </div>
       </div>
     </div>
@@ -772,7 +772,7 @@ article:hover button { filter: brightness(1.08); }
     <div style="max-width:1320px;margin:0 auto;padding:clamp(36px,4.5vw,64px) 24px">
       <div data-rb="nosotros" style="background:#FFFFFF;border:1.5px solid #40DF36;border-radius:16px;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:stretch">
         <div data-rb="nosotros-foto" style="position:relative;min-height:clamp(280px,43vw,640px);background:#FFFFFF">
-          <img src="./nosotros.jpg" alt="Equipo de MAXING.py en la oficina" loading="lazy" style="position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%">
+          <img src="{{ nosotros.foto }}" alt="{{ nosotros.alt }}" loading="lazy" style="position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%">
         </div>
         <div style="padding:clamp(24px,2.6vw,38px);display:flex;flex-direction:column;justify-content:center;gap:16px">
           <span data-rb="shiny" style="display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">{{ nosotros.arriba }}</span>
@@ -1884,7 +1884,7 @@ class Component extends DCLogic {
 
     // Arma una sección editable a partir de su clave. El cuerpo llega como un
     // texto con párrafos separados por línea en blanco, igual que en el panel.
-    const bloque = (clave) => {
+    const bloque = (clave, respaldo) => {
       const c = CONTENIDO[clave] || null;
       const parrafos = c && c.body
         ? c.body.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
@@ -1900,7 +1900,7 @@ class Component extends DCLogic {
         // tratamiento tipográfico que el resto.
         primero: parrafos[0] || "",
         resto: parrafos.slice(1),
-        foto: c && c.image_url ? MaxingDB.imagen(c.image_url) : "",
+        foto: c && c.image_url ? MaxingDB.imagen(c.image_url) : (respaldo || ""),
         hayFoto: !!(c && c.image_url),
         alt: (c && c.image_alt) || "",
         izquierda: !!(c && c.image_side === "left"),
@@ -2133,9 +2133,9 @@ class Component extends DCLogic {
       // --- Secciones editables ---
       // `bloque` arma cada una a partir de su clave. Si el panel la ocultó,
       // `visible` queda en false y la sección entera desaparece del sitio.
-      setup: bloque("setup"),
-      nosotros: bloque("nosotros"),
-      editorial: bloque("seo_editorial"),
+      setup: bloque("setup", "./setup.jpg"),
+      nosotros: bloque("nosotros", "./nosotros.jpg"),
+      editorial: bloque("seo_editorial", "./seccion.jpg"),
       bloqueRedes: bloque("redes"),
 
       categories: CAT.map((c) => {
