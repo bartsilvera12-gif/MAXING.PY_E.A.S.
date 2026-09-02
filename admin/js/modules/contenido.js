@@ -239,15 +239,27 @@
         // items de la columna de ayuda llevan destino.
         mostrarSi: function (f) { return f.group_key !== "operativo"; }
       },
-      { k: "color", label: "Color de fondo", tipo: "color", grupo: "Apariencia" },
-      { k: "ink_color", label: "Color del texto", tipo: "color", grupo: "Apariencia" },
+      // Se llamaba "Color de fondo" y no lo era: el fondo de la tarjeta es
+      // blanco fijo y este color pinta el borde.
+      {
+        k: "color", label: "Color del borde", tipo: "color", grupo: "Apariencia",
+        pista: "El marco de la tarjeta en el pie del sitio."
+      },
+      {
+        k: "ink_color", label: "Color del título", tipo: "color", grupo: "Apariencia",
+        pista: "El título de la tarjeta. El texto de abajo va siempre en gris."
+      },
+      // No se ven en el sitio, pero no son de adorno: encienden el aviso
+      // "Faltan datos del pie de página" del Resumen. Sin ellos ese aviso
+      // quedaría prendido para siempre, sin forma de apagarlo.
       {
         k: "is_pending", label: "Falta el dato definitivo", tipo: "switch", pordefecto: false,
-        grupo: "Estado del dato"
+        grupo: "Estado del dato",
+        pista: "Enciende el aviso del Resumen. Apagalo cuando cargues el dato real."
       },
       {
         k: "pending_note", label: "Qué falta", grupo: "Estado del dato",
-        pista: "Solo para el panel: no se muestra en el sitio.",
+        pista: "Es el texto que aparece en ese aviso. No se muestra en el sitio.",
         placeholder: "Falta: dirección y cómo llegar"
       },
       { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },

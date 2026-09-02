@@ -19,8 +19,18 @@
     }
     if (campo.tipo === "switch") {
       var sw = UI.interruptor(campo.label, valor == null ? campo.pordefecto !== false : valor);
-      sw.leer = function () { return sw.control.checked; };
-      return sw;
+      var leerSw = function () { return sw.control.checked; };
+      if (!campo.pista) {
+        sw.leer = leerSw;
+        return sw;
+      }
+      // Un interruptor con ayuda: el <label> no puede envolver el parrafo, asi
+      // que van juntos en un contenedor que se comporta igual. `control` se
+      // reexpone porque hay validaciones que lo leen.
+      var caja = h("div", { class: "campo" }, [sw, h("p", { class: "pista", text: campo.pista })]);
+      caja.leer = leerSw;
+      Object.defineProperty(caja, "control", { get: function () { return sw.control; } });
+      return caja;
     }
     if (campo.tipo === "color") {
       var c = UI.campo({ label: campo.label, valor: valor || "", placeholder: "#40DF36", pista: campo.pista });
