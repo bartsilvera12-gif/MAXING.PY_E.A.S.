@@ -64,6 +64,10 @@
       icono: def.icono,
 
       async render(cont, app) {
+        // Un modulo puede necesitar datos antes de dibujarse: los temas y las
+        // categorias que llenan sus selectores, por ejemplo.
+        if (def.preparar) await def.preparar(app);
+
         if (def.nota) {
           cont.appendChild(h("div", { class: "aviso" }, [h("div", null, def.nota)]));
         }
@@ -185,6 +189,12 @@
             return b.querySelector(".campo, .interruptor");
           });
 
+          // Un modulo puede sumar controles propios —relaciones, listas— que
+          // no entran en un campo plano. Se dibujan al final y se guardan con
+          // el hook `alGuardar`.
+          var extras = def.extras ? def.extras(fila) : null;
+          if (extras) bloques.push(extras.nodo || extras);
+
           var acciones = [
             { label: "Cancelar", clase: "btn-plano", onclick: function () { UI.cerrarCajon(); } },
             {
@@ -238,9 +248,12 @@
               if (fila) {
                 r = await sb.from(def.tabla).update(datos).eq(def.pk || "id", fila[def.pk || "id"]);
               } else {
-                r = await sb.from(def.tabla).insert(datos);
+                r = await sb.from(def.tabla).insert(datos).select("id").single();
               }
               if (r.error) throw r.error;
+              if (def.alGuardar) {
+                await def.alGuardar(fila, datos, extras, r);
+              }
               UI.cerrarCajon();
               UI.noti(fila ? "Cambios guardados." : "Creado.");
               App.invalidar();

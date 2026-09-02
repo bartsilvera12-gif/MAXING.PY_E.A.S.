@@ -44,7 +44,14 @@ while ($listener.IsListening) {
     # primero con .html (/politicadeprivacidad) y despues como carpeta
     # (/admin -> /admin/index.html).
     $candidatos = @()
-    if ($ruta -eq "/" -or $ruta.EndsWith("/")) {
+
+    # Rutas de la vidriera: las resuelve el propio index.html leyendo la URL.
+    # Sin esto, entrar directo a /productos/msi-katana-15 daria 404 en local
+    # y no se podria probar que la ruta funciona al recargar.
+    $rutasApp = '^/(productos|categorias)(/|$)|^/(nosotros|favoritos|lista-de-consulta)$'
+    if ($ruta -match $rutasApp) {
+      $candidatos += "/index.html"
+    } elseif ($ruta -eq "/" -or $ruta.EndsWith("/")) {
       $candidatos += ($ruta + "index.html")
     } elseif (-not [System.IO.Path]::HasExtension($ruta)) {
       $candidatos += ($ruta + ".html")

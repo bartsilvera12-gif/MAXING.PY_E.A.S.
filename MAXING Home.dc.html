@@ -759,6 +759,29 @@ article:hover button { filter: brightness(1.08); }
     </div>
   </section>
 
+<!-- Preguntas frecuentes. Solo aparece si hay alguna cargada y respondida
+     desde el panel: una seccion vacia es peor que ninguna. -->
+<sc-if value="{{ hayFaqs }}" hint-placeholder-val="{{ false }}">
+  <section id="faq" aria-labelledby="faq-h" style="border-bottom:1px solid #E8E8E8">
+    <div style="max-width:920px;margin:0 auto;padding:clamp(48px,6vw,80px) 24px">
+      <h2 id="faq-h" style="margin:0 0 8px;font-size:clamp(22px,2.6vw,34px);font-weight:800;letter-spacing:-0.03em;color:#000000">Preguntas frecuentes</h2>
+      <p style="margin:0 0 26px;font-size:15px;font-weight:500;color:#5C6862">Lo que más nos consultan. Si tu duda no está acá, escribinos por WhatsApp.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ faqs }}" as="f" hint-placeholder-count="4">
+          <div style="border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden">
+            <a href="#" onClick="{{ f.alterna }}" aria-expanded="{{ f.aria }}" style="display:flex;align-items:center;gap:16px;padding:16px 18px;cursor:pointer;font-size:16px;font-weight:700;color:#171717;text-wrap:pretty">
+              <span style="flex:1">{{ f.pregunta }}</span>
+              <span aria-hidden="true" style="flex:0 0 auto;width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:#F1FBEF;color:#1F8F19;font-size:16px;font-weight:700;line-height:1">{{ f.signo }}</span>
+            </a>
+            <sc-if value="{{ f.abierta }}" hint-placeholder-val="{{ false }}">
+              <p style="margin:0;padding:0 18px 18px;font-size:15px;line-height:1.7;font-weight:500;color:#525252;text-wrap:pretty">{{ f.respuesta }}</p>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+</sc-if>
   <section id="contacto" aria-label="Contacto por WhatsApp" style="background:#171717;color:#FFFFFF">
     <div style="max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,68px) 24px;display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between">
       <div>
@@ -1091,9 +1114,10 @@ article:hover button { filter: brightness(1.08); }
       </div>
     </div>
   </div>
+<sc-if value="{{ hayRelacionados }}" hint-placeholder-val="{{ true }}">
   <section aria-labelledby="rel-h" style="border-top:1px solid #E8E8E8">
     <div style="max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,72px) 24px">
-      <h2 id="rel-h" style="margin:0 0 26px;font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-0.03em;color:#000000">Productos relacionados</h2>
+      <h2 id="rel-h" style="margin:0 0 26px;font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-0.03em;color:#000000">{{ tituloRelacionados }}</h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:16px">
         <sc-for list="{{ related }}" as="p" hint-placeholder-count="4">
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden" style-hover="border-color:#171717">
@@ -1119,6 +1143,7 @@ article:hover button { filter: brightness(1.08); }
       </div>
     </div>
   </section>
+</sc-if>
 </main>
 </sc-if>
 
@@ -1217,6 +1242,8 @@ let REDES = {};
 let BENEFICIOS = [];
 let HERO = null;
 let SEO = {};
+let TEMAS_FAQ = [];
+let FAQS = [];
 
 // Derivados del catalogo. Se recalculan cada vez que llegan datos nuevos.
 let CAT_VISIBLES = [];
@@ -1244,6 +1271,8 @@ function aplicarDatos(d) {
   BENEFICIOS = d.beneficios || [];
   HERO = d.hero || null;
   SEO = d.seo || {};
+  TEMAS_FAQ = d.temasFaq || [];
+  FAQS = d.faqs || [];
 
   POR_ID = {};
   PRODUCTS.forEach((p) => { POR_ID[p.id] = p; });
@@ -1278,7 +1307,7 @@ class Component extends DCLogic {
   // `pslug` identifica al producto abierto por su slug, no por su posicion en
   // el array: la posicion cambia cada vez que el admin agrega, borra o
   // reordena, y un enlace compartido terminaria abriendo otro producto.
-  state = { page: "home", pslug: "", menuOpen: false, mega: null, narrow: false, fCat: [], fBrand: [], fStock: [], fMax: Infinity, sort: "rel", q: "", fav: [], cart: [], onlyFav: false, cartOpen: false, searchOpen: false, filtrosOpen: false, fotoVista: "", cargando: true, errorCarga: "" };
+  state = { page: "home", pslug: "", menuOpen: false, mega: null, narrow: false, fCat: [], fBrand: [], fStock: [], fMax: Infinity, sort: "rel", q: "", fav: [], cart: [], onlyFav: false, cartOpen: false, searchOpen: false, filtrosOpen: false, fotoVista: "", faqAbierta: "", cargando: true, errorCarga: "" };
 
   // Favoritos y lista de consulta sobreviven al recargar. Son del visitante,
   // no del negocio, asi que el unico lugar donde persistirlos es su navegador.
@@ -1349,8 +1378,12 @@ class Component extends DCLogic {
         }
         if (d.aviso) console.warn("[MAXING] una tabla secundaria no cargó:", d.aviso);
         aplicarDatos(d);
+        // La URL manda: define que pagina se abre al entrar. Recien se puede
+        // resolver aca, porque para saber a que categoria corresponde
+        // /categorias/notebooks hay que tener las categorias cargadas.
+        const desdeUrl = this.estadoDe(location.pathname);
         // El tope del filtro de precio recien se conoce con el catalogo cargado.
-        this.setState({ cargando: false, errorCarga: "", fMax: PMAX });
+        this.setState(Object.assign({ cargando: false, errorCarga: "", fMax: PMAX }, desdeUrl));
         this.recuperar();
         this.aplicarSeo();
         this.vigilar();
@@ -1464,10 +1497,174 @@ class Component extends DCLogic {
         }
       }
 
+      // Página de una categoría: /categorias/notebooks
+      if (s.page === "catalog" && s.fCat.length === 1) {
+        const c = CAT.filter((x) => x.name === s.fCat[0])[0];
+        if (c) {
+          titulo = c.seoTitulo || c.name + " — MAXING.py";
+          descripcion = c.seoDescripcion || c.count || descripcion;
+        }
+      }
+
       if (titulo) document.title = titulo;
       const meta = document.querySelector('meta[name="description"]');
       if (meta && descripcion) meta.setAttribute("content", descripcion);
+
+      // Canónica: la del panel si la cargaron, o la ruta actual.
+      const ruta = this.rutaDe(s);
+      let canonica = pagina.canonical_url || "";
+      if (s.page === "product") {
+        const p = PRODUCTS.filter((x) => x.slug === s.pslug)[0];
+        if (p && p.canonica) canonica = p.canonica;
+      }
+      if (!canonica) {
+        const c = s.page === "catalog" && s.fCat.length === 1
+          ? CAT.filter((x) => x.name === s.fCat[0])[0]
+          : null;
+        canonica = (c && c.canonica) || "https://maxing.py" + (ruta === "/" ? "/" : ruta);
+      }
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link) {
+        link = document.createElement("link");
+        link.setAttribute("rel", "canonical");
+        document.head.appendChild(link);
+      }
+      link.setAttribute("href", canonica);
+
+      this.aplicarJsonLd();
     } catch (e) { /* el SEO del HTML sigue siendo valido */ }
+  }
+
+  // Datos estructurados de la página abierta: la miga de pan y, en una ficha,
+  // el producto. Organization y WebSite ya vienen en el HTML y no se tocan.
+  //
+  // Se inyecta desde el navegador, así que lo lee Google —que ejecuta
+  // JavaScript— pero no los lectores de vista previa de WhatsApp.
+  aplicarJsonLd() {
+    const s = this.state;
+    const SITIO = "https://maxing.py";
+    const migas = [{ "@type": "ListItem", position: 1, name: "Inicio", item: SITIO + "/" }];
+    const grafo = [];
+
+    if (s.page === "catalog" || s.page === "product") {
+      migas.push({ "@type": "ListItem", position: 2, name: "Productos", item: SITIO + "/productos" });
+    }
+
+    if (s.page === "catalog" && s.fCat.length === 1) {
+      const c = CAT.filter((x) => x.name === s.fCat[0])[0];
+      if (c) migas.push({ "@type": "ListItem", position: 3, name: c.name, item: SITIO + "/categorias/" + c.slug });
+    }
+
+    if (s.page === "product") {
+      const p = PRODUCTS.filter((x) => x.slug === s.pslug)[0];
+      if (p) {
+        const cat = catsDe(p)[0];
+        const c = cat ? CAT.filter((x) => x.name === cat)[0] : null;
+        if (c) migas.push({ "@type": "ListItem", position: 3, name: c.name, item: SITIO + "/categorias/" + c.slug });
+        migas.push({
+          "@type": "ListItem",
+          position: c ? 4 : 3,
+          name: p.name,
+          item: SITIO + "/productos/" + p.slug
+        });
+
+        const imagenes = (p.galeria || []).map((g) => this.absoluta(g.url));
+        grafo.push({
+          "@type": "Product",
+          "@id": SITIO + "/productos/" + p.slug + "#product",
+          name: [p.brand, p.name].filter(Boolean).join(" "),
+          description: p.desc && p.desc.length ? p.desc[0] : p.spec,
+          sku: p.sku || undefined,
+          image: imagenes.length ? imagenes : undefined,
+          brand: p.brand ? { "@type": "Brand", name: p.brand } : undefined,
+          offers: {
+            "@type": "Offer",
+            url: SITIO + "/productos/" + p.slug,
+            priceCurrency: "PYG",
+            price: String(p.price),
+            // "Sin stock" no es lo mismo que "a pedido": el segundo se
+            // consigue, y decir lo contrario espanta una consulta real.
+            availability:
+              p.stock === "Sin stock"
+                ? "https://schema.org/OutOfStock"
+                : p.stock === "Bajo pedido"
+                ? "https://schema.org/BackOrder"
+                : "https://schema.org/InStock",
+            seller: { "@id": SITIO + "/#org" }
+          }
+        });
+      }
+    }
+
+    grafo.unshift({
+      "@type": "BreadcrumbList",
+      "@id": SITIO + (this.rutaDe(s) === "/" ? "/" : this.rutaDe(s)) + "#breadcrumb",
+      itemListElement: migas
+    });
+
+    // FAQPage solo con las preguntas que de verdad se ven en la pantalla:
+    // declarar preguntas que el visitante no encuentra es exactamente lo que
+    // Google penaliza.
+    const faqs = this.faqsVisibles();
+    if (faqs.length) {
+      grafo.push({
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.question,
+          acceptedAnswer: { "@type": "Answer", text: f.answer }
+        }))
+      });
+    }
+
+    let nodo = document.getElementById("ld-pagina");
+    if (!nodo) {
+      nodo = document.createElement("script");
+      nodo.type = "application/ld+json";
+      nodo.id = "ld-pagina";
+      document.head.appendChild(nodo);
+    }
+    nodo.textContent = JSON.stringify({ "@context": "https://schema.org", "@graph": grafo });
+  }
+
+  absoluta(u) {
+    if (!u) return "";
+    if (/^https?:\/\//i.test(u)) return u;
+    return "https://maxing.py/" + String(u).replace(/^\.?\//, "");
+  }
+
+  // Las preguntas que corresponden a la pantalla abierta.
+  //
+  // Una pregunta sin categorías ni productos asociados es general y sale en
+  // el inicio. Las que sí los tienen aparecen solo donde corresponde: una
+  // pregunta sobre batería en la categoría Notebooks, una sobre la garantía
+  // de un fabricante en sus productos.
+  faqsVisibles() {
+    const s = this.state;
+    if (!FAQS.length) return [];
+    const general = (f) => !f.categorias.length && !f.productos.length;
+
+    if (s.page === "product") {
+      const p = PRODUCTS.filter((x) => x.slug === s.pslug)[0];
+      if (!p) return [];
+      const idsCat = catsDe(p)
+        .map((n) => (CAT.filter((c) => c.name === n)[0] || {}).id)
+        .filter(Boolean);
+      return FAQS.filter(
+        (f) =>
+          f.productos.indexOf(p.id) !== -1 ||
+          f.categorias.some((c) => idsCat.indexOf(c) !== -1)
+      );
+    }
+
+    if (s.page === "catalog" && s.fCat.length === 1) {
+      const c = CAT.filter((x) => x.name === s.fCat[0])[0];
+      if (!c) return [];
+      return FAQS.filter((f) => f.categorias.indexOf(c.id) !== -1);
+    }
+
+    if (s.page === "home") return FAQS.filter(general);
+    return [];
   }
 
   componentDidMount() {
@@ -1476,6 +1673,14 @@ class Component extends DCLogic {
     this.mq.addEventListener("change", this.onMq);
     this.onMq();
     this.rbInit();
+
+    // Atras y adelante del navegador vuelven a la pagina que corresponde.
+    this.alVolverAtras = () => {
+      this.setState(Object.assign({ menuOpen: false, mega: null }, this.estadoDe(location.pathname)));
+      setTimeout(() => this.aplicarSeo(), 0);
+    };
+    window.addEventListener("popstate", this.alVolverAtras);
+
     this.cargarDatos();
   }
   componentWillUnmount() {
@@ -1485,6 +1690,7 @@ class Component extends DCLogic {
       document.removeEventListener("visibilitychange", this.alVolver);
       window.removeEventListener("focus", this.alVolver);
     }
+    if (this.alVolverAtras) window.removeEventListener("popstate", this.alVolverAtras);
     this.rbDestroy();
   }
 
@@ -1862,6 +2068,63 @@ class Component extends DCLogic {
 
   // Lleva a una sección del inicio. El salto va diferido porque el nodo recién
   // vuelve al DOM después de que el runtime renderiza la página de inicio.
+  // ---------------------------------------------------------------------
+  // Rutas
+  // ---------------------------------------------------------------------
+  // Cada pagina tiene su URL propia y estable, y se puede recargar,
+  // compartir o marcar como favorita. Antes todo vivia en el estado y la
+  // barra de direcciones nunca cambiaba: para un buscador el sitio entero
+  // era una sola pagina, y no habia forma de enlazar un producto.
+  //
+  // La identidad de la URL es el slug, no la posicion en el array: el slug
+  // no cambia cuando el admin reordena el catalogo.
+  rutaDe(s) {
+    if (s.page === "product" && s.pslug) return "/productos/" + s.pslug;
+    if (s.page === "catalog") {
+      // Una sola categoria elegida y sin otros filtros: es la pagina de esa
+      // categoria. Con varios filtros ya no describe una categoria sola, y
+      // se queda en el catalogo general.
+      const sola = s.fCat.length === 1 && !s.fBrand.length && !s.q.trim();
+      const cat = sola ? CAT.filter((c) => c.name === s.fCat[0])[0] : null;
+      return cat ? "/categorias/" + cat.slug : "/productos";
+    }
+    if (s.page === "nosotros") return "/nosotros";
+    if (s.page === "favoritos") return "/favoritos";
+    if (s.page === "carrito") return "/lista-de-consulta";
+    return "/";
+  }
+
+  estadoDe(ruta) {
+    const p = (ruta || "/").replace(/\/+$/, "") || "/";
+    let m;
+    if ((m = p.match(/^\/productos\/(.+)$/))) {
+      return { page: "product", pslug: decodeURIComponent(m[1]), fCat: [] };
+    }
+    if ((m = p.match(/^\/categorias\/(.+)$/))) {
+      const c = CAT.filter((x) => x.slug === decodeURIComponent(m[1]))[0];
+      // Categoria que no existe: se abre el catalogo completo en vez de una
+      // pantalla vacia.
+      return { page: "catalog", fCat: c ? [c.name] : [] };
+    }
+    if (p === "/productos") return { page: "catalog", fCat: [] };
+    if (p === "/nosotros") return { page: "nosotros" };
+    if (p === "/favoritos") return { page: "favoritos" };
+    if (p === "/lista-de-consulta") return { page: "carrito" };
+    return { page: "home" };
+  }
+
+  // Deja la barra de direcciones de acuerdo con lo que se esta viendo. Solo
+  // escribe cuando la ruta cambio de verdad, asi el boton Atras del
+  // navegador conserva un historial util en vez de una entrada por render.
+  sincronizarUrl() {
+    if (this.state.cargando || this.state.errorCarga) return;
+    const ruta = this.rutaDe(this.state);
+    if (location.pathname !== ruta) {
+      history.pushState({ ruta }, "", ruta);
+      this.aplicarSeo();
+    }
+  }
+
   // Traduce el destino que se eligio en el panel a la accion que corresponde.
   // Los valores posibles son los que documenta el propio formulario:
   // catalog, nosotros, whatsapp, una categoria, #ancla o una URL.
@@ -1914,6 +2177,24 @@ class Component extends DCLogic {
     // "hayDatos" = además hay catálogo para dibujar las páginas.
     const listo = !s.cargando && !s.errorCarga;
     const hayDatos = listo && PRODUCTS.length > 0;
+
+    // Los relacionados del producto abierto, resueltos contra el indice de
+    // publicados: uno despublicado simplemente no aparece.
+    const relacionados = (current.relacionados || [])
+      .map((r) => {
+        const p = POR_ID[r.id];
+        return p ? Object.assign({}, p, { tipoRelacion: r.tipo }) : null;
+      })
+      .filter(Boolean)
+      .slice(0, 4);
+
+    const faqsPagina = this.faqsVisibles();
+
+    // La barra de direcciones acompaña a lo que se está viendo. Se hace acá,
+    // fuera del render, porque cada pantalla llega a mostrarse por muchos
+    // caminos distintos —el menú, una ficha, un filtro, el buscador— y
+    // engancharlo en cada uno era garantía de olvidarse de alguno.
+    if (listo) setTimeout(() => this.sincronizarUrl(), 0);
 
     // Interruptor de visibilidad de una sección del inicio. Visible salvo que
     // el panel lo haya apagado explícitamente: un ajuste que falta no debería
@@ -2310,7 +2591,31 @@ class Component extends DCLogic {
       onPrice: (e) => this.setState({ fMax: Number(e.target.value) }),
       sortVal: s.sort,
       onSort: (e) => this.setState({ sort: e.target.value }),
-      related: view(PRODUCTS.filter((p) => p !== current).slice(0, 4)),
+      // Relacionados de verdad: los que el panel eligió para este producto.
+      // POR_ID solo tiene productos publicados, así que uno despublicado
+      // desaparece de la lista sin dejar una tarjeta rota.
+      //
+      // Si el producto todavía no tiene ninguno cargado, la sección no se
+      // muestra: cuatro productos cualesquiera no son una recomendación.
+      related: view(relacionados),
+      hayRelacionados: relacionados.length > 0,
+      tituloRelacionados: relacionados.some((p) => p.tipoRelacion === "complementary")
+        ? "Complementá tu compra"
+        : "También te puede interesar",
+
+      // --- Preguntas frecuentes ---
+      faqs: faqsPagina.map((f, i) => ({
+        pregunta: f.question,
+        respuesta: f.answer,
+        abierta: s.faqAbierta === f.id,
+        alterna: (e) => {
+          if (e) e.preventDefault();
+          this.setState({ faqAbierta: s.faqAbierta === f.id ? "" : f.id });
+        },
+        signo: s.faqAbierta === f.id ? "−" : "+",
+        aria: s.faqAbierta === f.id ? "true" : "false"
+      })),
+      hayFaqs: faqsPagina.length > 0,
       // Sale de BRAND_LIST, que se arma con los productos cargados: nunca
       // aparece una marca que no tenga nada que mostrar al hacer clic.
       // El logo se busca en ./marcas/<slug>.svg; mientras no esté el archivo

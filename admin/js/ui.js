@@ -638,6 +638,172 @@
   }
 
   /* --------------------------------------------------------------- */
+  /* Selector de productos relacionados                               */
+  /* --------------------------------------------------------------- */
+  // Venta cruzada cargada a mano: se busca un producto, se agrega, y queda
+  // en la lista con su motivo. El orden de la lista es el orden en que se
+  // muestran en la ficha.
+  var MOTIVOS = [
+    { valor: "related", label: "Relacionado" },
+    { valor: "complementary", label: "Complementario" },
+    { valor: "frequently_bought_together", label: "Se llevan juntos" }
+  ];
+
+  function selectorProductos(opciones) {
+    // [{ id, tipo }]
+    var elegidos = (opciones.valores || []).slice();
+    var catalogo = opciones.catalogo || [];
+    var excluir = opciones.excluir || null;
+
+    var porId = {};
+    catalogo.forEach(function (p) { porId[p.id] = p; });
+
+    var buscador = h("input", { type: "search", placeholder: "Buscar un producto para agregar…" });
+    var sugerencias = h("div", { class: "sugerencias", hidden: true });
+    var lista = h("div", { class: "lista-rel" });
+
+    function pintarLista() {
+      vaciar(lista);
+
+      if (!elegidos.length) {
+        lista.appendChild(h("p", { class: "pista", style: "margin:0", text: "Todavía no hay productos relacionados." }));
+        return;
+      }
+
+      elegidos.forEach(function (r, i) {
+        var p = porId[r.id];
+        if (!p) return;
+
+        var motivo = h(
+          "select",
+          {
+            style: "width:auto;min-width:150px;padding:5px 26px 5px 9px;font-size:12.5px",
+            onchange: function (e) { elegidos[i].tipo = e.currentTarget.value; }
+          },
+          MOTIVOS.map(function (m) {
+            var op = h("option", { value: m.valor }, m.label);
+            if (m.valor === r.tipo) op.selected = true;
+            return op;
+          })
+        );
+
+        lista.appendChild(
+          h("div", { class: "rel-item" }, [
+            p.main_image_url
+              ? h("img", { class: "miniatura", src: urlImagen(p.main_image_url), alt: "", loading: "lazy" })
+              : h("div", { class: "miniatura vacia" }, "—"),
+            h("div", { style: "flex:1;min-width:0" }, [
+              h("div", { style: "font-weight:600;font-size:13.5px", text: p.name }),
+              h("div", { style: "font-size:12px;color:var(--gris)", text: gs(p.price) })
+            ]),
+            motivo,
+            h(
+              "button",
+              {
+                class: "btn btn-plano",
+                type: "button",
+                "aria-label": "Quitar",
+                // Alt + flechas reordena, igual que en el resto del panel.
+                onkeydown: function (e) {
+                  if (!e.altKey) return;
+                  var hacia = e.key === "ArrowUp" ? i - 1 : e.key === "ArrowDown" ? i + 1 : -1;
+                  if (hacia < 0 || hacia >= elegidos.length) return;
+                  e.preventDefault();
+                  var t = elegidos[hacia];
+                  elegidos[hacia] = elegidos[i];
+                  elegidos[i] = t;
+                  pintarLista();
+                  var botones = lista.querySelectorAll(".btn-plano");
+                  if (botones[hacia]) botones[hacia].focus();
+                },
+                onclick: function () {
+                  elegidos.splice(i, 1);
+                  pintarLista();
+                }
+              },
+              "✕"
+            )
+          ])
+        );
+      });
+    }
+
+    function pintarSugerencias() {
+      var t = buscador.value.trim().toLowerCase();
+      vaciar(sugerencias);
+      if (t.length < 2) {
+        sugerencias.hidden = true;
+        return;
+      }
+
+      var yaEstan = elegidos.map(function (r) { return r.id; });
+      var hallados = catalogo
+        .filter(function (p) {
+          return (
+            p.id !== excluir &&
+            yaEstan.indexOf(p.id) === -1 &&
+            (p.name + " " + (p.sku || "")).toLowerCase().indexOf(t) !== -1
+          );
+        })
+        .slice(0, 6);
+
+      if (!hallados.length) {
+        sugerencias.appendChild(h("div", { class: "sug-vacia", text: "Ningún producto coincide." }));
+      } else {
+        hallados.forEach(function (p) {
+          sugerencias.appendChild(
+            h(
+              "button",
+              {
+                class: "sug-item",
+                type: "button",
+                onclick: function () {
+                  elegidos.push({ id: p.id, tipo: "related" });
+                  buscador.value = "";
+                  sugerencias.hidden = true;
+                  pintarLista();
+                }
+              },
+              [
+                p.main_image_url
+                  ? h("img", { src: urlImagen(p.main_image_url), alt: "", loading: "lazy" })
+                  : h("span", { class: "sin-foto" }, "—"),
+                h("span", { style: "flex:1;text-align:left", text: p.name })
+              ]
+            )
+          );
+        });
+      }
+      sugerencias.hidden = false;
+    }
+
+    buscador.addEventListener("input", pintarSugerencias);
+    buscador.addEventListener("blur", function () {
+      // Se espera un momento: sin esto el clic en una sugerencia nunca llega,
+      // porque el blur la borra antes.
+      setTimeout(function () { sugerencias.hidden = true; }, 160);
+    });
+    buscador.addEventListener("focus", pintarSugerencias);
+
+    pintarLista();
+
+    var envoltorio = h("div", { class: "campo" }, [
+      h("span", {
+        class: "pista",
+        style: "margin:0 0 9px",
+        text: "Se muestran en la ficha, en el orden de esta lista. Para reordenar: Alt + ↑ / ↓ sobre el botón de quitar."
+      }),
+      lista,
+      h("div", { style: "position:relative;margin-top:12px" }, [buscador, sugerencias])
+    ]);
+
+    envoltorio.leer = function () {
+      return elegidos.filter(function (r) { return porId[r.id]; });
+    };
+    return envoltorio;
+  }
+
+  /* --------------------------------------------------------------- */
   /* Confirmacion                                                     */
   /* --------------------------------------------------------------- */
   function confirmarBorrado(queCosa) {
@@ -699,6 +865,7 @@
     listaEditable: listaEditable,
     selectorImagen: selectorImagen,
     galeriaImagenes: galeriaImagenes,
+    selectorProductos: selectorProductos,
     subirArchivo: subirArchivo,
     urlImagen: urlImagen,
     confirmarBorrado: confirmarBorrado,

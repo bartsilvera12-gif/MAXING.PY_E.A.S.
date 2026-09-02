@@ -5,7 +5,16 @@
   "rewrites": [
     { "source": "/politicadeprivacidad", "destination": "/politicadeprivacidad.html" },
     { "source": "/admin", "destination": "/admin/index.html" },
-    { "source": "/admin/login", "destination": "/admin/login.html" }
+    { "source": "/admin/login", "destination": "/admin/login.html" },
+
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+
+    { "source": "/productos", "destination": "/index.html" },
+    { "source": "/productos/:slug", "destination": "/index.html" },
+    { "source": "/categorias/:slug", "destination": "/index.html" },
+    { "source": "/nosotros", "destination": "/index.html" },
+    { "source": "/favoritos", "destination": "/index.html" },
+    { "source": "/lista-de-consulta", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -14,6 +23,13 @@
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
         { "key": "Referrer-Policy", "value": "same-origin" },
         { "key": "X-Frame-Options", "value": "DENY" }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=3600" }
       ]
     }
   ]

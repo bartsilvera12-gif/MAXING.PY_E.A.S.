@@ -275,11 +275,19 @@
     var features = [];
     var specs = [];
     var galeria = [];
+    var relacionados = [];
+
+    // Catalogo liviano para el buscador de relacionados: solo lo necesario
+    // para listar y reconocer un producto, no la ficha entera.
+    var catalogoLiviano = (await sb
+      .from("products")
+      .select("id, name, sku, price, main_image_url")
+      .order("name")).data || [];
 
     if (id) {
       var r = await sb
         .from("products")
-        .select("*, product_categories(category_id), product_features(feature, sort_order), product_specs(spec_key, spec_value, sort_order), product_images(image_url, sort_order)")
+        .select("*, product_categories(category_id), product_features(feature, sort_order), product_specs(spec_key, spec_value, sort_order), product_images(image_url, sort_order), product_relations!product_relations_product_id_fkey(related_product_id, relation_type, sort_order)")
         .eq("id", id)
         .single();
       if (r.error) {
@@ -305,6 +313,9 @@
       if (p.main_image_url && galeria.indexOf(p.main_image_url) === -1) {
         galeria.unshift(p.main_image_url);
       }
+      relacionados = (p.product_relations || [])
+        .sort(function (a, b) { return a.sort_order - b.sort_order; })
+        .map(function (x) { return { id: x.related_product_id, tipo: x.relation_type }; });
     }
 
     /* ---- controles ---- */
@@ -422,6 +433,28 @@
 
     var swPublicado = UI.interruptor("Publicado en el sitio", p.is_published);
 
+    // --- SEO de la ficha ---
+    var fMetaTitulo = UI.campo({
+      label: "Título SEO", valor: p.meta_title,
+      pista: "Vacío: se arma con la marca y el nombre."
+    });
+    var fMetaDesc = UI.campo({ label: "Descripción SEO", tipo: "textarea", filas: 3, valor: p.meta_description });
+    var fCanonica = UI.campo({
+      label: "URL canónica", tipo: "url", valor: p.canonical_url,
+      pista: "Vacío: se usa https://maxing.py/productos/" + (p.slug || "<slug>")
+    });
+    var fOgTitulo = UI.campo({ label: "Título al compartir", valor: p.og_title });
+    var fOgDesc = UI.campo({ label: "Descripción al compartir", tipo: "textarea", filas: 2, valor: p.og_description });
+    var fOgImagen = UI.selectorImagen({ label: "Imagen al compartir", valor: p.og_image_url, carpeta: "products" });
+
+    // --- Productos relacionados ---
+    var fRelacionados = UI.selectorProductos({
+      valores: relacionados,
+      // El propio producto no puede relacionarse consigo mismo.
+      excluir: id,
+      catalogo: catalogoLiviano
+    });
+
 
     refrescarOferta();
 
@@ -451,8 +484,16 @@
         fDesc, fFeatures, fSpecs
       ]),
       h("fieldset", { class: "bloque" }, [
+        h("legend", null, "Productos relacionados"),
+        fRelacionados
+      ]),
+      h("fieldset", { class: "bloque" }, [
         h("legend", null, "Publicación"),
         swPublicado
+      ]),
+      h("fieldset", { class: "bloque" }, [
+        h("legend", null, "SEO"),
+        fMetaTitulo, fMetaDesc, fCanonica, fOgTitulo, fOgDesc, fOgImagen
       ])
     ];
 
@@ -508,10 +549,13 @@
         // es lo que hay que describir en una foto de producto.
         image_alt: null,
         is_published: swPublicado.control.checked,
-        sort_order: Number(fOrden.control.value) || 0
-        // El SEO del producto no se pide: el sitio arma el titulo con la marca
-        // y el nombre, que para 24 productos alcanza. Los campos de la base
-        // siguen ahi por si algun dia hace falta afinar alguno a mano.
+        sort_order: Number(fOrden.control.value) || 0,
+        meta_title: fMetaTitulo.control.value.trim() || null,
+        meta_description: fMetaDesc.control.value.trim() || null,
+        canonical_url: fCanonica.control.value.trim() || null,
+        og_title: fOgTitulo.control.value.trim() || null,
+        og_description: fOgDesc.control.value.trim() || null,
+        og_image_url: fOgImagen.leer()
       };
 
       if (!datos.name) { UI.noti("Falta el nombre.", "error"); fNombre.control.focus(); return; }
@@ -607,6 +651,25 @@
             })
           );
           if (ri.error) throw ri.error;
+        }
+
+        // Productos relacionados. Se reemplaza la lista entera, igual que las
+        // demás relaciones: son pocas filas por producto.
+        await sb.from("product_relations").delete().eq("product_id", idProd);
+        var rels = fRelacionados.leer();
+        if (rels.length) {
+          var rr = await sb.from("product_relations").insert(
+            rels.map(function (x, n) {
+              return {
+                product_id: idProd,
+                related_product_id: x.id,
+                relation_type: x.tipo || "related",
+                sort_order: n + 1,
+                is_active: true
+              };
+            })
+          );
+          if (rr.error) throw rr.error;
         }
 
         UI.cerrarCajon();

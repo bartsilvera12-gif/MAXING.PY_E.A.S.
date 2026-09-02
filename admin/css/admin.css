@@ -1435,3 +1435,88 @@ fieldset.bloque legend {
   background: var(--acento-velo);
   border-top: 1px solid #cbeac8;
 }
+
+/* ------------------------------------------------------------------ */
+/* Productos relacionados                                              */
+/* ------------------------------------------------------------------ */
+.lista-rel {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.rel-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 9px;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-chico);
+  background: var(--blanco);
+}
+
+.rel-item .miniatura {
+  width: 34px;
+  height: 34px;
+}
+
+/* Sugerencias del buscador: flotan sobre el formulario para no empujarlo
+   hacia abajo cada vez que se escribe. */
+.sugerencias {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 5;
+  background: var(--blanco);
+  border: 1px solid var(--linea);
+  border-radius: var(--r-chico);
+  box-shadow: var(--sombra);
+  overflow: hidden;
+  max-height: 268px;
+  overflow-y: auto;
+}
+
+.sug-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 1px solid var(--linea-suave);
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--tinta);
+}
+
+.sug-item:last-child {
+  border-bottom: 0;
+}
+
+.sug-item:hover {
+  background: var(--acento-velo);
+}
+
+.sug-item img,
+.sug-item .sin-foto {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  border: 1px solid var(--linea);
+  object-fit: contain;
+  background: var(--humo);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: #b8beb8;
+}
+
+.sug-vacia {
+  padding: 10px;
+  font-size: 12.5px;
+  color: var(--gris);
+}

@@ -24,12 +24,13 @@
   var SELECT_PRODUCTOS = [
     "id, slug, sku, name, short_spec, description, price, old_price",
     "is_on_sale, discount_percent, stock_status, main_image_url, image_alt",
-    "meta_title, meta_description",
+    "meta_title, meta_description, canonical_url, og_title, og_description, og_image_url",
     "is_featured, sort_order",
     "brand:brands(id, slug, name, logo_url)",
     "product_categories(category:categories(slug, name))",
     "product_features(feature, sort_order)",
-    "product_images(image_url, alt_text, sort_order)"
+    "product_images(image_url, alt_text, sort_order)",
+    "relaciones:product_relations!product_relations_product_id_fkey(related_product_id, relation_type, sort_order)"
   ].join(", ");
 
   function porOrden(a, b) {
@@ -83,10 +84,19 @@
       foto: f.main_image_url ? db.imagen(f.main_image_url) : "",
       img: f.image_alt || f.name || "",
       galeria: galeria,
+      // Solo los ids: los productos completos ya vienen en la misma carga, y
+      // se resuelven contra el indice para no pedirlos de nuevo.
+      relacionados: (f.relaciones || []).slice().sort(porOrden).map(function (r) {
+        return { id: r.related_product_id, tipo: r.relation_type };
+      }),
       desc: desc,
       features: features,
       metaTitulo: f.meta_title || "",
       metaDescripcion: f.meta_description || "",
+      canonica: f.canonical_url || "",
+      ogTitulo: f.og_title || "",
+      ogDescripcion: f.og_description || "",
+      ogImagen: f.og_image_url || "",
       destacado: !!f.is_featured,
       orden: f.sort_order || 0
     };
@@ -102,6 +112,9 @@
       icono: f.icon_svg || "",
       color: f.color || "#40DF36",
       ink: f.ink_color || "#24801C",
+      seoTitulo: f.seo_title || "",
+      seoDescripcion: f.seo_description || "",
+      canonica: f.canonical_url || "",
       img: "foto: " + f.name
     };
   }
@@ -130,7 +143,7 @@
     cargar: function () {
       return Promise.all([
         db.from("products").select(SELECT_PRODUCTOS).eq("is_published", true).order("sort_order"),
-        db.from("categories").select("id, slug, name, short_description, image_url, icon_svg, color, ink_color, sort_order").eq("is_active", true).order("sort_order"),
+        db.from("categories").select("id, slug, name, short_description, image_url, icon_svg, color, ink_color, sort_order, seo_title, seo_description, canonical_url").eq("is_active", true).order("sort_order"),
         db.from("brands").select("id, slug, name, logo_url, sort_order").eq("is_active", true).order("sort_order"),
         db.from("collections").select("id, slug, name, description, anchor_id, is_automatic, auto_rule, max_items, sort_order, product_collections(product_id, sort_order)").eq("is_active", true).order("sort_order"),
         db.from("hero_slides").select("*").eq("is_active", true).order("sort_order"),
@@ -139,7 +152,9 @@
         db.from("footer_items").select("*").eq("is_active", true).order("sort_order"),
         db.from("social_links").select("*").eq("is_active", true).order("sort_order"),
         db.from("site_settings").select("key, value, value_type, group_key"),
-        db.from("seo_pages").select("*")
+        db.from("seo_pages").select("*"),
+        db.from("faq_categories").select("id, slug, name, description, sort_order").eq("is_active", true).order("sort_order"),
+        db.from("faqs").select("id, faq_category_id, question, answer, sort_order, faq_product_categories(category_id), faq_products(product_id)").eq("is_active", true).order("sort_order")
       ]).then(function (r) {
         // Si falla la consulta de productos no hay sitio que mostrar; el
         // resto degrada a vacio sin romper la pagina.
@@ -198,7 +213,22 @@
           pie: pie,
           redes: redes,
           ajustes: armarAjustes(r[9].data),
-          seo: seo
+          seo: seo,
+          temasFaq: r[11].data || [],
+          // Una pregunta sin respuesta no se muestra: RLS ya las filtra, esto
+          // cubre el caso de un espacio en blanco.
+          faqs: (r[12].data || []).filter(function (f) {
+            return f.answer && f.answer.trim();
+          }).map(function (f) {
+            return {
+              id: f.id,
+              tema: f.faq_category_id,
+              question: f.question,
+              answer: f.answer,
+              categorias: (f.faq_product_categories || []).map(function (x) { return x.category_id; }),
+              productos: (f.faq_products || []).map(function (x) { return x.product_id; })
+            };
+          })
         };
       });
     },

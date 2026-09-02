@@ -50,7 +50,17 @@
       { k: "ink_color", label: "Color del texto", tipo: "color", grupo: "Apariencia" },
 
       { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },
-      { k: "is_active", label: "Categoría activa", tipo: "switch", grupo: "Publicación" }
+      { k: "is_active", label: "Categoría activa", tipo: "switch", grupo: "Publicación" },
+
+      {
+        k: "seo_title", label: "Título SEO", grupo: "SEO",
+        pista: "Vacío: se usa “<nombre> — MAXING.py”."
+      },
+      { k: "seo_description", label: "Descripción SEO", tipo: "textarea", filas: 3, grupo: "SEO" },
+      {
+        k: "canonical_url", label: "URL canónica", tipo: "url", grupo: "SEO",
+        pista: "Vacío: se usa https://maxing.py/categorias/<slug>"
+      }
     ],
 
     validar: function (d) {
