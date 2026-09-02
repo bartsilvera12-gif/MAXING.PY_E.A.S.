@@ -15,8 +15,11 @@
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
 
     { "source": "/productos", "destination": "/index.html" },
+    { "source": "/categorias", "destination": "/index.html" },
+    { "source": "/marcas", "destination": "/index.html" },
     { "source": "/productos/:slug", "destination": "/api/pagina?tipo=producto&slug=:slug" },
     { "source": "/categorias/:slug", "destination": "/api/pagina?tipo=categoria&slug=:slug" },
+    { "source": "/marcas/:slug", "destination": "/api/pagina?tipo=marca&slug=:slug" },
     { "source": "/nosotros", "destination": "/index.html" },
     { "source": "/favoritos", "destination": "/index.html" },
     { "source": "/lista-de-consulta", "destination": "/index.html" }

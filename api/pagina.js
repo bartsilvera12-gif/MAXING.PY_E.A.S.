@@ -341,6 +341,48 @@ async function categoria(slug) {
   };
 }
 
+async function marca(slug) {
+  // "*" en vez de la lista de columnas: si esto se despliega antes de correr
+  // la migracion 017, pedir una columna que no existe devuelve un error y la
+  // ficha se quedaria sin metadata.
+  const filas = await traer(
+    "/brands?select=*&slug=eq." + encodeURIComponent(slug) +
+    "&is_active=eq.true&limit=1"
+  );
+  const b = filas && filas[0];
+  if (!b) return null;
+
+  const url = b.canonical_url || SITIO + "/marcas/" + b.slug;
+
+  return {
+    tipo: "website",
+    // "Productos MSI — MAXING.py" dice de qué es la página sin repetir la
+    // palabra tres veces, que es lo que un buscador penaliza.
+    titulo: b.seo_title || "Productos " + b.name + " — MAXING.py",
+    descripcion: recortar(
+      b.seo_description || b.description ||
+        "Conocé los productos " + b.name + " disponibles en MAXING.py. Consultanos por WhatsApp.",
+      200
+    ),
+    canonica: url,
+    // El logo suele ser un PNG chico con fondo transparente: sirve, pero si
+    // la marca tiene una imagen propia para compartir, se prefiere esa.
+    imagen: imagenAbsoluta(b.og_image_url) || imagenAbsoluta(b.logo_url),
+    imagenAlt: b.name,
+    grafo: [
+      {
+        "@type": "BreadcrumbList",
+        "@id": SITIO + "/marcas/" + b.slug + "#breadcrumb",
+        itemListElement: [
+          MIGA_INICIO,
+          MIGA_PRODUCTOS,
+          { "@type": "ListItem", position: 3, name: b.name, item: SITIO + "/marcas/" + b.slug }
+        ]
+      }
+    ]
+  };
+}
+
 /* ------------------------------------------------------------------ */
 
 export default async function handler(req, res) {
@@ -361,7 +403,12 @@ export default async function handler(req, res) {
 
   let datos = null;
   try {
-    if (slug) datos = tipo === "categoria" ? await categoria(slug) : await producto(slug);
+    if (slug) {
+      datos =
+        tipo === "categoria" ? await categoria(slug)
+        : tipo === "marca" ? await marca(slug)
+        : await producto(slug);
+    }
   } catch (e) {
     // Si Supabase no responde se sirve la página genérica: el visitante ve
     // el sitio igual y el JavaScript reintenta por su cuenta. Un 500 acá

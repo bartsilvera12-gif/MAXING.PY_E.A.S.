@@ -61,6 +61,7 @@
   // Se cargan una vez y se reusan para los selectores.
   var temas = [];
   var categorias = [];
+  var catalogo = [];
 
   crudSimple({
     clave: "faqs",
@@ -76,6 +77,12 @@
     preparar: async function (app) {
       temas = (await sb.from("faq_categories").select("id, name").order("sort_order")).data || [];
       categorias = await app.categorias();
+      // Catalogo liviano para el buscador: lo justo para reconocer un
+      // producto y poder buscarlo por nombre, codigo o marca.
+      catalogo = (await sb
+        .from("products")
+        .select("id, name, sku, price, main_image_url, brand:brands(name)")
+        .order("name")).data || [];
     },
     select: "*, faq_product_categories(category_id), faq_products(product_id)",
     orden: ["sort_order"],
@@ -140,7 +147,8 @@
       { k: "is_active", label: "Pregunta activa", tipo: "switch", grupo: "Publicación" }
     ],
 
-    // Las categorías del catálogo en las que se muestra esta pregunta.
+    // Dónde se muestra la pregunta: en el inicio, en unas categorías o en
+    // unos productos concretos.
     extras: function (fila) {
       var elegidas = ((fila && fila.faq_product_categories) || []).map(function (x) {
         return x.category_id;
@@ -153,20 +161,41 @@
         casillas.appendChild(h("label", { class: "casilla" }, [input, c.name]));
       });
 
+      // Productos puntuales. Sin motivo: acá no hay tipos de relación, solo
+      // "esta pregunta se muestra en esta ficha".
+      var elegidos = ((fila && fila.faq_products) || []).map(function (x) {
+        return { id: x.product_id, tipo: "related" };
+      });
+      var selProductos = UI.selectorProductos({
+        valores: elegidos,
+        catalogo: catalogo,
+        sinTipos: true,
+        vacio: "Ningún producto en particular."
+      });
+
       var nodo = h("fieldset", { class: "bloque" }, [
         h("legend", null, "Dónde se muestra"),
         h("span", {
           class: "pista",
           style: "margin:0 0 10px",
-          text: "Sin marcar ninguna, la pregunta es general y sale en el inicio. Marcando categorías, aparece solo en ellas."
+          text:
+            "Sin marcar nada, la pregunta es general y sale en el inicio. " +
+            "Marcando categorías aparece en sus listados y en las fichas de sus productos. " +
+            "Eligiendo productos, solo en esas fichas."
         }),
-        casillas
+        h("span", { class: "pista", style: "margin:0 0 6px;font-weight:600", text: "Categorías" }),
+        casillas,
+        h("span", { class: "pista", style: "margin:14px 0 6px;font-weight:600", text: "Productos puntuales" }),
+        selProductos
       ]);
 
       nodo.leer = function () {
-        return Array.prototype.slice
-          .call(casillas.querySelectorAll("input:checked"))
-          .map(function (x) { return x.value; });
+        return {
+          categorias: Array.prototype.slice
+            .call(casillas.querySelectorAll("input:checked"))
+            .map(function (x) { return x.value; }),
+          productos: selProductos.leer().map(function (r) { return r.id; })
+        };
       };
       return nodo;
     },
@@ -175,17 +204,28 @@
       var id = fila ? fila.id : r.data && r.data.id;
       if (!id || !extras || !extras.leer) return;
 
-      // Se reemplaza la lista entera: son pocas filas y evita calcular altas
-      // y bajas por separado.
+      // Se reemplazan las dos listas enteras: son pocas filas y evita calcular
+      // altas y bajas por separado.
+      var elegido = extras.leer();
+
       await sb.from("faq_product_categories").delete().eq("faq_id", id);
-      var elegidas = extras.leer();
-      if (elegidas.length) {
+      if (elegido.categorias.length) {
         var ins = await sb.from("faq_product_categories").insert(
-          elegidas.map(function (cid) {
+          elegido.categorias.map(function (cid) {
             return { faq_id: id, category_id: cid };
           })
         );
         if (ins.error) throw ins.error;
+      }
+
+      await sb.from("faq_products").delete().eq("faq_id", id);
+      if (elegido.productos.length) {
+        var insP = await sb.from("faq_products").insert(
+          elegido.productos.map(function (pid) {
+            return { faq_id: id, product_id: pid };
+          })
+        );
+        if (insP.error) throw insP.error;
       }
     },
 

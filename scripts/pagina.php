@@ -307,6 +307,41 @@ function mx_categoria($slug) {
     );
 }
 
+function mx_marca($slug) {
+    global $SITIO;
+    // "*" y no la lista de columnas: si esto se sube antes de correr la
+    // migracion 017, pedir una columna inexistente devolveria un error.
+    $filas = mx_traer('/brands?select=*&slug=eq.' . rawurlencode($slug)
+        . '&is_active=eq.true&limit=1');
+    if (!$filas || !isset($filas[0])) return null;
+    $b = $filas[0];
+
+    $url = !empty($b['canonical_url']) ? $b['canonical_url'] : $SITIO . '/marcas/' . $b['slug'];
+    $desc = !empty($b['seo_description']) ? $b['seo_description']
+          : (!empty($b['description']) ? $b['description']
+          : 'Conocé los productos ' . $b['name'] . ' disponibles en MAXING.py. Consultanos por WhatsApp.');
+    $img = mx_imagen($b['og_image_url']);
+    if ($img === '') $img = mx_imagen($b['logo_url']);
+
+    return array(
+        'tipo'        => 'website',
+        'titulo'      => !empty($b['seo_title']) ? $b['seo_title'] : 'Productos ' . $b['name'] . ' — MAXING.py',
+        'descripcion' => mx_recortar($desc, 200),
+        'canonica'    => $url,
+        'imagen'      => $img,
+        'imagenAlt'   => $b['name'],
+        'grafo'       => array(
+            array('@type' => 'BreadcrumbList',
+                  '@id'   => $SITIO . '/marcas/' . $b['slug'] . '#breadcrumb',
+                  'itemListElement' => array(
+                      array('@type' => 'ListItem', 'position' => 1, 'name' => 'Inicio',    'item' => $SITIO . '/'),
+                      array('@type' => 'ListItem', 'position' => 2, 'name' => 'Productos', 'item' => $SITIO . '/productos'),
+                      array('@type' => 'ListItem', 'position' => 3, 'name' => $b['name'],  'item' => $SITIO . '/marcas/' . $b['slug'])
+                  ))
+        )
+    );
+}
+
 /* ------------------------------------------------------------------ */
 
 $html = @file_get_contents($RUTA_HTML);
@@ -324,7 +359,9 @@ $slug = isset($_GET['slug']) ? trim($_GET['slug']) : '';
 $datos = null;
 try {
     if ($slug !== '') {
-        $datos = ($tipo === 'categoria') ? mx_categoria($slug) : mx_producto($slug);
+        if ($tipo === 'categoria')   $datos = mx_categoria($slug);
+        elseif ($tipo === 'marca')  $datos = mx_marca($slug);
+        else                        $datos = mx_producto($slug);
     }
 } catch (Throwable $e) {
     // Si algo falla se sirve la página genérica: el visitante ve el sitio

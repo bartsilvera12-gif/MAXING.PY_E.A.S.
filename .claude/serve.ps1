@@ -54,7 +54,7 @@ while ($listener.IsListening) {
     # que apunta devolvia el HTML de la pagina en lugar de la imagen. Apache y
     # Vercel hacen lo mismo: sirven el archivo si existe y recien despues
     # aplican el rewrite.
-    $rutasApp = '^/(productos|categorias)(/|$)|^/(nosotros|favoritos|lista-de-consulta)$'
+    $rutasApp = '^/(productos|categorias|marcas)(/|$)|^/(nosotros|favoritos|lista-de-consulta)$'
     if ($ruta -match $rutasApp) {
       $candidatos += $ruta
       $candidatos += "/index.html"

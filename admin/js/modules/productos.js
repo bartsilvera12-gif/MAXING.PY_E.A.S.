@@ -281,7 +281,7 @@
     // para listar y reconocer un producto, no la ficha entera.
     var catalogoLiviano = (await sb
       .from("products")
-      .select("id, name, sku, price, main_image_url")
+      .select("id, name, sku, price, main_image_url, brand:brands(name)")
       .order("name")).data || [];
 
     if (id) {
@@ -479,6 +479,13 @@
       ]),
       h("fieldset", { class: "bloque" }, [
         h("legend", null, "Productos relacionados"),
+        h("span", {
+          class: "pista",
+          style: "margin:0 0 10px",
+          text:
+            "La ficha muestra un bloque por tipo. Lo que elijas al lado de cada " +
+            "producto es el título de la sección donde va a aparecer."
+        }),
         fRelacionados
       ]),
       h("fieldset", { class: "bloque" }, [

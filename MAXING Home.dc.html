@@ -962,10 +962,18 @@ article:hover button { filter: brightness(1.08); }
 <main>
   <div style="max-width:1320px;margin:0 auto;padding:22px 24px 0">
     <nav aria-label="Ruta de navegación" style="display:flex;gap:8px;font-size:12.5px;font-weight:600;color:#5C6862">
-      <a href="#" onClick="{{ goHome }}">Inicio</a><span>/</span><span style="color:#171717">Productos</span>
+      <a href="#" onClick="{{ goHome }}">Inicio</a><span>/</span><a href="#" onClick="{{ goCatalog }}">Productos</a><span>/</span><span style="color:#171717">{{ catMiga }}</span>
     </nav>
-    <h1 style="margin:18px 0 8px;font-size:clamp(28px,3.4vw,42px);font-weight:800;letter-spacing:-0.03em;color:#000000">Productos de tecnología e informática</h1>
-    <p style="margin:0;max-width:70ch;font-size:15px;font-weight:500;line-height:1.6;color:#5C6862">Celulares, notebooks, gaming, monitores, TV, audio, periféricos y accesorios. Filtrá por categoría, marca y precio.</p>
+    <!-- La misma cabecera sirve al catálogo completo, a una categoría y a una
+         marca. En la página de una marca se antepone su logo: es lo que la
+         hace reconocible de un vistazo sin cambiar el diseño. -->
+    <div style="display:flex;align-items:center;gap:16px;margin:18px 0 8px">
+      <sc-if value="{{ hayLogoMarca }}" hint-placeholder-val="{{ false }}">
+        <img src="{{ logoMarca }}" alt="" loading="lazy" style="flex:none;width:64px;height:64px;object-fit:contain;border:1px solid #E8E8E8;border-radius:12px;padding:8px;background:#FFFFFF">
+      </sc-if>
+      <h1 style="margin:0;font-size:clamp(28px,3.4vw,42px);font-weight:800;letter-spacing:-0.03em;color:#000000">{{ catTitulo }}</h1>
+    </div>
+    <p style="margin:0;max-width:70ch;font-size:15px;font-weight:500;line-height:1.6;color:#5C6862">{{ catBajada }}</p>
   </div>
   <div data-rb="cat-layout" style="max-width:1320px;margin:0 auto;padding:28px 24px clamp(56px,6vw,88px)">
     <!-- En telefono los filtros van plegados: desplegados empujan el primer
@@ -1144,12 +1152,83 @@ article:hover button { filter: brightness(1.08); }
       </div>
     </div>
   </div>
+<!-- Tres bloques separados, uno por tipo de relación, y cada uno se enciende
+     solo si tiene algo. Antes era una sola lista con el título cambiado: un
+     mouse y otra notebook aparecían mezclados bajo el mismo encabezado, así
+     que quien miraba no sabía si le estaban ofreciendo un reemplazo o un
+     accesorio. -->
 <sc-if value="{{ hayRelacionados }}" hint-placeholder-val="{{ true }}">
   <section aria-labelledby="rel-h" style="border-top:1px solid #E8E8E8">
     <div style="max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,72px) 24px">
-      <h2 id="rel-h" style="margin:0 0 26px;font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-0.03em;color:#000000">{{ tituloRelacionados }}</h2>
+      <h2 id="rel-h" style="margin:0 0 26px;font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-0.03em;color:#000000">También te puede interesar</h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:16px">
         <sc-for list="{{ related }}" as="p" hint-placeholder-count="4">
+          <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden" style-hover="border-color:#171717">
+            <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center">
+              <sc-if value="{{ p.foto }}" hint-placeholder-val="{{ true }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background:#FFFFFF"><img src="{{ p.foto }}" alt="{{ p.name }}" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:8%"></div>
+              </sc-if>
+              <sc-if value="{{ p.sinFoto }}" hint-placeholder-val="{{ false }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
+                <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
+              </sc-if>
+              <button type="button" onClick="{{ p.toggleFav }}" aria-label="{{ p.favLabel }}" title="{{ p.favLabel }}" style="position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#E0245E;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="{{ p.favColor }}" stroke-width="1.9" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a3.9 3.9 0 0 1 7-2.4A3.9 3.9 0 0 1 19 11c0 4.6-7 9-7 9z"></path></svg></button>
+              <button type="button" onClick="{{ p.addCart }}" aria-label="{{ p.addLabel }}" title="{{ p.addLabel }}" style="position:absolute;top:10px;right:52px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8F19" stroke-width="1.9" aria-hidden="true"><path d="M6 8h12l-1.2 11H7.2L6 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg></button>
+            </div>
+            <div style="padding:16px;display:flex;flex-direction:column;gap:6px;flex:1">
+              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ p.brand }}</span>
+              <h3 style="margin:0;font-size:15px;font-weight:700;line-height:1.3;color:#171717">{{ p.name }}</h3>
+              <div style="margin-top:auto;padding-top:14px;font-size:18px;font-weight:800;color:#000000">{{ p.price }}</div>
+              <button type="button" onClick="{{ p.open }}" style="margin-top:12px;height:44px;border:1px solid #40DF36;background:#40DF36;color:#000000;font-size:13.5px;font-weight:700;border-radius:9px;cursor:pointer;transition:background 200ms,color 200ms,border-color 200ms" style-hover="filter:brightness(0.93)">Ver producto</button>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+<!-- Lo que se suma a lo que ya está mirando: el mouse de la notebook, el
+     cable del monitor. -->
+<sc-if value="{{ hayComplementos }}" hint-placeholder-val="{{ true }}">
+  <section aria-labelledby="comp-h" style="border-top:1px solid #E8E8E8">
+    <div style="max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,72px) 24px">
+      <h2 id="comp-h" style="margin:0 0 26px;font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-0.03em;color:#000000">Complementá tu compra</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:16px">
+        <sc-for list="{{ complementarios }}" as="p" hint-placeholder-count="4">
+          <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden" style-hover="border-color:#171717">
+            <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center">
+              <sc-if value="{{ p.foto }}" hint-placeholder-val="{{ true }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background:#FFFFFF"><img src="{{ p.foto }}" alt="{{ p.name }}" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:8%"></div>
+              </sc-if>
+              <sc-if value="{{ p.sinFoto }}" hint-placeholder-val="{{ false }}">
+                <div data-rb="zoom" style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#FFFFFF 0 8px,#F0F0F0 8px 16px)"></div>
+                <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5C6862;text-align:center;padding:0 12px">{{ p.img }}</span>
+              </sc-if>
+              <button type="button" onClick="{{ p.toggleFav }}" aria-label="{{ p.favLabel }}" title="{{ p.favLabel }}" style="position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#E0245E;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="{{ p.favColor }}" stroke-width="1.9" aria-hidden="true"><path d="M12 20s-7-4.4-7-9a3.9 3.9 0 0 1 7-2.4A3.9 3.9 0 0 1 19 11c0 4.6-7 9-7 9z"></path></svg></button>
+              <button type="button" onClick="{{ p.addCart }}" aria-label="{{ p.addLabel }}" title="{{ p.addLabel }}" style="position:absolute;top:10px;right:52px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:1px solid #E8E8E8;background:rgba(255,255,255,0.92);border-radius:9px;cursor:pointer;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:#FFFFFF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F8F19" stroke-width="1.9" aria-hidden="true"><path d="M6 8h12l-1.2 11H7.2L6 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg></button>
+            </div>
+            <div style="padding:16px;display:flex;flex-direction:column;gap:6px;flex:1">
+              <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#5C6862">{{ p.brand }}</span>
+              <h3 style="margin:0;font-size:15px;font-weight:700;line-height:1.3;color:#171717">{{ p.name }}</h3>
+              <div style="margin-top:auto;padding-top:14px;font-size:18px;font-weight:800;color:#000000">{{ p.price }}</div>
+              <button type="button" onClick="{{ p.open }}" style="margin-top:12px;height:44px;border:1px solid #40DF36;background:#40DF36;color:#000000;font-size:13.5px;font-weight:700;border-radius:9px;cursor:pointer;transition:background 200ms,color 200ms,border-color 200ms" style-hover="filter:brightness(0.93)">Ver producto</button>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+<!-- Los que en la práctica salen en la misma compra. Por ahora se cargan a
+     mano desde el panel; no hay ningún algoritmo detrás. -->
+<sc-if value="{{ hayJuntos }}" hint-placeholder-val="{{ true }}">
+  <section aria-labelledby="junt-h" style="border-top:1px solid #E8E8E8">
+    <div style="max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,72px) 24px">
+      <h2 id="junt-h" style="margin:0 0 26px;font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-0.03em;color:#000000">Se llevan juntos</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:16px">
+        <sc-for list="{{ juntos }}" as="p" hint-placeholder-count="4">
           <article data-rb="spot" data-rb-reveal style="display:flex;flex-direction:column;border:1px solid #E8E8E8;border-radius:12px;background:#FFFFFF;overflow:hidden" style-hover="border-color:#171717">
             <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;display:grid;place-items:center">
               <sc-if value="{{ p.foto }}" hint-placeholder-val="{{ true }}">
@@ -1578,14 +1657,25 @@ class Component extends DCLogic {
       }
     }
 
-    if (s.page === "catalog" && s.fCat.length === 1) {
-      const c = CAT.filter((x) => x.name === s.fCat[0])[0];
-      if (c) {
-        titulo = c.seoTitulo || c.name + " — MAXING.py";
-        descripcion = c.seoDescripcion || c.count || descripcion;
-        if (c.canonica) canonica = c.canonica;
-        if (c.foto) imagen = this.absoluta(c.foto);
-      }
+    const cat = this.categoriaDe(s);
+    if (cat) {
+      titulo = cat.seoTitulo || cat.name + " — MAXING.py";
+      descripcion = cat.seoDescripcion || cat.count || descripcion;
+      if (cat.canonica) canonica = cat.canonica;
+      if (cat.foto) imagen = this.absoluta(cat.foto);
+    }
+
+    const marca = this.marcaDe(s);
+    if (marca) {
+      // "Productos MSI — MAXING.py" dice de que es la pagina sin repetir la
+      // palabra tres veces, que es lo que un buscador penaliza.
+      titulo = marca.seoTitulo || "Productos " + marca.name + " — MAXING.py";
+      descripcion =
+        marca.seoDescripcion ||
+        marca.descripcion ||
+        "Conocé los productos " + marca.name + " disponibles en MAXING.py. Consultanos por WhatsApp.";
+      if (marca.canonica) canonica = marca.canonica;
+      imagen = this.absoluta(marca.ogImagen || marca.logo);
     }
 
     const ruta = this.rutaDe(s);
@@ -1658,9 +1748,14 @@ class Component extends DCLogic {
       migas.push({ "@type": "ListItem", position: 2, name: "Productos", item: SITIO + "/productos" });
     }
 
-    if (s.page === "catalog" && s.fCat.length === 1) {
-      const c = CAT.filter((x) => x.name === s.fCat[0])[0];
-      if (c) migas.push({ "@type": "ListItem", position: 3, name: c.name, item: SITIO + "/categorias/" + c.slug });
+    const catMiga = this.categoriaDe(s);
+    if (catMiga) {
+      migas.push({ "@type": "ListItem", position: 3, name: catMiga.name, item: SITIO + "/categorias/" + catMiga.slug });
+    }
+
+    const marcaMiga = this.marcaDe(s);
+    if (marcaMiga) {
+      migas.push({ "@type": "ListItem", position: 3, name: marcaMiga.name, item: SITIO + "/marcas/" + marcaMiga.slug });
     }
 
     if (s.page === "product") {
@@ -1747,6 +1842,17 @@ class Component extends DCLogic {
   // el inicio. Las que sí los tienen aparecen solo donde corresponde: una
   // pregunta sobre batería en la categoría Notebooks, una sobre la garantía
   // de un fabricante en sus productos.
+  // Qué preguntas corresponden a la pantalla abierta.
+  //
+  // La regla es de lo particular a lo general:
+  //   · una pregunta asignada a productos se muestra SOLO en esas fichas;
+  //   · una asignada a categorías, en el listado de esas categorías y en las
+  //     fichas de sus productos;
+  //   · una sin nada asignado es general y vive en el inicio.
+  //
+  // En una ficha pueden coincidir las dos primeras. Entonces van primero las
+  // del producto, que son las más específicas, y después las de su categoría;
+  // una pregunta que entre por los dos caminos aparece una sola vez.
   faqsVisibles() {
     const s = this.state;
     if (!FAQS.length) return [];
@@ -1758,18 +1864,17 @@ class Component extends DCLogic {
       const idsCat = catsDe(p)
         .map((n) => (CAT.filter((c) => c.name === n)[0] || {}).id)
         .filter(Boolean);
-      return FAQS.filter(
+      const delProducto = FAQS.filter((f) => f.productos.indexOf(p.id) !== -1);
+      const deSuCategoria = FAQS.filter(
         (f) =>
-          f.productos.indexOf(p.id) !== -1 ||
+          f.productos.indexOf(p.id) === -1 &&
           f.categorias.some((c) => idsCat.indexOf(c) !== -1)
       );
+      return delProducto.concat(deSuCategoria);
     }
 
-    if (s.page === "catalog" && s.fCat.length === 1) {
-      const c = CAT.filter((x) => x.name === s.fCat[0])[0];
-      if (!c) return [];
-      return FAQS.filter((f) => f.categorias.indexOf(c.id) !== -1);
-    }
+    const cat = this.categoriaDe(s);
+    if (cat) return FAQS.filter((f) => f.categorias.indexOf(cat.id) !== -1);
 
     if (s.page === "home") return FAQS.filter(general);
     return [];
@@ -2186,15 +2291,31 @@ class Component extends DCLogic {
   //
   // La identidad de la URL es el slug, no la posicion en el array: el slug
   // no cambia cuando el admin reordena el catalogo.
+  // La categoria o la marca que describe la pantalla, si es que la describe
+  // una sola. Con otros filtros encima ya no es la pagina de esa categoria ni
+  // de esa marca: es el catalogo filtrado, y se queda en /productos. Se usa
+  // para la URL, para el SEO y para el encabezado, que tienen que decir todos
+  // lo mismo.
+  categoriaDe(s) {
+    if (s.page !== "catalog") return null;
+    const sola = s.fCat.length === 1 && !s.fBrand.length && !s.q.trim();
+    return sola ? CAT.filter((c) => c.name === s.fCat[0])[0] || null : null;
+  }
+
+  marcaDe(s) {
+    if (s.page !== "catalog") return null;
+    const sola = s.fBrand.length === 1 && !s.fCat.length && !s.q.trim();
+    return sola ? MARCAS.filter((m) => m.name === s.fBrand[0])[0] || null : null;
+  }
+
   rutaDe(s) {
     if (s.page === "product" && s.pslug) return "/productos/" + s.pslug;
     if (s.page === "catalog") {
-      // Una sola categoria elegida y sin otros filtros: es la pagina de esa
-      // categoria. Con varios filtros ya no describe una categoria sola, y
-      // se queda en el catalogo general.
-      const sola = s.fCat.length === 1 && !s.fBrand.length && !s.q.trim();
-      const cat = sola ? CAT.filter((c) => c.name === s.fCat[0])[0] : null;
-      return cat ? "/categorias/" + cat.slug : "/productos";
+      const cat = this.categoriaDe(s);
+      if (cat) return "/categorias/" + cat.slug;
+      const marca = this.marcaDe(s);
+      if (marca) return "/marcas/" + marca.slug;
+      return "/productos";
     }
     if (s.page === "nosotros") return "/nosotros";
     if (s.page === "favoritos") return "/favoritos";
@@ -2213,6 +2334,10 @@ class Component extends DCLogic {
       // Categoria que no existe: se abre el catalogo completo en vez de una
       // pantalla vacia.
       return { page: "catalog", fCat: c ? [c.name] : [] };
+    }
+    if ((m = p.match(/^\/marcas\/(.+)$/))) {
+      const b = MARCAS.filter((x) => x.slug === decodeURIComponent(m[1]))[0];
+      return { page: "catalog", fCat: [], fBrand: b ? [b.name] : [] };
     }
     if (p === "/productos") return { page: "catalog", fCat: [] };
     if (p === "/nosotros") return { page: "nosotros" };
@@ -2479,13 +2604,23 @@ class Component extends DCLogic {
 
     // Los relacionados del producto abierto, resueltos contra el indice de
     // publicados: uno despublicado simplemente no aparece.
-    const relacionados = (current.relacionados || [])
-      .map((r) => {
-        const p = POR_ID[r.id];
-        return p ? Object.assign({}, p, { tipoRelacion: r.tipo }) : null;
-      })
-      .filter(Boolean)
-      .slice(0, 4);
+    // Los relacionados del producto abierto, separados por motivo. Cada tipo
+    // ocupa su propio bloque en la ficha: una notebook alternativa y el mouse
+    // que le va no significan lo mismo, y mezclados bajo un solo título
+    // obligaban a adivinar cuál era cuál.
+    //
+    // Se resuelven contra el índice de publicados, así que un producto que se
+    // despublica desaparece solo de las tres listas.
+    const porTipo = (tipo) =>
+      (current.relacionados || [])
+        .filter((r) => (r.tipo || "related") === tipo)
+        .map((r) => POR_ID[r.id])
+        .filter(Boolean)
+        .slice(0, 4);
+
+    const relacionados = porTipo("related");
+    const complementarios = porTipo("complementary");
+    const juntos = porTipo("frequently_bought_together");
 
     const faqsPagina = this.faqsVisibles();
 
@@ -2542,6 +2677,46 @@ class Component extends DCLogic {
       sinCatalogo: listo && PRODUCTS.length === 0,
 
       isHome: hayDatos && s.page === "home", isCatalog: hayDatos && s.page === "catalog", isProduct: hayDatos && s.page === "product",
+
+      // --- Encabezado del catalogo ---
+      // La misma pantalla sirve al catalogo completo, a una categoria y a una
+      // marca. Antes el titulo y la bajada estaban escritos a mano en la
+      // plantilla, asi que la pagina de una categoria decia "Productos de
+      // tecnologia e informatica" igual que todas.
+      ...(() => {
+        const cat = this.categoriaDe(s);
+        const marca = this.marcaDe(s);
+        if (marca) {
+          return {
+            catTitulo: marca.name,
+            catBajada:
+              marca.descripcion ||
+              "Todo lo que tenemos publicado de " + marca.name + ". Consultanos por WhatsApp por cualquiera.",
+            catMiga: marca.name,
+            logoMarca: marca.logo,
+            hayLogoMarca: !!marca.logo
+          };
+        }
+        if (cat) {
+          return {
+            catTitulo: cat.name,
+            // `count` es la bajada corta de la categoria: se llama asi por
+            // como quedo el mapeo original, no porque sea un numero.
+            catBajada: cat.count || "Todo lo que tenemos publicado en " + cat.name + ".",
+            catMiga: cat.name,
+            logoMarca: "",
+            hayLogoMarca: false
+          };
+        }
+        return {
+          catTitulo: "Productos de tecnología e informática",
+          catBajada:
+            "Celulares, notebooks, gaming, monitores, TV, audio, periféricos y accesorios. Filtrá por categoría, marca y precio.",
+          catMiga: "Productos",
+          logoMarca: "",
+          hayLogoMarca: false
+        };
+      })(),
       isFavs: hayDatos && s.page === "favoritos", isCart: hayDatos && s.page === "carrito", isNosotros: hayDatos && s.page === "nosotros",
       goHome: this.go("home"), goCatalog: this.go("catalog"), noop: (e) => e.preventDefault(),
       toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
@@ -2721,9 +2896,10 @@ class Component extends DCLogic {
       // muestra: cuatro productos cualesquiera no son una recomendación.
       related: view(relacionados),
       hayRelacionados: relacionados.length > 0,
-      tituloRelacionados: relacionados.some((p) => p.tipoRelacion === "complementary")
-        ? "Complementá tu compra"
-        : "También te puede interesar",
+      complementarios: view(complementarios),
+      hayComplementos: complementarios.length > 0,
+      juntos: view(juntos),
+      hayJuntos: juntos.length > 0,
 
       // --- Preguntas frecuentes ---
       faqs: faqsPagina.map((f, i) => ({

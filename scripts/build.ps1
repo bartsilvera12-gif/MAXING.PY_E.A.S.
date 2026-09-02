@@ -89,9 +89,10 @@ try {
   $cab = @{ apikey = $anon; Authorization = "Bearer $anon"; 'Accept-Profile' = 'maxingpy' }
   $rest = "$api/rest/v1"
 
-  $productos = Invoke-RestMethod -Uri "$rest/products?select=slug,updated_at&is_published=eq.true&order=updated_at.desc" -Headers $cab -TimeoutSec 25
+  $productos = Invoke-RestMethod -Uri "$rest/products?select=slug,updated_at,brand_id&is_published=eq.true&order=updated_at.desc" -Headers $cab -TimeoutSec 25
   $categorias = Invoke-RestMethod -Uri "$rest/categories?select=id,slug,updated_at&is_active=eq.true&order=sort_order" -Headers $cab -TimeoutSec 25
   $relaciones = Invoke-RestMethod -Uri "$rest/product_categories?select=category_id" -Headers $cab -TimeoutSec 25
+  $marcas = Invoke-RestMethod -Uri "$rest/brands?select=id,slug,updated_at&is_active=eq.true&order=sort_order" -Headers $cab -TimeoutSec 25
 
   # Una categoría sin productos publicados no se muestra en el sitio: mandar
   # al buscador ahí sería mandarlo a una página vacía.
@@ -103,11 +104,23 @@ try {
       $urls.Add((Url "$Sitio/categorias/$($c.slug)" $c.updated_at 'weekly' '0.8'))
     }
   }
+  # Lo mismo con las marcas: una sin productos publicados tendría su página
+  # vacía, así que no se manda al buscador.
+  $conMarca = @{}
+  foreach ($p in $productos) { if ($p.brand_id) { $conMarca[$p.brand_id] = $true } }
+
+  foreach ($b in $marcas) {
+    if ($conMarca.ContainsKey($b.id)) {
+      $urls.Add((Url "$Sitio/marcas/$($b.slug)" $b.updated_at 'weekly' '0.7'))
+    }
+  }
   foreach ($p in $productos) {
     $urls.Add((Url "$Sitio/productos/$($p.slug)" $p.updated_at 'weekly' '0.7'))
   }
 
-  Write-Host "  sitemap: $($urls.Count) URLs ($($productos.Count) productos, $(($categorias | Where-Object { $conProductos.ContainsKey($_.id) }).Count) categorias)"
+  $nCat = ($categorias | Where-Object { $conProductos.ContainsKey($_.id) }).Count
+  $nMar = ($marcas | Where-Object { $conMarca.ContainsKey($_.id) }).Count
+  Write-Host "  sitemap: $($urls.Count) URLs ($($productos.Count) productos, $nCat categorias, $nMar marcas)"
 } catch {
   # Sin conexión queda el sitemap mínimo. Se avisa fuerte porque subir así
   # deja el catálogo entero fuera del buscador.
@@ -165,12 +178,13 @@ Options -Indexes
   # sitio: los lectores de vista previa no ejecutan JavaScript.
   RewriteRule ^productos/([^/]+)/?$ /pagina.php?tipo=producto&slug=$1 [L,QSA]
   RewriteRule ^categorias/([^/]+)/?$ /pagina.php?tipo=categoria&slug=$1 [L,QSA]
+  RewriteRule ^marcas/([^/]+)/?$ /pagina.php?tipo=marca&slug=$1 [L,QSA]
 
   # El resto de las rutas las resuelve index.html leyendo la URL. Van ANTES
   # del corte por carpeta: /productos y /categorias son además las carpetas
   # donde viven las fotos, así que sin esto Apache servía la carpeta en vez
   # de la página y el catálogo daba 404.
-  RewriteRule ^(productos|categorias)/?$ /index.html [L]
+  RewriteRule ^(productos|categorias|marcas)/?$ /index.html [L]
   RewriteRule ^(nosotros|favoritos|lista-de-consulta)/?$ /index.html [L]
 
   # Cualquier otra carpeta real se sirve tal cual.

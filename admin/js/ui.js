@@ -630,17 +630,27 @@
   // Venta cruzada cargada a mano: se busca un producto, se agrega, y queda
   // en la lista con su motivo. El orden de la lista es el orden en que se
   // muestran en la ficha.
+  // Cada motivo se llama igual que el bloque en el que va a salir en la ficha.
+  // Antes decian "Relacionado" y "Complementario", que son correctos pero no
+  // dicen donde termina el producto; con el titulo de la seccion no hay como
+  // equivocarse.
   var MOTIVOS = [
-    { valor: "related", label: "Relacionado" },
-    { valor: "complementary", label: "Complementario" },
+    { valor: "related", label: "También te puede interesar" },
+    { valor: "complementary", label: "Complementá tu compra" },
     { valor: "frequently_bought_together", label: "Se llevan juntos" }
   ];
 
+  // Buscador de productos con lista elegida. Se usa en dos lugares:
+  //   · en un producto, para sus relacionados, donde cada uno lleva un motivo;
+  //   · en una pregunta frecuente, para decir en que fichas se muestra, donde
+  //     el motivo no tiene sentido. Ahi se pasa `sinTipos`.
   function selectorProductos(opciones) {
     // [{ id, tipo }]
     var elegidos = (opciones.valores || []).slice();
     var catalogo = opciones.catalogo || [];
     var excluir = opciones.excluir || null;
+    var sinTipos = !!opciones.sinTipos;
+    var vacio = opciones.vacio || "Todavía no hay productos relacionados.";
 
     var porId = {};
     catalogo.forEach(function (p) { porId[p.id] = p; });
@@ -653,7 +663,7 @@
       vaciar(lista);
 
       if (!elegidos.length) {
-        lista.appendChild(h("p", { class: "pista", style: "margin:0", text: "Todavía no hay productos relacionados." }));
+        lista.appendChild(h("p", { class: "pista", style: "margin:0", text: vacio }));
         return;
       }
 
@@ -661,10 +671,10 @@
         var p = porId[r.id];
         if (!p) return;
 
-        var motivo = h(
+        var motivo = sinTipos ? null : h(
           "select",
           {
-            style: "width:auto;min-width:150px;padding:5px 26px 5px 9px;font-size:12.5px",
+            style: "width:auto;min-width:210px;padding:5px 26px 5px 9px;font-size:12.5px",
             onchange: function (e) { elegidos[i].tipo = e.currentTarget.value; }
           },
           MOTIVOS.map(function (m) {
@@ -729,7 +739,9 @@
           return (
             p.id !== excluir &&
             yaEstan.indexOf(p.id) === -1 &&
-            (p.name + " " + (p.sku || "")).toLowerCase().indexOf(t) !== -1
+            // Nombre, codigo y marca: quien carga una pregunta suele acordarse
+            // de la marca antes que del modelo exacto.
+            (p.name + " " + (p.sku || "") + " " + ((p.brand && p.brand.name) || "")).toLowerCase().indexOf(t) !== -1
           );
         })
         .slice(0, 6);

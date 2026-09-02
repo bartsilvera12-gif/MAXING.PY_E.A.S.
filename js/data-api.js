@@ -143,7 +143,11 @@
       return Promise.all([
         db.from("products").select(SELECT_PRODUCTOS).eq("is_published", true).order("sort_order"),
         db.from("categories").select("id, slug, name, short_description, image_url, icon_svg, color, ink_color, sort_order, seo_title, seo_description, canonical_url").eq("is_active", true).order("sort_order"),
-        db.from("brands").select("id, slug, name, logo_url, sort_order").eq("is_active", true).order("sort_order"),
+        // Con "*" y no con la lista de columnas a proposito: si el sitio se
+        // sube antes de correr la migracion 017, pedir description o seo_title
+        // devolveria un error y se caeria la carga entera. Asi, las columnas
+        // que todavia no existen simplemente no vienen.
+        db.from("brands").select("*").eq("is_active", true).order("sort_order"),
         db.from("collections").select("id, slug, name, description, anchor_id, is_automatic, auto_rule, max_items, sort_order, product_collections(product_id, sort_order)").eq("is_active", true).order("sort_order"),
         db.from("hero_slides").select("*").eq("is_active", true).order("sort_order"),
         db.from("content_sections").select("*").eq("is_visible", true).order("sort_order"),
@@ -201,7 +205,14 @@
               id: f.id,
               slug: f.slug,
               name: f.name,
-              logo: f.logo_url ? db.imagen(f.logo_url) : ""
+              logo: f.logo_url ? db.imagen(f.logo_url) : "",
+              // La marca tiene pagina propia (/marcas/<slug>): necesita su
+              // texto y su SEO, no solo el logo del carrusel.
+              descripcion: f.description || "",
+              seoTitulo: f.seo_title || "",
+              seoDescripcion: f.seo_description || "",
+              canonica: f.canonical_url || "",
+              ogImagen: f.og_image_url ? db.imagen(f.og_image_url) : ""
             };
           }),
           colecciones: r[3].data || [],

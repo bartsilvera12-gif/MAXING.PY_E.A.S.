@@ -52,10 +52,11 @@ function url(loc, fecha, frecuencia, prioridad) {
 
 export default async function handler(req, res) {
   try {
-    const [productos, categorias, relaciones] = await Promise.all([
-      traer("/products?select=slug,updated_at&is_published=eq.true&order=updated_at.desc"),
+    const [productos, categorias, relaciones, marcas] = await Promise.all([
+      traer("/products?select=slug,updated_at,brand_id&is_published=eq.true&order=updated_at.desc"),
       traer("/categories?select=id,slug,updated_at&is_active=eq.true&order=sort_order"),
-      traer("/product_categories?select=category_id")
+      traer("/product_categories?select=category_id"),
+      traer("/brands?select=id,slug,updated_at&is_active=eq.true&order=sort_order")
     ]);
 
     // Una categoría sin productos publicados no se muestra en el sitio, así
@@ -71,6 +72,14 @@ export default async function handler(req, res) {
     categorias
       .filter((c) => conProductos.has(c.id))
       .forEach((c) => partes.push(url(SITIO + "/categorias/" + c.slug, c.updated_at, "weekly", "0.8")));
+
+    // Una marca sin productos publicados tampoco tiene nada que mostrar: su
+    // pagina saldria vacia, asi que no se manda al buscador.
+    const marcasConProductos = new Set(productos.map((p) => p.brand_id).filter(Boolean));
+
+    marcas
+      .filter((b) => marcasConProductos.has(b.id))
+      .forEach((b) => partes.push(url(SITIO + "/marcas/" + b.slug, b.updated_at, "weekly", "0.7")));
 
     productos.forEach((p) =>
       partes.push(url(SITIO + "/productos/" + p.slug, p.updated_at, "weekly", "0.7"))

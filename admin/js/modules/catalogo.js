@@ -8,6 +8,8 @@
   // la pantalla porque es el dato que decide si la categoría se ve o no en el
   // sitio, y desde la lista no había forma de saberlo.
   var conteo = {};
+  // Lo mismo para las marcas: cuántos productos publicados tiene cada una.
+  var porMarca = {};
 
   /* ---------------------------------------------------------------- */
   crudSimple({
@@ -113,9 +115,28 @@
     nota: "En el sitio se muestran las marcas activas que tengan al menos un producto publicado.",
     vacio: "Creá la primera marca.",
 
+    preparar: async function () {
+      var r = await sb.from("products").select("brand_id").eq("is_published", true);
+      porMarca = {};
+      (r.data || []).forEach(function (p) {
+        if (p.brand_id) porMarca[p.brand_id] = (porMarca[p.brand_id] || 0) + 1;
+      });
+    },
+
     columnas: [
       { label: "", render: celda.imagen("logo_url") },
       { label: "Marca", render: celda.principal("name", "slug") },
+      // Una marca sin productos publicados no se muestra en el sitio ni entra
+      // al sitemap. Sin esta columna no había forma de saber cuál.
+      {
+        label: "Productos",
+        clase: "num",
+        render: function (b) {
+          var n = porMarca[b.id] || 0;
+          if (n) return h("span", { style: "font-variant-numeric:tabular-nums", text: String(n) });
+          return h("span", { class: "insignia pendiente", text: "Sin productos" });
+        }
+      },
       { label: "Orden", clase: "num", render: celda.texto("sort_order") },
       { label: "Estado", render: celda.estado("is_active", "Activa", "Oculta") }
     ],
@@ -125,12 +146,32 @@
       {
         k: "slug", label: "Slug", grupo: "Identificación",
         desde: "name",
-        pista: "Se escribe solo desde el nombre.",
+        pista: "Es la dirección de su página: maxingpy.com/marcas/<slug>.",
         placeholder: "msi"
       },
       { k: "logo_url", label: "Logo", tipo: "imagen", carpeta: "brands", grupo: "Identificación" },
+      {
+        k: "description", label: "Descripción", tipo: "textarea", filas: 4, grupo: "Identificación",
+        pista: "El párrafo que encabeza la página de la marca. Vacío: se arma uno solo."
+      },
+
       { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },
-      { k: "is_active", label: "Marca activa", tipo: "switch", grupo: "Publicación" }
+      { k: "is_active", label: "Marca activa", tipo: "switch", grupo: "Publicación" },
+
+      // La marca tiene página propia, así que también tiene su SEO. Se deja a
+      // mano porque acá sí hay algo que decir que el sitio no puede adivinar.
+      {
+        k: "seo_title", label: "Título SEO", grupo: "SEO",
+        pista: "Vacío: se usa “Productos <marca> — MAXING.py”."
+      },
+      {
+        k: "seo_description", label: "Descripción SEO", tipo: "textarea", filas: 3, grupo: "SEO",
+        pista: "Vacío: se usa la descripción de arriba."
+      },
+      {
+        k: "og_image_url", label: "Imagen al compartir", tipo: "imagen", carpeta: "brands", grupo: "SEO",
+        pista: "Vacío: se comparte el logo, que suele quedar chico en WhatsApp."
+      }
     ],
 
     validar: function (d) {
