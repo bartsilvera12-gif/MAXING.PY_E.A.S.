@@ -263,13 +263,15 @@
     var input = h("input", { type: "checkbox" });
     input.checked = !!valor;
     if (onCambio) input.addEventListener("change", function () { onCambio(input.checked); });
-    var el = h("label", { class: "interruptor" }, [
+    // No se le asigna `.control`: en un <label> esa propiedad es de solo
+    // lectura del DOM y asignarla tira TypeError en modo estricto. Tampoco
+    // hace falta, porque el navegador ya devuelve ahi el input anidado, que
+    // es justo el que buscan los que llaman a esta funcion.
+    return h("label", { class: "interruptor" }, [
       input,
       h("span", { class: "pista-sw" }),
       h("span", { class: "texto-sw", text: label })
     ]);
-    el.control = input;
-    return el;
   }
 
   // Lista de textos reordenable: caracteristicas, specs, imagenes.
