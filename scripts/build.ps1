@@ -119,6 +119,11 @@ $sitemap = "<?xml version=`"1.0`" encoding=`"UTF-8`"?>`n<urlset xmlns=`"http://w
            ($urls -join "`n") + "`n</urlset>`n"
 [System.IO.File]::WriteAllText((Join-Path $dist 'sitemap.xml'), $sitemap, (New-Object System.Text.UTF8Encoding $false))
 
+# pagina.php: la contraparte de api/pagina.js para Apache. Genera la metadata
+# de cada ficha y cada categoría del lado del servidor, que es lo único que
+# leen WhatsApp y Facebook. Va en la raíz porque busca index.html al lado.
+Copy-Item (Join-Path $PSScriptRoot 'pagina.php') (Join-Path $dist 'pagina.php') -Force
+
 # ---------------------------------------------------------------------
 # 4. .htaccess
 # ---------------------------------------------------------------------
@@ -131,12 +136,15 @@ $htaccess = @'
 # Traduce los rewrites de vercel.json. El catálogo lo sirve Supabase desde el
 # navegador; acá no corre nada del lado del servidor.
 
+# Sin listados de carpeta: entrar a /categorias mostraba los archivos.
+Options -Indexes
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # Si el archivo o la carpeta existen, se sirven tal cual.
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
+  # Un archivo que existe se sirve tal cual: las fotos de /productos y de
+  # /categorias tienen que ganarle a las rutas de más abajo.
+  RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule ^ - [L]
 
   # Páginas sueltas con ruta amigable.
@@ -144,12 +152,23 @@ $htaccess = @'
   RewriteRule ^admin/login/?$ /admin/login.html [L]
   RewriteRule ^admin/?$ /admin/index.html [L]
 
-  # Rutas de la vidriera: las resuelve index.html leyendo la URL. Cada
-  # producto y cada categoría tienen dirección propia, así que tienen que
-  # funcionar al recargar o al abrirlas desde un enlace compartido.
-  RewriteRule ^productos(/.*)?$ /index.html [L]
-  RewriteRule ^categorias/.+$ /index.html [L]
+  # Fichas y categorías: pasan por pagina.php, que arma la metadata de esa
+  # página antes de mandar el HTML. Es lo que hace que compartir un producto
+  # por WhatsApp muestre su foto y su nombre y no la tarjeta genérica del
+  # sitio: los lectores de vista previa no ejecutan JavaScript.
+  RewriteRule ^productos/([^/]+)/?$ /pagina.php?tipo=producto&slug=$1 [L,QSA]
+  RewriteRule ^categorias/([^/]+)/?$ /pagina.php?tipo=categoria&slug=$1 [L,QSA]
+
+  # El resto de las rutas las resuelve index.html leyendo la URL. Van ANTES
+  # del corte por carpeta: /productos y /categorias son además las carpetas
+  # donde viven las fotos, así que sin esto Apache servía la carpeta en vez
+  # de la página y el catálogo daba 404.
+  RewriteRule ^(productos|categorias)/?$ /index.html [L]
   RewriteRule ^(nosotros|favoritos|lista-de-consulta)/?$ /index.html [L]
+
+  # Cualquier otra carpeta real se sirve tal cual.
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
 </IfModule>
 
 # El panel no se indexa nunca.
