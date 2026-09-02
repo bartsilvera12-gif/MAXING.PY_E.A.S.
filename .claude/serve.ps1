@@ -48,8 +48,15 @@ while ($listener.IsListening) {
     # Rutas de la vidriera: las resuelve el propio index.html leyendo la URL.
     # Sin esto, entrar directo a /productos/msi-katana-15 daria 404 en local
     # y no se podria probar que la ruta funciona al recargar.
+    #
+    # El candidato real va PRIMERO: /productos/ es a la vez una ruta de la app
+    # y la carpeta donde viven las fotos, asi que reescribir sin mirar hacia
+    # que apunta devolvia el HTML de la pagina en lugar de la imagen. Apache y
+    # Vercel hacen lo mismo: sirven el archivo si existe y recien despues
+    # aplican el rewrite.
     $rutasApp = '^/(productos|categorias)(/|$)|^/(nosotros|favoritos|lista-de-consulta)$'
     if ($ruta -match $rutasApp) {
+      $candidatos += $ruta
       $candidatos += "/index.html"
     } elseif ($ruta -eq "/" -or $ruta.EndsWith("/")) {
       $candidatos += ($ruta + "index.html")

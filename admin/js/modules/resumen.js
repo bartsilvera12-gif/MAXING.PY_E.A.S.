@@ -73,12 +73,18 @@
       }
 
       if (vacias.length) {
+        // El nombre va adelante, en negrita: antes quedaba al final de un
+        // renglón largo y había que leerlo entero para saber cuál era.
+        var nombres = vacias.map(function (c) { return c.name; });
         avisos.push(
           aviso(
             "atencion",
-            vacias.length === 1 ? "1 categoría sin productos" : vacias.length + " categorías sin productos",
-            "No aparecen en el sitio hasta que tengan al menos un producto publicado: " +
-              vacias.map(function (c) { return c.name; }).join(", ") + ".",
+            vacias.length === 1
+              ? nombres[0] + " no tiene productos"
+              : nombres.join(", ") + ": sin productos",
+            vacias.length === 1
+              ? "No aparece en el sitio hasta que tenga al menos un producto publicado."
+              : "No aparecen en el sitio hasta que tengan al menos un producto publicado.",
             "Ver categorías",
             "categorias"
           )

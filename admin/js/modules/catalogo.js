@@ -4,6 +4,11 @@
 
   var h = UI.h;
 
+  // Cuántos productos PUBLICADOS tiene cada categoría. Se calcula al entrar a
+  // la pantalla porque es el dato que decide si la categoría se ve o no en el
+  // sitio, y desde la lista no había forma de saberlo.
+  var conteo = {};
+
   /* ---------------------------------------------------------------- */
   crudSimple({
     clave: "categorias",
@@ -20,10 +25,34 @@
       "Una categoría vacía se oculta sola, no hace falta desactivarla.",
     vacio: "Creá la primera categoría para poder agrupar los productos.",
 
+    preparar: async function () {
+      var r = await sb
+        .from("products")
+        .select("id, product_categories(category_id)")
+        .eq("is_published", true);
+      conteo = {};
+      (r.data || []).forEach(function (p) {
+        (p.product_categories || []).forEach(function (x) {
+          conteo[x.category_id] = (conteo[x.category_id] || 0) + 1;
+        });
+      });
+    },
+
     columnas: [
       { label: "", clase: null, render: celda.imagen("image_url") },
       { label: "Categoría", render: celda.principal("name", "short_description") },
       { label: "Slug", render: celda.texto("slug") },
+      // La columna que faltaba: sin ella no había forma de ver desde la lista
+      // cuál está vacía, que es justo la que no se muestra en el sitio.
+      {
+        label: "Productos",
+        clase: "num",
+        render: function (c) {
+          var n = conteo[c.id] || 0;
+          if (n) return h("span", { style: "font-variant-numeric:tabular-nums", text: String(n) });
+          return h("span", { class: "insignia pendiente", text: "Sin productos" });
+        }
+      },
       { label: "Orden", clase: "num", render: celda.texto("sort_order") },
       { label: "Estado", render: celda.estado("is_active", "Activa", "Oculta") }
     ],
