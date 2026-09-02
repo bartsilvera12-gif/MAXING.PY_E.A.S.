@@ -482,7 +482,7 @@ article:hover button { filter: brightness(1.08); }
     <!-- Respaldo por si la foto no carga: fondo claro con el acento verde a la
          derecha, en vez de un hueco. -->
     <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(70% 90% at 78% 58%, rgba(64,223,54,0.20), rgba(64,223,54,0) 62%), linear-gradient(90deg,#FFFFFF 0%,#F6FBF7 55%,#EAF6EC 100%)"></div>
-    <img src="./hero.jpg" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:72% 42%">
+    <img src="{{ hero.foto }}" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:72% 42%">
     <!-- Mismo efecto que la seccion de promocion, en variante clara: al
          multiplicarse sobre la foto solo aporta el tinte verde animado. -->
     <canvas data-rb="velaris" data-velaris="claro" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block;mix-blend-mode:multiply"></canvas>
@@ -492,11 +492,11 @@ article:hover button { filter: brightness(1.08); }
     </div>
     <div data-rb="hero-txt" style="position:relative;max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,84px) 24px;min-height:clamp(450px,43vw,790px);display:flex;align-items:center">
       <div style="max-width:min(100%,580px)">
-        <span data-rb="shiny-claro" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">Tecnología · Informática · Gaming</span>
-        <h1 data-rb="shiny-title-claro" style="margin:16px 0 0;font-size:clamp(34px,5.2vw,72px);line-height:1.03;font-weight:800;letter-spacing:-0.035em;text-wrap:balance"><span>Tecnología</span> <span style="--rb-delay:90ms">que</span> <span style="--rb-delay:180ms">mejora</span> <span style="--rb-delay:270ms">tu</span> <span style="--rb-delay:360ms">día.</span></h1>
-        <p style="margin:18px 0 0;max-width:46ch;font-size:clamp(14.5px,1.2vw,17px);line-height:1.55;font-weight:500;color:#2E3B35;text-wrap:pretty">Encontrá tecnología, informática y accesorios para trabajar, crear, jugar y disfrutar más.</p>
+        <sc-if value="{{ hero.hayEyebrow }}" hint-placeholder-val="{{ true }}"><span data-rb="shiny-claro" style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">{{ hero.eyebrow }}</span></sc-if>
+        <h1 data-rb="shiny-title-claro" style="margin:16px 0 0;font-size:clamp(34px,5.2vw,72px);line-height:1.03;font-weight:800;letter-spacing:-0.035em;text-wrap:balance"><sc-for list="{{ hero.palabras }}" as="pal" hint-placeholder-count="5"><span style="{{ pal.estilo }}">{{ pal.w }}</span> </sc-for></h1>
+        <sc-if value="{{ hero.hayBajada }}" hint-placeholder-val="{{ true }}"><p style="margin:18px 0 0;max-width:46ch;font-size:clamp(14.5px,1.2vw,17px);line-height:1.55;font-weight:500;color:#2E3B35;text-wrap:pretty">{{ hero.bajada }}</p></sc-if>
         <div style="margin-top:28px;display:flex;flex-wrap:wrap;gap:12px">
-          <a href="#" onClick="{{ goCatalog }}" style="height:52px;padding:0 28px;display:inline-flex;align-items:center;background:#40DF36;color:#0B1F12;font-size:15px;font-weight:700;border-radius:10px;transition:filter 200ms" style-hover="filter:brightness(1.08)">Explorar productos</a>
+          <a href="#" onClick="{{ hero.abrirCta }}" style="height:52px;padding:0 28px;display:inline-flex;align-items:center;background:#40DF36;color:#0B1F12;font-size:15px;font-weight:700;border-radius:10px;transition:filter 200ms" style-hover="filter:brightness(1.08)">{{ hero.cta }}</a>
           <a href="#" onClick="{{ ctaSec.abrir }}" style="height:52px;padding:0 28px;display:inline-flex;align-items:center;border:1.5px solid rgba(11,31,18,0.30);color:#0B1F12;font-size:15px;font-weight:700;border-radius:10px;transition:border-color 200ms,background 200ms" style-hover="border-color:#40DF36;background:rgba(64,223,54,0.16)">{{ ctaSec.label }}</a>
         </div>
       </div>
@@ -579,10 +579,10 @@ article:hover button { filter: brightness(1.08); }
     <canvas data-rb="velaris" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas>
     <div style="max-width:1320px;margin:0 auto;padding:clamp(44px,5vw,72px) 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:40px;align-items:center">
       <div>
-        <span data-rb="shiny-dark" style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">Setup completo</span>
-        <h2 data-rb-reveal style="margin:16px 0 0;font-size:clamp(28px,3.4vw,44px);font-weight:800;letter-spacing:-0.03em;line-height:1.06">Todo lo que necesitás para tu setup.</h2>
-        <p data-rb-reveal style="margin:16px 0 0;max-width:46ch;font-size:15.5px;line-height:1.6;font-weight:500;color:#A3A3A3">Monitores, periféricos, audio y almacenamiento seleccionados para trabajar y jugar mejor.</p>
-        <a href="#" onClick="{{ goCatalog }}" style="margin-top:28px;height:52px;padding:0 28px;display:inline-flex;align-items:center;background:#40DF36;color:#000000;font-size:15px;font-weight:700;border-radius:10px;transition:filter 200ms" style-hover="filter:brightness(1.08)">Armar mi setup</a>
+        <span data-rb="shiny-dark" style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">{{ setup.arriba }}</span>
+        <h2 data-rb-reveal style="margin:16px 0 0;font-size:clamp(28px,3.4vw,44px);font-weight:800;letter-spacing:-0.03em;line-height:1.06">{{ setup.titulo }}</h2>
+        <p data-rb-reveal style="margin:16px 0 0;max-width:46ch;font-size:15.5px;line-height:1.6;font-weight:500;color:#A3A3A3">{{ setup.primero }}</p>
+        <a href="#" onClick="{{ setup.abrirCta }}" style="margin-top:28px;height:52px;padding:0 28px;display:inline-flex;align-items:center;background:#40DF36;color:#000000;font-size:15px;font-weight:700;border-radius:10px;transition:filter 200ms" style-hover="filter:brightness(1.08)">{{ setup.cta }}</a>
       </div>
       <div data-rb="spot" data-rb-reveal style="position:relative;aspect-ratio:16/10;background:#171717;border-radius:14px;display:grid;place-items:center;overflow:hidden">
         <div data-rb="zoom" style="position:absolute;inset:0"><img src="./setup.jpg" alt="Setup de escritorio con monitor, notebook, teclado y auriculares" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover"></div>
@@ -712,10 +712,10 @@ article:hover button { filter: brightness(1.08); }
     <div style="max-width:1320px;margin:0 auto;padding:clamp(36px,4.5vw,64px) 24px">
       <div style="background:#FFFFFF;border:1.5px solid #40DF36;border-radius:16px;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:stretch">
         <div style="padding:clamp(26px,3.2vw,44px);display:flex;flex-direction:column;justify-content:center;gap:16px">
-          <h2 id="seo-h" style="margin:0;font-size:clamp(22px,2.4vw,32px);font-weight:800;letter-spacing:-0.03em;line-height:1.12;color:#1F8F19">Tecnología para trabajar, crear y disfrutar</h2>
-          <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">En MAXING.py acercamos productos de informática y tecnología para profesionales, empresas, gamers y usuarios que buscan rendimiento, calidad y una buena experiencia de compra.</p>
-          <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">Trabajamos con computadoras, notebooks, componentes de PC, monitores, celulares, audio, periféricos y accesorios tecnológicos, con asesoramiento directo para elegir el equipo correcto según el uso y el presupuesto.</p>
-          <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">Si buscás una tienda de tecnología e informática en Paraguay, escribinos por WhatsApp y te ayudamos a encontrar lo que necesitás.</p>
+          <h2 id="seo-h" style="margin:0;font-size:clamp(22px,2.4vw,32px);font-weight:800;letter-spacing:-0.03em;line-height:1.12;color:#1F8F19">{{ editorial.titulo }}</h2>
+          <sc-for list="{{ editorial.parrafos }}" as="par" hint-placeholder-count="3">
+            <p style="margin:0;font-size:15.5px;line-height:1.68;font-weight:500;color:#525252;text-wrap:pretty">{{ par }}</p>
+          </sc-for>
         </div>
         <div style="min-height:clamp(200px,22vw,300px);background:#FFFFFF">
           <img src="./seccion.jpg" alt="Setup de escritorio con PC, monitor, teclado y auriculares" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 50%">
@@ -727,8 +727,8 @@ article:hover button { filter: brightness(1.08); }
   <section aria-labelledby="soc-h" style="border-bottom:1px solid #E8E8E8">
     <div style="max-width:1320px;margin:0 auto;padding:clamp(40px,5vw,64px) 24px;display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between">
       <div>
-        <h2 id="soc-h" style="margin:0;font-size:clamp(20px,2.2vw,26px);font-weight:800;letter-spacing:-0.02em;color:#000000">Seguinos y descubrí lo nuevo</h2>
-        <p style="margin:8px 0 0;font-size:14.5px;font-weight:500;color:#5C6862">Novedades, lanzamientos y recomendaciones en nuestras redes.</p>
+        <h2 id="soc-h" style="margin:0;font-size:clamp(20px,2.2vw,26px);font-weight:800;letter-spacing:-0.02em;color:#000000">{{ bloqueRedes.titulo }}</h2>
+        <p style="margin:8px 0 0;font-size:14.5px;font-weight:500;color:#5C6862">{{ bloqueRedes.primero }}</p>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:12px">
         <a href="https://instagram.com/maxing.py" target="_blank" rel="noopener" data-rb="soc soc-ig" style="height:50px;padding:0 22px;display:inline-flex;align-items:center;gap:10px;border:1px solid #40DF36;border-radius:10px;font-size:14.5px;font-weight:700;transition:border-color 220ms,background 220ms,transform 220ms" style-hover="border-color:#2A8F24;background:#F1FBF0">
@@ -775,11 +775,11 @@ article:hover button { filter: brightness(1.08); }
           <img src="./nosotros.jpg" alt="Equipo de MAXING.py en la oficina" loading="lazy" style="position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%">
         </div>
         <div style="padding:clamp(24px,2.6vw,38px);display:flex;flex-direction:column;justify-content:center;gap:16px">
-          <span data-rb="shiny" style="display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">La empresa</span>
-          <h1 id="nos-h" style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:800;letter-spacing:-0.03em;line-height:1.12;color:#1F8F19">¿Quiénes somos?</h1>
-          <p style="margin:0;font-size:17px;line-height:1.7;font-weight:500;color:#525252;text-wrap:pretty"><strong style="color:#171717;font-weight:700">MAXING.PY E.A.S.</strong> es una empresa paraguaya fundada en 2025, especializada en soluciones tecnológicas para personas, profesionales y empresas.</p>
-          <p style="margin:0;font-size:17px;line-height:1.7;font-weight:500;color:#525252;text-wrap:pretty">Comercializamos equipos de informática, dispositivos móviles y soluciones personalizadas, acompañando a cada cliente con asesoramiento profesional, garantía y un servicio cercano.</p>
-          <p style="margin:0;font-size:17px;line-height:1.7;font-weight:500;color:#525252;text-wrap:pretty">Más que vender tecnología, buscamos construir relaciones de confianza mediante un acompañamiento antes, durante y después de cada compra.</p>
+          <span data-rb="shiny" style="display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase">{{ nosotros.arriba }}</span>
+          <h1 id="nos-h" style="margin:0;font-size:clamp(28px,3.2vw,42px);font-weight:800;letter-spacing:-0.03em;line-height:1.12;color:#1F8F19">{{ nosotros.titulo }}</h1>
+          <sc-for list="{{ nosotros.parrafos }}" as="par" hint-placeholder-count="3">
+            <p style="margin:0;font-size:17px;line-height:1.7;font-weight:500;color:#525252;text-wrap:pretty">{{ par }}</p>
+          </sc-for>
         </div>
       </div>
     </div>
@@ -1829,6 +1829,28 @@ class Component extends DCLogic {
 
   // Lleva a una sección del inicio. El salto va diferido porque el nodo recién
   // vuelve al DOM después de que el runtime renderiza la página de inicio.
+  // Traduce el destino que se eligio en el panel a la accion que corresponde.
+  // Los valores posibles son los que documenta el propio formulario:
+  // catalog, nosotros, whatsapp, una categoria, #ancla o una URL.
+  accionDestino(destino, respaldo) {
+    const d = (destino || "").trim();
+    if (!d) return respaldo || this.go("catalog");
+    if (d === "catalog" || d === "productos") return this.go("catalog");
+    if (d === "nosotros") return this.go("nosotros");
+    if (d === "home" || d === "inicio") return this.go("home");
+    if (d === "whatsapp") {
+      const url = "https://wa.me/" + (AJUSTES.whatsapp_phone || "595984127274");
+      return (e) => { if (e) e.preventDefault(); window.open(url, "_blank", "noopener"); };
+    }
+    if (d.charAt(0) === "#") return this.irAAncla(d.slice(1));
+    if (/^https?:\/\//i.test(d) || d.charAt(0) === "/") {
+      return (e) => { if (e) e.preventDefault(); window.open(d, d.charAt(0) === "/" ? "_self" : "_blank", "noopener"); };
+    }
+    // Si coincide con una categoria del catalogo, abre el catalogo filtrado.
+    if (CAT.some((c) => c.name === d)) return this.irACat(d);
+    return respaldo || this.go("catalog");
+  }
+
   irAAncla(id) {
     return (e) => {
       if (e) e.preventDefault();
@@ -1859,6 +1881,34 @@ class Component extends DCLogic {
     // "hayDatos" = además hay catálogo para dibujar las páginas.
     const listo = !s.cargando && !s.errorCarga;
     const hayDatos = listo && PRODUCTS.length > 0;
+
+    // Arma una sección editable a partir de su clave. El cuerpo llega como un
+    // texto con párrafos separados por línea en blanco, igual que en el panel.
+    const bloque = (clave) => {
+      const c = CONTENIDO[clave] || null;
+      const parrafos = c && c.body
+        ? c.body.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+        : [];
+      return {
+        visible: !!c,
+        titulo: (c && c.title) || "",
+        hayTitulo: !!(c && c.title),
+        arriba: (c && c.subtitle) || "",
+        hayArriba: !!(c && c.subtitle),
+        parrafos,
+        // El primer párrafo va aparte: algunas secciones lo muestran con otro
+        // tratamiento tipográfico que el resto.
+        primero: parrafos[0] || "",
+        resto: parrafos.slice(1),
+        foto: c && c.image_url ? MaxingDB.imagen(c.image_url) : "",
+        hayFoto: !!(c && c.image_url),
+        alt: (c && c.image_alt) || "",
+        izquierda: !!(c && c.image_side === "left"),
+        cta: (c && c.cta_label) || "",
+        hayCta: !!(c && c.cta_label),
+        abrirCta: this.accionDestino(c && c.cta_target, this.go("catalog"))
+      };
+    };
     // El numero y el saludo inicial se editan en el panel, en Ajustes. Los
     // valores de respaldo son los que tenia el sitio antes, para que un ajuste
     // borrado por error no deje los botones de WhatsApp rotos.
@@ -2061,6 +2111,33 @@ class Component extends DCLogic {
       // El ícono va como data-URI y no interpolado dentro del atributo d de un
       // path: ahí el navegador intenta leer el texto crudo del template antes
       // de que el runtime lo reemplace, y tira un error de SVG inválido.
+      // --- Hero: todo lo que se ve acá se edita en el panel ---
+      // El título se parte en palabras porque cada una entra con su propio
+      // retardo; ese escalonado es el efecto que ya tenía el sitio.
+      hero: (() => {
+        const d = HERO || {};
+        const titulo = d.title || "Tecnología que mejora tu día.";
+        return {
+          eyebrow: d.eyebrow || "",
+          hayEyebrow: !!d.eyebrow,
+          palabras: titulo.split(/\s+/).filter(Boolean).map((w, i) => ({ w, estilo: "--rb-delay:" + i * 90 + "ms" })),
+          bajada: d.subtitle || "",
+          hayBajada: !!d.subtitle,
+          foto: d.image_url ? MaxingDB.imagen(d.image_url) : "./hero.jpg",
+          alt: d.image_alt || "",
+          cta: d.cta_label || "Explorar productos",
+          abrirCta: this.accionDestino(d.cta_target, this.go("catalog"))
+        };
+      })(),
+
+      // --- Secciones editables ---
+      // `bloque` arma cada una a partir de su clave. Si el panel la ocultó,
+      // `visible` queda en false y la sección entera desaparece del sitio.
+      setup: bloque("setup"),
+      nosotros: bloque("nosotros"),
+      editorial: bloque("seo_editorial"),
+      bloqueRedes: bloque("redes"),
+
       categories: CAT.map((c) => {
         const vacia = !CAT_VISIBLES.some((v) => v.name === c.name);
         const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="' + c.ink +
