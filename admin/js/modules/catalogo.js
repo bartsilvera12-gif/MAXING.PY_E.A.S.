@@ -40,7 +40,6 @@
         pista: "La línea corta que se ve en la ficha de la categoría.",
         placeholder: "Trabajo, estudio y gaming"
       },
-      { k: "description", label: "Descripción larga", tipo: "textarea", filas: 3, grupo: "Identificación" },
 
       { k: "image_url", label: "Foto", tipo: "imagen", carpeta: "categories", grupo: "Apariencia" },
       {
@@ -79,7 +78,6 @@
     columnas: [
       { label: "", render: celda.imagen("logo_url") },
       { label: "Marca", render: celda.principal("name", "slug") },
-      { label: "Sitio web", render: celda.texto("website_url", 34) },
       { label: "Orden", clase: "num", render: celda.texto("sort_order") },
       { label: "Estado", render: celda.estado("is_active", "Activa", "Oculta") }
     ],
@@ -88,10 +86,6 @@
       { k: "name", label: "Nombre", grupo: "Identificación", placeholder: "MSI" },
       { k: "slug", label: "Slug", grupo: "Identificación", placeholder: "msi" },
       { k: "logo_url", label: "Logo", tipo: "imagen", carpeta: "brands", grupo: "Identificación" },
-      {
-        k: "website_url", label: "Sitio oficial", tipo: "url", grupo: "Identificación",
-        placeholder: "https://msi.com"
-      },
       { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },
       { k: "is_active", label: "Marca activa", tipo: "switch", grupo: "Publicación" }
     ],

@@ -30,7 +30,22 @@
       var r = await sb.from("site_settings").select("*").order("group_key").order("sort_order");
       if (r.error) throw r.error;
 
-      var filas = r.data || [];
+      // Ajustes que el sitio todavia no lee. Se ocultan en vez de borrarlos:
+      // las filas quedan en la base por si alguna vez se conectan, pero no se
+      // ofrecen para editar, porque escribirlos no cambiaria nada en la web.
+      //
+      // El nombre, el eslogan y la razon social estan escritos en el HTML;
+      // los datos de contacto van en las tarjetas del pie, que si se editan;
+      // y el escalon del filtro y el prefijo de precio son fijos.
+      var SIN_USO = [
+        "site_name", "site_slogan", "site_url", "legal_name",
+        "contact_email", "contact_address", "contact_hours",
+        "price_step", "currency_prefix"
+      ];
+
+      var filas = (r.data || []).filter(function (f) {
+        return SIN_USO.indexOf(f.key) === -1;
+      });
       var controles = {};
       var grupos = [];
 
@@ -189,12 +204,6 @@
             ]),
             h("td", null, [medidor(f.title, 60)]),
             h("td", null, [medidor(f.meta_description, 160)]),
-            h("td", null, [
-              h("span", {
-                class: "insignia " + (/noindex/.test(f.robots || "") ? "borrador" : "publicado"),
-                text: /noindex/.test(f.robots || "") ? "No se indexa" : "Se indexa"
-              })
-            ]),
             h("td", { class: "acciones" }, [
               h("button", { class: "btn btn-plano", type: "button", onclick: function () { editar(f); } }, "Editar")
             ])
@@ -212,7 +221,6 @@
                   h("th", null, "Página"),
                   h("th", null, "Título"),
                   h("th", null, "Descripción"),
-                  h("th", null, "Buscadores"),
                   h("th", { class: "acciones" }, "")
                 ])
               ]),
@@ -254,29 +262,13 @@
 
     var fTitulo = contado(UI.campo({ label: "Título", valor: f.title }), 60);
     var fDesc = contado(UI.campo({ label: "Descripción", tipo: "textarea", filas: 3, valor: f.meta_description }), 160);
-    var fOgTitulo = UI.campo({ label: "Título al compartir", valor: f.og_title, pista: "Si está vacío se usa el título normal." });
-    var fOgDesc = UI.campo({ label: "Descripción al compartir", tipo: "textarea", filas: 3, valor: f.og_description });
-    var fOgImg = UI.selectorImagen({ label: "Imagen al compartir", valor: f.og_image_url, carpeta: "sections" });
-    var fCanon = UI.campo({ label: "URL canónica", tipo: "url", valor: f.canonical_url });
-    var fRobots = UI.campo({
-      label: "Buscadores", tipo: "select", valor: f.robots || "index,follow",
-      opciones: [
-        { valor: "index,follow", label: "Indexar y seguir enlaces" },
-        { valor: "noindex,follow", label: "No indexar, seguir enlaces" },
-        { valor: "noindex,nofollow", label: "No indexar ni seguir" }
-      ]
-    });
 
     UI.abrirCajon({
       titulo: "SEO — " + (NOMBRES_PAGINA[f.page_key] || f.page_key),
       cuerpo: [
         h("fieldset", { class: "bloque" }, [
-          h("legend", null, "Buscadores"),
-          fTitulo, fDesc, fCanon, fRobots
-        ]),
-        h("fieldset", { class: "bloque" }, [
-          h("legend", null, "Al compartir en redes"),
-          fOgTitulo, fOgDesc, fOgImg
+          h("legend", null, "Título y descripción"),
+          fTitulo, fDesc
         ])
       ],
       acciones: [
@@ -293,11 +285,7 @@
               .update({
                 title: fTitulo.control.value.trim() || null,
                 meta_description: fDesc.control.value.trim() || null,
-                og_title: fOgTitulo.control.value.trim() || null,
-                og_description: fOgDesc.control.value.trim() || null,
-                og_image_url: fOgImg.leer(),
-                canonical_url: fCanon.control.value.trim() || null,
-                robots: fRobots.control.value
+                meta_description: fDesc.control.value.trim() || null
               })
               .eq("page_key", f.page_key);
 

@@ -6,6 +6,12 @@
   // en el inicio es un bloque de titulo, bajada y enlaces, sin lugar para una
   // foto. Si algun dia el sitio le agrega uno, se suma su clave acá.
   var SECCIONES_CON_IMAGEN = ["setup", "nosotros", "seo_editorial"];
+  // Idem con el boton: solo la seccion de setup lo dibuja.
+  var SECCIONES_CON_BOTON = ["setup"];
+  function CON_BOTON(fila) {
+    if (!fila.section_key) return true;
+    return SECCIONES_CON_BOTON.indexOf(fila.section_key) !== -1;
+  }
   function CON_IMAGEN(fila) {
     // En una seccion nueva todavia no hay clave: se muestran los campos y
     // sera el sitio el que decida si la dibuja.
@@ -127,8 +133,10 @@
         ]
       },
 
-      { k: "cta_label", label: "Botón", grupo: "Botón" },
-      { k: "cta_target", label: "Destino del botón", grupo: "Botón", placeholder: "catalog" },
+      // Solo "setup" dibuja un boton en el sitio; en las demas secciones
+      // configurarlo no mostraria nada.
+      { k: "cta_label", label: "Botón", grupo: "Botón", mostrarSi: CON_BOTON },
+      { k: "cta_target", label: "Destino del botón", grupo: "Botón", placeholder: "catalog", mostrarSi: CON_BOTON },
 
       { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },
       { k: "is_visible", label: "Sección visible", tipo: "switch", grupo: "Publicación" }
@@ -232,7 +240,10 @@
       { k: "text", label: "Texto", tipo: "textarea", filas: 3, grupo: "Contenido" },
       {
         k: "link_target", label: "Destino", grupo: "Contenido",
-        pista: "catalog, nosotros, #ancla o una ruta del sitio. Vacío si no es un enlace."
+        pista: "catalog, nosotros, #ancla o una ruta del sitio.",
+        // Las tarjetas operativas del pie son texto, no enlaces: solo los
+        // items de la columna de ayuda llevan destino.
+        mostrarSi: function (f) { return f.group_key !== "operativo"; }
       },
       { k: "color", label: "Color de fondo", tipo: "color", grupo: "Apariencia" },
       { k: "ink_color", label: "Color del texto", tipo: "color", grupo: "Apariencia" },

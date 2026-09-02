@@ -133,12 +133,6 @@
 
     var fNombre = UI.campo({ label: "Nombre", valor: c.name, placeholder: "Destacados" });
     var fSlug = UI.campo({ label: "Slug", valor: c.slug, placeholder: "destacados" });
-    var fDesc = UI.campo({ label: "Bajada", tipo: "textarea", filas: 2, valor: c.description });
-    var fAncla = UI.campo({
-      label: "Ancla en el inicio", valor: c.anchor_id,
-      pista: "El id de la sección a la que salta el menú. Vacío si no tiene sección propia.",
-      placeholder: "feat-h"
-    });
 
     var swAuto = UI.interruptor("Se llena automáticamente", c.is_automatic, function (v) {
       fRegla.style.display = v ? "" : "none";
@@ -181,7 +175,7 @@
       cuerpo: [
         h("fieldset", { class: "bloque" }, [
           h("legend", null, "Identificación"),
-          fNombre, fSlug, fDesc, fAncla
+          fNombre, fSlug
         ]),
         h("fieldset", { class: "bloque" }, [
           h("legend", null, "Cómo se llena"),
@@ -200,8 +194,6 @@
       var datos = {
         name: fNombre.control.value.trim(),
         slug: fSlug.control.value.trim() || UI.slugificar(fNombre.control.value),
-        description: fDesc.control.value.trim() || null,
-        anchor_id: fAncla.control.value.trim() || null,
         is_automatic: swAuto.control.checked,
         auto_rule: swAuto.control.checked ? fRegla.control.value : null,
         max_items: Number(fMax.control.value) || 8,

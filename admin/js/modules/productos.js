@@ -100,7 +100,7 @@
       .from("products")
       .select(
         "id, slug, sku, name, price, old_price, is_on_sale, discount_percent, stock_status," +
-          " main_image_url, is_published, is_featured, sort_order, updated_at," +
+          " main_image_url, is_published, sort_order, updated_at," +
           " brand:brands(name), product_categories(category_id)"
       )
       .order("sort_order");
@@ -222,8 +222,7 @@
           class: "insignia " + (p.is_published ? "publicado" : "borrador"),
           text: p.is_published ? "Publicado" : "Borrador"
         }),
-        p.is_on_sale ? h("span", { class: "insignia oferta", style: "margin-left:5px", text: "-" + p.discount_percent + "%" }) : null,
-        p.is_featured ? h("span", { class: "chip", style: "margin-left:5px", text: "Destacado" }) : null
+        p.is_on_sale ? h("span", { class: "insignia oferta", style: "margin-left:5px", text: "-" + p.discount_percent + "%" }) : null
       ]),
       h("td", { class: "acciones" }, [
         h(
@@ -270,7 +269,7 @@
     var p = {
       name: "", slug: "", sku: "", brand_id: "", short_spec: "", description: "",
       price: "", old_price: "", stock_status: "Disponible", main_image_url: "",
-      image_alt: "", is_published: false, is_featured: false, sort_order: 0
+      image_alt: "", is_published: false, sort_order: 0
     };
     var catsElegidas = [];
     var features = [];
@@ -422,7 +421,6 @@
     });
 
     var swPublicado = UI.interruptor("Publicado en el sitio", p.is_published);
-    var swDestacado = UI.interruptor("Marcar como destacado", p.is_featured);
 
 
     refrescarOferta();
@@ -454,7 +452,7 @@
       ]),
       h("fieldset", { class: "bloque" }, [
         h("legend", null, "Publicación"),
-        swPublicado, swDestacado
+        swPublicado
       ])
     ];
 
@@ -510,7 +508,6 @@
         // es lo que hay que describir en una foto de producto.
         image_alt: null,
         is_published: swPublicado.control.checked,
-        is_featured: swDestacado.control.checked,
         sort_order: Number(fOrden.control.value) || 0
         // El SEO del producto no se pide: el sitio arma el titulo con la marca
         // y el nombre, que para 24 productos alcanza. Los campos de la base
