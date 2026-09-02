@@ -1124,40 +1124,6 @@ fieldset.bloque legend {
   flex: 1;
 }
 
-.lista-edit .mover {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.lista-edit .mover button {
-  padding: 1px 6px;
-  font-size: 9px;
-  line-height: 1.5;
-  border: 1px solid var(--linea);
-  background: var(--blanco);
-  cursor: pointer;
-  color: var(--gris);
-}
-
-.lista-edit .mover button:first-child {
-  border-radius: 4px 4px 0 0;
-}
-
-.lista-edit .mover button:last-child {
-  border-radius: 0 0 4px 4px;
-  border-top: 0;
-}
-
-.lista-edit .mover button:hover:not(:disabled) {
-  background: var(--humo);
-  color: var(--tinta);
-}
-
-.lista-edit .mover button:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
 
 /* Casillas de categoria */
 .casillas {

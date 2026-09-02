@@ -282,7 +282,23 @@
         var i = elegidos.indexOf(p.id);
         var marcado = i !== -1;
 
-        var casilla = h("input", { type: "checkbox" });
+        // Alt + flechas reordena el elegido, en vez de un par de botones ▲▼
+        // colgando de cada renglón.
+        var casilla = h("input", {
+          type: "checkbox",
+          onkeydown: function (e) {
+            if (!e.altKey || i === -1) return;
+            var hacia = e.key === "ArrowUp" ? i - 1 : e.key === "ArrowDown" ? i + 1 : -1;
+            if (hacia < 0 || hacia >= elegidos.length) return;
+            e.preventDefault();
+            var t = elegidos[hacia];
+            elegidos[hacia] = elegidos[i];
+            elegidos[i] = t;
+            pintar();
+            var casillas = lista.querySelectorAll('input[type="checkbox"]');
+            if (casillas[hacia]) casillas[hacia].focus();
+          }
+        });
         casilla.checked = marcado;
         casilla.addEventListener("change", function () {
           if (casilla.checked) {
@@ -315,40 +331,22 @@
                 h("div", { style: "font-weight:600;font-size:13px", text: p.name }),
                 h("div", { style: "font-size:11.5px;color:var(--gris)", text: UI.gs(p.price) })
               ]),
+              // El número de orden dice lo mismo que decían las flechas, y
+              // además informa: es la posición en la que va a salir en el sitio.
               marcado
-                ? h("div", { class: "mover", style: "display:flex;flex-direction:column;gap:1px" }, [
-                    h(
-                      "button",
-                      {
-                        type: "button", "aria-label": "Subir", disabled: i === 0,
-                        style: "padding:1px 6px;font-size:9px;border:1px solid var(--linea);background:#fff;cursor:pointer",
-                        onclick: function () {
-                          var tmp = elegidos[i - 1]; elegidos[i - 1] = elegidos[i]; elegidos[i] = tmp;
-                          pintar();
-                        }
-                      },
-                      "▲"
-                    ),
-                    h(
-                      "button",
-                      {
-                        type: "button", "aria-label": "Bajar", disabled: i === elegidos.length - 1,
-                        style: "padding:1px 6px;font-size:9px;border:1px solid var(--linea);background:#fff;cursor:pointer",
-                        onclick: function () {
-                          var tmp = elegidos[i + 1]; elegidos[i + 1] = elegidos[i]; elegidos[i] = tmp;
-                          pintar();
-                        }
-                      },
-                      "▼"
-                    )
-                  ])
+                ? h("span", {
+                    class: "insignia sin-punto",
+                    style: "font-variant-numeric:tabular-nums",
+                    text: String(i + 1) + "º"
+                  })
                 : null
             ]
           )
         );
       });
 
-      contador.textContent = elegidos.length + " de " + coleccion.max_items + " lugares usados.";
+      contador.textContent = elegidos.length + " de " + coleccion.max_items +
+        " lugares usados. El número indica en qué orden sale en el sitio; para cambiarlo, Alt + ↑ / ↓ sobre la casilla.";
     }
 
     buscador.addEventListener("input", pintar);

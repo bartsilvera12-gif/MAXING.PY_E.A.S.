@@ -279,10 +279,32 @@
     var valores = (opciones.valores || []).slice();
     var cont = h("div", { class: "lista-edit" });
 
+    // Reordenar con Alt + flechas en vez de un par de botones ▲▼ por renglon:
+    // esas flechitas ensucian la lista entera para una accion que casi no se
+    // usa. Se mantiene el foco en el renglon movido para poder encadenar
+    // varios movimientos sin volver a hacer clic.
+    function mover(desde, hacia) {
+      if (hacia < 0 || hacia >= valores.length) return;
+      var t = valores[hacia];
+      valores[hacia] = valores[desde];
+      valores[desde] = t;
+      pintar();
+      var inputs = cont.querySelectorAll("input");
+      if (inputs[hacia]) inputs[hacia].focus();
+    }
+
     function pintar() {
       vaciar(cont);
       valores.forEach(function (v, i) {
-        var input = h("input", { type: "text", placeholder: opciones.placeholder || "" });
+        var input = h("input", {
+          type: "text",
+          placeholder: opciones.placeholder || "",
+          onkeydown: function (e) {
+            if (!e.altKey) return;
+            if (e.key === "ArrowUp") { e.preventDefault(); mover(i, i - 1); }
+            else if (e.key === "ArrowDown") { e.preventDefault(); mover(i, i + 1); }
+          }
+        });
         input.value = v;
         input.addEventListener("input", function () {
           valores[i] = input.value;
@@ -290,38 +312,6 @@
 
         cont.appendChild(
           h("div", { class: "renglon" }, [
-            h("div", { class: "mover" }, [
-              h(
-                "button",
-                {
-                  type: "button",
-                  "aria-label": "Subir",
-                  disabled: i === 0,
-                  onclick: function () {
-                    var t = valores[i - 1];
-                    valores[i - 1] = valores[i];
-                    valores[i] = t;
-                    pintar();
-                  }
-                },
-                "▲"
-              ),
-              h(
-                "button",
-                {
-                  type: "button",
-                  "aria-label": "Bajar",
-                  disabled: i === valores.length - 1,
-                  onclick: function () {
-                    var t = valores[i + 1];
-                    valores[i + 1] = valores[i];
-                    valores[i] = t;
-                    pintar();
-                  }
-                },
-                "▼"
-              )
-            ]),
             input,
             h(
               "button",
@@ -361,9 +351,15 @@
 
     pintar();
 
+    // La pista propia no siempre termina en punto; sin esto las dos frases
+    // se pegan.
+    var propia = (opciones.pista || "").trim();
+    if (propia && !/[.:;!?]$/.test(propia)) propia += ".";
+    var ayuda = (propia ? propia + " " : "") + "Para reordenar: Alt + ↑ / ↓ sobre el renglón.";
+
     var envoltorio = h("div", { class: "campo" }, [
       h("span", { class: "etiqueta", text: opciones.label }),
-      opciones.pista ? h("span", { class: "pista", style: "margin:-2px 0 7px", text: opciones.pista }) : null,
+      h("span", { class: "pista", style: "margin:-2px 0 7px", text: ayuda }),
       cont
     ]);
 

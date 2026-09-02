@@ -180,9 +180,11 @@
       "Acá se administran las tarjetas de envíos, retiro, garantía y atención, y la columna de ayuda.",
     vacio: "Creá el primer ítem del pie.",
 
+    // Sin columna de grupo: mostraba la clave interna (`col_ayuda`,
+    // `operativo`), que no le dice nada a quien administra. La tabla ya viene
+    // ordenada por grupo, y el grupo se elige en el formulario.
     columnas: [
       { label: "Ítem", render: celda.principal("title", "text") },
-      { label: "Grupo", render: celda.texto("group_key") },
       {
         label: "Dato",
         render: function (f) {
