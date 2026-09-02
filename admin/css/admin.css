@@ -1351,3 +1351,87 @@ fieldset.bloque legend {
   border-color: #f0dfc0;
   background: var(--aviso-velo);
 }
+
+/* ------------------------------------------------------------------ */
+/* Galeria de imagenes del producto                                    */
+/* ------------------------------------------------------------------ */
+.galeria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.gal-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--linea);
+  border-radius: var(--r-chico);
+  background: var(--blanco);
+  overflow: hidden;
+}
+
+/* La principal se distingue sola, sin tener que leer el rotulo. */
+.gal-item.principal {
+  border-color: var(--acento);
+  box-shadow: 0 0 0 2px rgba(64, 223, 54, 0.22);
+}
+
+.gal-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+}
+
+.gal-estrella,
+.gal-quitar {
+  position: absolute;
+  top: 5px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--linea);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.94);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+  color: var(--gris);
+  transition: color 0.14s ease, border-color 0.14s ease, background 0.14s ease;
+}
+
+.gal-estrella { left: 5px; }
+.gal-quitar { right: 5px; font-size: 11px; }
+
+.gal-estrella:hover { color: #c9a227; border-color: #e6d08a; }
+
+.gal-estrella.activa {
+  color: #d8a200;
+  border-color: #e8cf87;
+  background: #fffaeb;
+}
+
+.gal-quitar:hover {
+  color: var(--peligro);
+  border-color: #ecd4d1;
+  background: var(--peligro-velo);
+}
+
+.gal-rotulo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 3px 0;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--acento-tinta);
+  background: var(--acento-velo);
+  border-top: 1px solid #cbeac8;
+}

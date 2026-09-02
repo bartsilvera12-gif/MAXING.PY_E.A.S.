@@ -483,7 +483,7 @@ article:hover button { filter: brightness(1.08); }
     <!-- Respaldo por si la foto no carga: fondo claro con el acento verde a la
          derecha, en vez de un hueco. -->
     <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(70% 90% at 78% 58%, rgba(64,223,54,0.20), rgba(64,223,54,0) 62%), linear-gradient(90deg,#FFFFFF 0%,#F6FBF7 55%,#EAF6EC 100%)"></div>
-    <img src="{{ hero.foto }}" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:72% 42%">
+    <img src="{{ hero.foto }}" alt="" aria-hidden="true" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:72% 42%">
     <!-- Mismo efecto que la seccion de promocion, en variante clara: al
          multiplicarse sobre la foto solo aporta el tinte verde animado. -->
     <canvas data-rb="velaris" data-velaris="claro" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block;mix-blend-mode:multiply"></canvas>
@@ -733,7 +733,7 @@ article:hover button { filter: brightness(1.08); }
           </sc-for>
         </div>
         <div style="min-height:clamp(200px,22vw,300px);background:#FFFFFF">
-          <img src="{{ editorial.foto }}" alt="{{ editorial.alt }}" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 50%">
+          <img src="{{ editorial.foto }}" alt="{{ editorial.alt }}" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 50%">
         </div>
       </div>
     </div>
@@ -1033,14 +1033,14 @@ article:hover button { filter: brightness(1.08); }
           <span style="position:relative;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#5C6862;text-align:center;padding:0 16px">{{ current.img }}</span>
         </sc-if>
       </div>
-      <!-- Solo mientras el producto no tenga foto real: con una sola foto,
-           cuatro miniaturas de relleno prometen imagenes que no existen. -->
-      <sc-if value="{{ hayGaleria }}" hint-placeholder-val="{{ false }}">
-      <div style="margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
-        <sc-for list="{{ gallery }}" as="g" hint-placeholder-count="4">
-          <div style="position:relative;aspect-ratio:1/1;background:#F5F5F5;border:1px solid #E8E8E8;border-radius:9px;display:grid;place-items:center;cursor:pointer;transition:border-color 200ms" style-hover="border-color:#171717">
-            <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#A3A3A3">{{ g }}</span>
-          </div>
+      <!-- Miniaturas reales del producto. Solo aparecen si hay mas de una
+           foto: con una sola no hay nada que elegir. -->
+      <sc-if value="{{ hayMiniaturas }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:10px">
+        <sc-for list="{{ miniaturas }}" as="m" hint-placeholder-count="4">
+          <a href="#" onClick="{{ m.abrir }}" aria-label="{{ m.aria }}" style="position:relative;aspect-ratio:1/1;background:#FFFFFF;border:1.5px solid {{ m.borde }};border-radius:9px;display:block;overflow:hidden;cursor:pointer;transition:border-color 200ms" style-hover="border-color:#40DF36">
+            <img src="{{ m.url }}" alt="{{ m.alt }}" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:5px">
+          </a>
         </sc-for>
       </div>
       </sc-if>
@@ -1278,7 +1278,7 @@ class Component extends DCLogic {
   // `pslug` identifica al producto abierto por su slug, no por su posicion en
   // el array: la posicion cambia cada vez que el admin agrega, borra o
   // reordena, y un enlace compartido terminaria abriendo otro producto.
-  state = { page: "home", pslug: "", menuOpen: false, mega: null, narrow: false, fCat: [], fBrand: [], fStock: [], fMax: Infinity, sort: "rel", q: "", fav: [], cart: [], onlyFav: false, cartOpen: false, searchOpen: false, filtrosOpen: false, cargando: true, errorCarga: "" };
+  state = { page: "home", pslug: "", menuOpen: false, mega: null, narrow: false, fCat: [], fBrand: [], fStock: [], fMax: Infinity, sort: "rel", q: "", fav: [], cart: [], onlyFav: false, cartOpen: false, searchOpen: false, filtrosOpen: false, fotoVista: "", cargando: true, errorCarga: "" };
 
   // Favoritos y lista de consulta sobreviven al recargar. Son del visitante,
   // no del negocio, asi que el unico lugar donde persistirlos es su navegador.
@@ -1442,13 +1442,31 @@ class Component extends DCLogic {
 
   // El titulo y la descripcion de la portada tambien se administran desde el
   // panel. El resto del SEO ya viene servido en el HTML.
+  // El titulo de la pestaña y la descripcion cambian segun la pagina abierta.
+  // En la ficha de producto se usan los campos SEO del propio producto, y si
+  // estan vacios se arma uno con el nombre y la marca.
+  //
+  // Ojo con el alcance: esto lo ejecuta el navegador. Google lo toma, porque
+  // corre JavaScript; la vista previa de WhatsApp o Facebook NO, porque leen
+  // el HTML tal como sale del servidor, antes de que corra nada.
   aplicarSeo() {
     try {
-      const s = SEO.home;
-      if (!s) return;
-      if (s.title) document.title = s.title;
+      const s = this.state;
+      const pagina = SEO[s.page] || SEO.home || {};
+      let titulo = pagina.title || "";
+      let descripcion = pagina.meta_description || "";
+
+      if (s.page === "product") {
+        const p = PRODUCTS.filter((x) => x.slug === s.pslug)[0];
+        if (p) {
+          titulo = p.metaTitulo || [p.brand, p.name].filter(Boolean).join(" ") + " — MAXING.py";
+          descripcion = p.metaDescripcion || p.spec || descripcion;
+        }
+      }
+
+      if (titulo) document.title = titulo;
       const meta = document.querySelector('meta[name="description"]');
-      if (meta && s.meta_description) meta.setAttribute("content", s.meta_description);
+      if (meta && descripcion) meta.setAttribute("content", descripcion);
     } catch (e) { /* el SEO del HTML sigue siendo valido */ }
   }
 
@@ -1792,7 +1810,9 @@ class Component extends DCLogic {
   go(page, pslug) {
     return (e) => {
       if (e) e.preventDefault();
-      this.setState({ page, pslug: pslug == null ? this.state.pslug : pslug, menuOpen: false, mega: null });
+      this.setState({ page, pslug: pslug == null ? this.state.pslug : pslug, menuOpen: false, mega: null, fotoVista: "" });
+      // El título de la pestaña acompaña a la página abierta.
+      setTimeout(() => this.aplicarSeo(), 0);
       window.scrollTo(0, 0);
     };
   }
@@ -2055,8 +2075,19 @@ class Component extends DCLogic {
     // Mientras el catálogo se está cargando, o si quedara vacío, `current` cae
     // a un producto en blanco: renderVals lee sus campos sin condicionales y
     // un null haría reventar toda la pantalla, no solo la ficha.
-    const VACIO = { id: "", slug: "", name: "", brand: "", spec: "", price: 0, oldPrice: null, badge: "", cats: [], stock: "", sku: "", foto: "", img: "", desc: [], features: [] };
+    const VACIO = { id: "", slug: "", name: "", brand: "", spec: "", price: 0, oldPrice: null, badge: "", cats: [], stock: "", sku: "", foto: "", img: "", desc: [], features: [], galeria: [] };
     const current = PRODUCTS.filter((p) => p.slug === s.pslug)[0] || PRODUCTS[0] || VACIO;
+
+    // Las fotos del producto abierto. La galería llega ordenada, con la que
+    // el panel marcó como principal primera. Un producto cargado antes de que
+    // hubiera galería solo tiene su foto principal.
+    const fotos = current.galeria && current.galeria.length
+      ? current.galeria
+      : (current.foto ? [{ url: current.foto, alt: current.name }] : []);
+    // La elegida por el visitante, mientras siga existiendo en este producto.
+    const fotoVista = fotos.some((f) => f.url === s.fotoVista)
+      ? s.fotoVista
+      : (fotos[0] ? fotos[0].url : "");
 
     // --- Filtros del catálogo: se aplican sobre PRODUCTS, no sobre una lista fija ---
     const uniq = (arr) => arr.filter((v, i) => arr.indexOf(v) === i);
@@ -2287,15 +2318,27 @@ class Component extends DCLogic {
         text: b.text || ""
       })),
       filters: [grupoCat(), group("Marca", "brand", "fBrand"), group("Disponibilidad", "stock", "fStock")],
+      // La ficha muestra la foto elegida en las miniaturas; si no se tocó
+      // ninguna, la principal, que es la que el panel marcó con la estrella.
+      miniaturas: fotos.map((f) => ({
+        url: f.url,
+        alt: f.alt || current.name,
+        activa: f.url === fotoVista,
+        borde: f.url === fotoVista ? "#40DF36" : "#E8E8E8",
+        aria: f.url === fotoVista ? "Foto en pantalla" : "Ver esta foto",
+        abrir: (e) => { if (e) e.preventDefault(); this.setState({ fotoVista: f.url }); }
+      })),
+      // Con una sola foto las miniaturas no aportan nada.
+      hayMiniaturas: fotos.length > 1,
+
       current: { ...current, wa: waFor(current), price: P(current.price), sku: current.sku || "MX-0000", oldPrice: current.oldPrice ? P(current.oldPrice) : "", badge: current.badge || "",
-        sinFoto: !current.foto,
+        foto: fotoVista,
+        sinFoto: !fotoVista,
         hayDesc: !!(current.desc && current.desc.length),
         desc: current.desc || [],
         // Los productos cargados traen su propia lista; el resto cae al texto generico.
         features: current.features || ["Pensado para uso intensivo diario.", "Compatible con accesorios estándar.", "Garantía según política del fabricante.", "Consultá disponibilidad antes de confirmar."],
         specs: [{ k: "Marca", v: current.brand }, { k: "Modelo", v: current.name }, { k: "Especificación", v: current.spec }, { k: "Categoría", v: catsDe(current).join(" · ") }, { k: "Disponibilidad", v: current.stock }] },
-      hayGaleria: !current.foto,
-      gallery: ["ángulo 2", "ángulo 3", "detalle", "en uso"],
       // `todo` no se renderiza: queda como registro de lo que falta confirmar
       // con el cliente (ver README). Para mostrarlo, agregar un parrafo con op.todo.
       footerOps: PIE.operativo.map((f) => ({

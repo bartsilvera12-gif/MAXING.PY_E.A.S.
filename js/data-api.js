@@ -24,6 +24,7 @@
   var SELECT_PRODUCTOS = [
     "id, slug, sku, name, short_spec, description, price, old_price",
     "is_on_sale, discount_percent, stock_status, main_image_url, image_alt",
+    "meta_title, meta_description",
     "is_featured, sort_order",
     "brand:brands(id, slug, name, logo_url)",
     "product_categories(category:categories(slug, name))",
@@ -84,6 +85,8 @@
       galeria: galeria,
       desc: desc,
       features: features,
+      metaTitulo: f.meta_title || "",
+      metaDescripcion: f.meta_description || "",
       destacado: !!f.is_featured,
       orden: f.sort_order || 0
     };

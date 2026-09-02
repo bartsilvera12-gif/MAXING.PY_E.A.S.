@@ -497,6 +497,147 @@
   }
 
   /* --------------------------------------------------------------- */
+  /* Galeria de imagenes de un producto                               */
+  /* --------------------------------------------------------------- */
+  // Varias fotos por producto, con una marcada como principal. La estrella
+  // dice cual se muestra primero: en la tarjeta del catalogo y arriba de
+  // todo en la ficha. Las demas quedan como miniaturas.
+  //
+  // Se guarda la lista completa y, aparte, cual es la principal. El orden de
+  // la lista es el orden en que se ven las miniaturas.
+  function galeriaImagenes(opciones) {
+    var imagenes = (opciones.valores || []).slice();
+    var principal = opciones.principal || (imagenes[0] || null);
+    var carpeta = opciones.carpeta || "products";
+
+    var grilla = h("div", { class: "galeria" });
+    var ruta = h("input", { type: "text", placeholder: "productos/archivo.jpg" });
+    var entrada = h("input", { type: "file", accept: "image/*", multiple: true, style: "display:none" });
+    var zona = h("div", { class: "zona-suelta" }, "Subir imágenes o arrastrarlas acá");
+
+    function agregar(url) {
+      if (!url || imagenes.indexOf(url) !== -1) return;
+      imagenes.push(url);
+      if (!principal) principal = url;
+      pintar();
+    }
+
+    async function subir(archivos) {
+      var lista = Array.prototype.slice.call(archivos || []);
+      if (!lista.length) return;
+      zona.textContent = "Subiendo…";
+      for (var i = 0; i < lista.length; i++) {
+        try {
+          agregar(await subirArchivo(lista[i], carpeta));
+        } catch (e) {
+          noti(e.message, "error");
+        }
+      }
+      zona.textContent = "Subir imágenes o arrastrarlas acá";
+      noti(lista.length === 1 ? "Imagen subida." : lista.length + " imágenes subidas.");
+    }
+
+    function pintar() {
+      vaciar(grilla);
+
+      imagenes.forEach(function (url, i) {
+        var esPrincipal = url === principal;
+
+        var estrella = h(
+          "button",
+          {
+            class: "gal-estrella" + (esPrincipal ? " activa" : ""),
+            type: "button",
+            title: esPrincipal ? "Es la que se muestra primero" : "Mostrar esta primero",
+            "aria-label": esPrincipal ? "Imagen principal" : "Marcar como principal",
+            "aria-pressed": esPrincipal ? "true" : "false",
+            onclick: function () {
+              principal = url;
+              pintar();
+            }
+          },
+          esPrincipal ? "★" : "☆"
+        );
+
+        var quitar = h(
+          "button",
+          {
+            class: "gal-quitar",
+            type: "button",
+            title: "Quitar",
+            "aria-label": "Quitar imagen",
+            onclick: function () {
+              imagenes.splice(i, 1);
+              // Si se quita la principal, la siguiente ocupa su lugar: un
+              // producto sin principal no se puede publicar.
+              if (principal === url) principal = imagenes[0] || null;
+              pintar();
+            }
+          },
+          "✕"
+        );
+
+        grilla.appendChild(
+          h("div", { class: "gal-item" + (esPrincipal ? " principal" : "") }, [
+            h("img", { src: urlImagen(url), alt: "", loading: "lazy" }),
+            estrella,
+            quitar,
+            esPrincipal ? h("span", { class: "gal-rotulo" }, "Principal") : null
+          ])
+        );
+      });
+
+      if (!imagenes.length) {
+        grilla.appendChild(h("p", { class: "pista", style: "margin:0", text: "Todavía no hay imágenes." }));
+      }
+    }
+
+    zona.addEventListener("click", function () { entrada.click(); });
+    zona.addEventListener("dragover", function (e) { e.preventDefault(); zona.classList.add("encima"); });
+    zona.addEventListener("dragleave", function () { zona.classList.remove("encima"); });
+    zona.addEventListener("drop", function (e) {
+      e.preventDefault();
+      zona.classList.remove("encima");
+      subir(e.dataTransfer.files);
+    });
+    entrada.addEventListener("change", function () { subir(entrada.files); });
+
+    var agregarRuta = h(
+      "button",
+      {
+        class: "btn",
+        type: "button",
+        onclick: function () {
+          agregar(ruta.value.trim());
+          ruta.value = "";
+        }
+      },
+      "Agregar"
+    );
+
+    pintar();
+
+    var envoltorio = h("div", { class: "campo" }, [
+      h("span", { class: "etiqueta", text: opciones.label || "Imágenes" }),
+      h("span", {
+        class: "pista",
+        style: "margin:-2px 0 9px",
+        text: "La marcada con estrella es la que se muestra primero, en el catálogo y arriba de todo en la ficha."
+      }),
+      grilla,
+      zona,
+      entrada,
+      h("span", { class: "pista", style: "margin:9px 0 4px", text: "o agregá una que ya esté en el sitio" }),
+      h("div", { style: "display:flex;gap:7px" }, [ruta, agregarRuta])
+    ]);
+
+    envoltorio.leer = function () {
+      return { principal: principal, imagenes: imagenes.slice() };
+    };
+    return envoltorio;
+  }
+
+  /* --------------------------------------------------------------- */
   /* Confirmacion                                                     */
   /* --------------------------------------------------------------- */
   function confirmarBorrado(queCosa) {
@@ -557,6 +698,7 @@
     interruptor: interruptor,
     listaEditable: listaEditable,
     selectorImagen: selectorImagen,
+    galeriaImagenes: galeriaImagenes,
     subirArchivo: subirArchivo,
     urlImagen: urlImagen,
     confirmarBorrado: confirmarBorrado,

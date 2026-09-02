@@ -276,11 +276,12 @@
     var catsElegidas = [];
     var features = [];
     var specs = [];
+    var galeria = [];
 
     if (id) {
       var r = await sb
         .from("products")
-        .select("*, product_categories(category_id), product_features(feature, sort_order), product_specs(spec_key, spec_value, sort_order)")
+        .select("*, product_categories(category_id), product_features(feature, sort_order), product_specs(spec_key, spec_value, sort_order), product_images(image_url, sort_order)")
         .eq("id", id)
         .single();
       if (r.error) {
@@ -297,6 +298,15 @@
       specs = (p.product_specs || [])
         .sort(function (a, b) { return a.sort_order - b.sort_order; })
         .map(function (x) { return x.spec_key + " | " + x.spec_value; });
+      galeria = (p.product_images || [])
+        .sort(function (a, b) { return a.sort_order - b.sort_order; })
+        .map(function (x) { return x.image_url; });
+      // Un producto cargado antes de que hubiera galería tiene su foto en
+      // main_image_url y puede no estar en la lista: se agrega para que
+      // aparezca en la grilla y no parezca que se perdió.
+      if (p.main_image_url && galeria.indexOf(p.main_image_url) === -1) {
+        galeria.unshift(p.main_image_url);
+      }
     }
 
     /* ---- controles ---- */
@@ -375,10 +385,13 @@
       pista: "Menor número, aparece antes."
     });
 
-    var fFoto = UI.selectorImagen({ label: "Foto principal", valor: p.main_image_url, carpeta: "products" });
-    var fAlt = UI.campo({
-      label: "Texto alternativo de la foto", valor: p.image_alt,
-      pista: "Lo leen los lectores de pantalla y los buscadores."
+    // Varias fotos por producto. La marcada con estrella es la principal y
+    // es la que va a products.main_image_url, que es la que ve el catalogo.
+    var fFotos = UI.galeriaImagenes({
+      label: "Imágenes",
+      valores: galeria,
+      principal: p.main_image_url,
+      carpeta: "products"
     });
 
     var fDesc = UI.campo({
@@ -432,7 +445,7 @@
       ]),
       h("fieldset", { class: "bloque" }, [
         h("legend", null, "Imagen"),
-        fFoto, fAlt
+        fFotos
       ]),
       h("fieldset", { class: "bloque" }, [
         h("legend", null, "Categorías"),
@@ -499,8 +512,10 @@
         price: Number(fPrecio.control.value) || 0,
         old_price: fPrecioViejo.control.value === "" ? null : Number(fPrecioViejo.control.value),
         stock_status: fEstado.control.value,
-        main_image_url: fFoto.leer(),
-        image_alt: fAlt.control.value.trim() || null,
+        main_image_url: fFotos.leer().principal,
+        // El texto alternativo no se pide: se usa el nombre del producto, que
+        // es lo que hay que describir en una foto de producto.
+        image_alt: null,
         is_published: swPublicado.control.checked,
         is_featured: swDestacado.control.checked,
         sort_order: Number(fOrden.control.value) || 0,
@@ -576,15 +591,31 @@
           if (rs.error) throw rs.error;
         }
 
-        // La foto principal se mantiene como primera imagen de la galeria.
+        // La galería se guarda entera, con la principal primera: así el sitio
+        // la muestra arriba de todo sin tener que ordenar nada.
+        var fotos = fFotos.leer();
+        var orden = fotos.imagenes.slice().sort(function (a, b) {
+          if (a === fotos.principal) return -1;
+          if (b === fotos.principal) return 1;
+          return 0;
+        });
+
         await sb.from("product_images").delete().eq("product_id", idProd);
-        if (datos.main_image_url) {
-          await sb.from("product_images").insert({
-            product_id: idProd,
-            image_url: datos.main_image_url,
-            alt_text: datos.image_alt,
-            sort_order: 1
-          });
+        if (orden.length) {
+          var ri = await sb.from("product_images").insert(
+            orden.map(function (url, n) {
+              return {
+                product_id: idProd,
+                image_url: url,
+                // El texto alternativo sale del nombre del producto: para una
+                // foto de producto es justo lo que corresponde describir, y
+                // evita un campo mas que nadie completa.
+                alt_text: datos.name,
+                sort_order: n + 1
+              };
+            })
+          );
+          if (ri.error) throw ri.error;
         }
 
         UI.cerrarCajon();
