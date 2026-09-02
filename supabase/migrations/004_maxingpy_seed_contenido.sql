@@ -22,8 +22,10 @@ insert into maxingpy.collections
 values
   ('ofertas',   'Ofertas',   'Selección con descuento vigente.',  'ofertas', true,  'on_sale',  4, 1, true),
   ('novedades', 'Novedades', 'Lo último que sumamos al catálogo.', 'new-h',  true,  'newest',   4, 2, true),
-  ('destacados','Destacados','Selección recomendada por el equipo.','feat-h', false, 'featured', 8, 3, true),
-  ('mas-vendidos','Más vendidos','Los que más consultan.',        null,      true,  'most_viewed', 8, 4, false)
+  ('destacados','Destacados','Selección recomendada por el equipo.','feat-h', false, 'featured', 8, 3, true)
+-- "Más vendidos" no se crea: el sitio no tiene una sección donde dibujarla y
+-- nada incrementa la columna `views`, asi que su regla ordenaria por ceros.
+-- Si alguna vez hace falta, hay que contar las vistas y agregarle su seccion.
 on conflict (slug) do update set
   name = excluded.name,
   description = excluded.description,
