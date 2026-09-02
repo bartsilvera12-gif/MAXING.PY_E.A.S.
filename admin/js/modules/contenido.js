@@ -24,14 +24,19 @@
     contadorPlural: "slides",
     icono: '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
     tabla: "hero_slides",
-    nota: "El sitio muestra el primer slide activo. Los demás quedan guardados para poder alternarlos.",
+    // El sitio dibuja un solo hero, asi que el panel administra uno solo: sin
+    // boton de "nuevo slide" y sin campo de orden. Varios slides sin poder
+    // ordenarlos serian una trampa —no habria forma de saber cual sale—, y
+    // ordenarlos no serviria de nada porque igual se muestra uno.
+    soloEdicion: true,
+    sinBorrado: true,
+    nota: "Es el bloque grande de arriba de todo, en el inicio. Para sacarlo del sitio sin borrar su contenido, usá el interruptor “Mostrar hero” en Ajustes.",
     vacio: "Creá el contenido del hero.",
 
     columnas: [
       { label: "", render: celda.imagen("image_url") },
       { label: "Título", render: celda.principal("title", "eyebrow") },
       { label: "Botón", render: celda.texto("cta_label") },
-      { label: "Orden", clase: "num", render: celda.texto("sort_order") },
       { label: "Estado", render: celda.estado("is_active", "Activo", "Oculto") }
     ],
 
@@ -58,8 +63,7 @@
       // "Ver ofertas" cuando hay algo rebajado y "Ver novedades" cuando no,
       // asi nunca lleva a una seccion vacia.
 
-      { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },
-      { k: "is_active", label: "Slide activo", tipo: "switch", grupo: "Publicación" }
+      { k: "is_active", label: "Hero activo", tipo: "switch", grupo: "Publicación" }
     ],
 
     validar: function (d) {
