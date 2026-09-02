@@ -24,7 +24,9 @@
   var SELECT_PRODUCTOS = [
     "id, slug, sku, name, short_spec, description, price, old_price",
     "is_on_sale, discount_percent, stock_status, main_image_url, image_alt",
-    "meta_title, meta_description, canonical_url, og_title, og_description, og_image_url",
+    // Las columnas og_ no se piden: el sitio tiene sus etiquetas og: fijas en
+    // el encabezado y nunca las leyo. Traerlas era peso muerto en cada carga.
+    "meta_title, meta_description, canonical_url",
     "is_featured, sort_order",
     "brand:brands(id, slug, name, logo_url)",
     "product_categories(category:categories(slug, name))",
@@ -94,9 +96,6 @@
       metaTitulo: f.meta_title || "",
       metaDescripcion: f.meta_description || "",
       canonica: f.canonical_url || "",
-      ogTitulo: f.og_title || "",
-      ogDescripcion: f.og_description || "",
-      ogImagen: f.og_image_url || "",
       destacado: !!f.is_featured,
       orden: f.sort_order || 0
     };

@@ -433,19 +433,13 @@
 
     var swPublicado = UI.interruptor("Publicado en el sitio", p.is_published);
 
-    // --- SEO de la ficha ---
-    var fMetaTitulo = UI.campo({
-      label: "Título SEO", valor: p.meta_title,
-      pista: "Vacío: se arma con la marca y el nombre."
-    });
-    var fMetaDesc = UI.campo({ label: "Descripción SEO", tipo: "textarea", filas: 3, valor: p.meta_description });
-    var fCanonica = UI.campo({
-      label: "URL canónica", tipo: "url", valor: p.canonical_url,
-      pista: "Vacío: se usa https://maxing.py/productos/" + (p.slug || "<slug>")
-    });
-    var fOgTitulo = UI.campo({ label: "Título al compartir", valor: p.og_title });
-    var fOgDesc = UI.campo({ label: "Descripción al compartir", tipo: "textarea", filas: 2, valor: p.og_description });
-    var fOgImagen = UI.selectorImagen({ label: "Imagen al compartir", valor: p.og_image_url, carpeta: "products" });
+    // El grupo SEO se saco del formulario. Los tres campos de “compartir”
+    // (titulo, descripcion e imagen) nunca hicieron nada: el sitio tiene sus
+    // etiquetas og: fijas en el encabezado y jamas leia esos valores. Los
+    // otros tres si servian, pero el sitio ya los arma solo: el titulo con la
+    // marca y el nombre, la descripcion con la ficha corta y la URL canonica
+    // con /productos/<slug>. Las columnas siguen en la base: si alguna vez
+    // hay un valor cargado, se sigue respetando.
 
     // --- Productos relacionados ---
     var fRelacionados = UI.selectorProductos({
@@ -490,10 +484,6 @@
       h("fieldset", { class: "bloque" }, [
         h("legend", null, "Publicación"),
         swPublicado
-      ]),
-      h("fieldset", { class: "bloque" }, [
-        h("legend", null, "SEO"),
-        fMetaTitulo, fMetaDesc, fCanonica, fOgTitulo, fOgDesc, fOgImagen
       ])
     ];
 
@@ -549,13 +539,8 @@
         // es lo que hay que describir en una foto de producto.
         image_alt: null,
         is_published: swPublicado.control.checked,
-        sort_order: Number(fOrden.control.value) || 0,
-        meta_title: fMetaTitulo.control.value.trim() || null,
-        meta_description: fMetaDesc.control.value.trim() || null,
-        canonical_url: fCanonica.control.value.trim() || null,
-        og_title: fOgTitulo.control.value.trim() || null,
-        og_description: fOgDesc.control.value.trim() || null,
-        og_image_url: fOgImagen.leer()
+        sort_order: Number(fOrden.control.value) || 0
+        // Los campos SEO no se escriben: se dejan como esten en la base.
       };
 
       if (!datos.name) { UI.noti("Falta el nombre.", "error"); fNombre.control.focus(); return; }
