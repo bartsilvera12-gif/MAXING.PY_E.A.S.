@@ -202,7 +202,6 @@ values
   ('show_novedades',   'true', 'boolean', 'Mostrar novedades', null, 'secciones', 5),
   ('show_brands',      'true', 'boolean', 'Mostrar marcas', null, 'secciones', 6),
   ('show_benefits',    'true', 'boolean', 'Mostrar beneficios', null, 'secciones', 7),
-  ('show_nosotros',    'true', 'boolean', 'Mostrar "Quiénes somos" en el inicio', null, 'secciones', 8),
   ('show_setup',       'true', 'boolean', 'Mostrar sección "Setup completo"', null, 'secciones', 9),
   ('show_seo_block',   'true', 'boolean', 'Mostrar bloque editorial', null, 'secciones', 10)
 on conflict (key) do update set
