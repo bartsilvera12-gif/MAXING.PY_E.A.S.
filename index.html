@@ -17,12 +17,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MAXING.py | Tecnología e Informática en Paraguay</title>
 <meta name="description" content="Descubrí tecnología, informática, computación, gaming, periféricos y accesorios en MAXING.py. Productos seleccionados y atención personalizada en Paraguay.">
-<link rel="canonical" href="https://maxing.py/">
+<link rel="canonical" href="https://maxingpy.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MAXING.py">
 <meta property="og:title" content="MAXING.py | Tecnología e Informática en Paraguay">
 <meta property="og:description" content="Tecnología, informática, computación, gaming y accesorios. Productos seleccionados y atención personalizada en Paraguay.">
-<meta property="og:url" content="https://maxing.py/">
+<meta property="og:url" content="https://maxingpy.com/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="MAXING.py | Tecnología e Informática en Paraguay">
 <meta name="twitter:description" content="Tecnología, informática, computación, gaming y accesorios en Paraguay.">
@@ -35,9 +35,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"Organization","@id":"https://maxing.py/#org","name":"MAXING.py","url":"https://maxing.py/","slogan":"Tecnología que mejora tu día.","areaServed":"PY","contactPoint":{"@type":"ContactPoint","telephone":"+595984127274","contactType":"customer service","availableLanguage":"es"},"sameAs":["https://instagram.com/maxing.py","https://tiktok.com/@maxing.py"]},
-{"@type":"WebSite","@id":"https://maxing.py/#website","url":"https://maxing.py/","name":"MAXING.py","publisher":{"@id":"https://maxing.py/#org"},"inLanguage":"es-PY","potentialAction":{"@type":"SearchAction","target":"https://maxing.py/productos?q={search_term_string}","query-input":"required name=search_term_string"}},
-{"@type":"BreadcrumbList","@id":"https://maxing.py/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://maxing.py/"}]}
+{"@type":"Organization","@id":"https://maxingpy.com/#org","name":"MAXING.py","url":"https://maxingpy.com/","slogan":"Tecnología que mejora tu día.","areaServed":"PY","contactPoint":{"@type":"ContactPoint","telephone":"+595984127274","contactType":"customer service","availableLanguage":"es"},"sameAs":["https://instagram.com/maxing.py","https://tiktok.com/@maxing.py"]},
+{"@type":"WebSite","@id":"https://maxingpy.com/#website","url":"https://maxingpy.com/","name":"MAXING.py","publisher":{"@id":"https://maxingpy.com/#org"},"inLanguage":"es-PY","potentialAction":{"@type":"SearchAction","target":"https://maxingpy.com/productos?q={search_term_string}","query-input":"required name=search_term_string"}},
+{"@type":"BreadcrumbList","@id":"https://maxingpy.com/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://maxingpy.com/"}]}
 ]}
 </script>
 <style>
@@ -1589,7 +1589,7 @@ class Component extends DCLogic {
     }
 
     const ruta = this.rutaDe(s);
-    if (!canonica) canonica = "https://maxing.py" + (ruta === "/" ? "/" : ruta);
+    if (!canonica) canonica = "https://maxingpy.com" + (ruta === "/" ? "/" : ruta);
     return { titulo, descripcion, canonica, tipo, imagen };
   }
 
@@ -1650,7 +1650,7 @@ class Component extends DCLogic {
   // JavaScript— pero no los lectores de vista previa de WhatsApp.
   aplicarJsonLd() {
     const s = this.state;
-    const SITIO = "https://maxing.py";
+    const SITIO = "https://maxingpy.com";
     const migas = [{ "@type": "ListItem", position: 1, name: "Inicio", item: SITIO + "/" }];
     const grafo = [];
 
@@ -1738,7 +1738,7 @@ class Component extends DCLogic {
   absoluta(u) {
     if (!u) return "";
     if (/^https?:\/\//i.test(u)) return u;
-    return "https://maxing.py/" + String(u).replace(/^\.?\//, "");
+    return "https://maxingpy.com/" + String(u).replace(/^\.?\//, "");
   }
 
   // Las preguntas que corresponden a la pantalla abierta.

@@ -41,7 +41,7 @@
 const API = "https://api.neura.com.py/rest/v1";
 const ANON =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzc0MTAxNDYxLCJleHAiOjE5MzE3ODE0NjF9.7_wAph8IolPMXtgfpezSwS5XR62IdD__qhqCywLDp3Q";
-const SITIO = "https://maxing.py";
+const SITIO = "https://maxingpy.com";
 const BUCKET = "maxingpy";
 const STORAGE = "https://api.neura.com.py/storage/v1/object/public/" + BUCKET + "/";
 
@@ -130,7 +130,7 @@ async function htmlBase(req) {
     /* se prueba por HTTP */
   }
 
-  const host = (req && req.headers && (req.headers["x-forwarded-host"] || req.headers.host)) || "maxing.py";
+  const host = (req && req.headers && (req.headers["x-forwarded-host"] || req.headers.host)) || "maxingpy.com";
   const proto = host.indexOf("localhost") === 0 ? "http" : "https";
   const r = await fetch(proto + "://" + host + "/index.html");
   if (!r.ok) throw new Error("No se pudo leer index.html (" + r.status + ")");

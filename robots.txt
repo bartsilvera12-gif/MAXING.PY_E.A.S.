@@ -5,4 +5,4 @@ Disallow: /cuenta
 Disallow: /admin
 Disallow: /admin/
 
-Sitemap: https://maxing.py/sitemap.xml
+Sitemap: https://maxingpy.com/sitemap.xml

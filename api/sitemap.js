@@ -17,7 +17,7 @@
 const API = "https://api.neura.com.py/rest/v1";
 const ANON =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzc0MTAxNDYxLCJleHAiOjE5MzE3ODE0NjF9.7_wAph8IolPMXtgfpezSwS5XR62IdD__qhqCywLDp3Q";
-const SITIO = "https://maxing.py";
+const SITIO = "https://maxingpy.com";
 
 async function traer(ruta) {
   const r = await fetch(API + ruta, {

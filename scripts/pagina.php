@@ -35,7 +35,7 @@
 $RUTA_HTML = __DIR__ . '/index.html';
 $API   = 'https://api.neura.com.py/rest/v1';
 $ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzc0MTAxNDYxLCJleHAiOjE5MzE3ODE0NjF9.7_wAph8IolPMXtgfpezSwS5XR62IdD__qhqCywLDp3Q';
-$SITIO = 'https://maxing.py';
+$SITIO = 'https://maxingpy.com';
 $STORAGE = 'https://api.neura.com.py/storage/v1/object/public/maxingpy/';
 
 /* ------------------------------------------------------------------ */

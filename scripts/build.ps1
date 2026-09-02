@@ -14,7 +14,7 @@
 
 param(
   [switch]$Zip,
-  [string]$Sitio = "https://maxing.py"
+  [string]$Sitio = "https://maxingpy.com"
 )
 
 $ErrorActionPreference = 'Stop'
