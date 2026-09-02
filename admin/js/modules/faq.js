@@ -19,14 +19,16 @@
   crudSimple({
     clave: "faq-temas",
     titulo: "Temas de FAQ",
-    sub: "Cómo se agrupan las preguntas",
+    sub: "Para encontrarlas en el panel, no salen en el sitio",
     grupo: "Contenido",
     singular: "Tema",
     contadorSingular: "tema",
     contadorPlural: "temas",
     icono: '<path d="M3 7h18"/><path d="M3 12h18"/><path d="M3 17h12"/>',
     tabla: "faq_categories",
-    nota: "Los temas agrupan las preguntas dentro del panel. En el sitio se muestran todas juntas.",
+    nota:
+      "Los temas son para ordenar las preguntas acá adentro: en el sitio no aparecen como títulos, " +
+      "las preguntas se muestran todas juntas en una sola lista.",
     vacio: "Creá el primer tema.",
 
     columnas: [
@@ -84,6 +86,16 @@
 
     columnas: [
       { label: "Pregunta", render: celda.principal("question", "answer") },
+      // El tema elegido no se veia en ninguna parte del panel, que es
+      // justamente para lo unico que sirve.
+      {
+        label: "Tema",
+        render: function (f) {
+          var t = temas.filter(function (x) { return x.id === f.faq_category_id; })[0];
+          if (!t) return h("span", { class: "chip", text: "Sin tema" });
+          return h("span", { style: "font-size:12.5px;font-weight:600", text: t.name });
+        }
+      },
       {
         label: "Dónde se muestra",
         render: function (f) {
