@@ -67,11 +67,6 @@
           h("tr", null, [
             h("td", null, [celda.principal("name", "slug")(c)]),
             h("td", null, [
-              c.is_automatic
-                ? h("span", { class: "insignia sin-punto", text: "Automática" })
-                : h("span", { class: "chip", text: "Curada" })
-            ]),
-            h("td", null, [
               h("span", {
                 style: "font-size:12.5px;color:var(--gris)",
                 text: c.is_automatic ? REGLAS[c.auto_rule] || "—" : (c.product_collections || []).length + " productos elegidos"
@@ -117,7 +112,6 @@
               h("thead", null, [
                 h("tr", null, [
                   h("th", null, "Colección"),
-                  h("th", null, "Tipo"),
                   h("th", null, "Contenido"),
                   h("th", { class: "num" }, "Máximo"),
                   h("th", null, "Estado"),
