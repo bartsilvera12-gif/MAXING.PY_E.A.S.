@@ -134,7 +134,14 @@ $htaccess = @'
 # MAXING.py — sitio estático sobre Apache (Hostinger).
 #
 # Traduce los rewrites de vercel.json. El catálogo lo sirve Supabase desde el
-# navegador; acá no corre nada del lado del servidor.
+# navegador. Lo único que corre del lado del servidor es pagina.php, que arma
+# la metadata de cada ficha y cada categoría para los lectores de vista previa
+# de WhatsApp y Facebook, que no ejecutan JavaScript.
+
+# Que el indice de una carpeta sea index.html. Panel Hito lo dejo anotado
+# despues de pelearse con esto: algunos Hostinger sirven index.txt si no se
+# les dice.
+DirectoryIndex index.html
 
 # Sin listados de carpeta: entrar a /categorias mostraba los archivos.
 Options -Indexes
