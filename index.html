@@ -1242,7 +1242,6 @@ let REDES = {};
 let BENEFICIOS = [];
 let HERO = null;
 let SEO = {};
-let TEMAS_FAQ = [];
 let FAQS = [];
 
 // Derivados del catalogo. Se recalculan cada vez que llegan datos nuevos.
@@ -1271,7 +1270,6 @@ function aplicarDatos(d) {
   BENEFICIOS = d.beneficios || [];
   HERO = d.hero || null;
   SEO = d.seo || {};
-  TEMAS_FAQ = d.temasFaq || [];
   FAQS = d.faqs || [];
 
   POR_ID = {};

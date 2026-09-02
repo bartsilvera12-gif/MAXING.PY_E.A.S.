@@ -79,13 +79,6 @@
     return "Gs. " + Math.round(v).toLocaleString("es-PY").replace(/,/g, ".");
   }
 
-  function fecha(iso) {
-    if (!iso) return "—";
-    var d = new Date(iso);
-    if (isNaN(d)) return "—";
-    return d.toLocaleDateString("es-PY", { day: "2-digit", month: "short", year: "numeric" });
-  }
-
   // Slug propuesto a partir del nombre. Editable: el admin puede corregirlo,
   // pero no se regenera solo despues de publicar, porque cambiarlo romperia
   // los enlaces que ya circulan.
@@ -854,7 +847,6 @@
     h: h,
     vaciar: vaciar,
     gs: gs,
-    fecha: fecha,
     slugificar: slugificar,
     noti: noti,
     explicar: explicar,

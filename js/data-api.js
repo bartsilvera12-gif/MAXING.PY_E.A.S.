@@ -153,7 +153,6 @@
         db.from("social_links").select("*").eq("is_active", true).order("sort_order"),
         db.from("site_settings").select("key, value, value_type, group_key"),
         db.from("seo_pages").select("*"),
-        db.from("faq_categories").select("id, slug, name, description, sort_order").eq("is_active", true).order("sort_order"),
         db.from("faqs").select("id, faq_category_id, question, answer, sort_order, faq_product_categories(category_id), faq_products(product_id)").eq("is_active", true).order("sort_order")
       ]).then(function (r) {
         // Si falla la consulta de productos no hay sitio que mostrar; el
@@ -214,10 +213,12 @@
           redes: redes,
           ajustes: armarAjustes(r[9].data),
           seo: seo,
-          temasFaq: r[11].data || [],
+          // Los temas agrupan las preguntas dentro del panel; el sitio las
+          // muestra juntas, asi que no hace falta traerlos.
+          //
           // Una pregunta sin respuesta no se muestra: RLS ya las filtra, esto
           // cubre el caso de un espacio en blanco.
-          faqs: (r[12].data || []).filter(function (f) {
+          faqs: (r[11].data || []).filter(function (f) {
             return f.answer && f.answer.trim();
           }).map(function (f) {
             return {
