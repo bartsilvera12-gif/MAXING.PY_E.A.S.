@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$Root = (Split-Path -Parent $PSScriptRoot),
   [int]$Port = 3000
 )
@@ -71,10 +71,51 @@ while ($listener.IsListening) {
     foreach ($c in $candidatos) {
       $full = Join-Path $Root ($c.TrimStart('/') -replace '/', '\')
       try { $resolved = (Resolve-Path -LiteralPath $full -ErrorAction Stop).Path } catch { $resolved = $null }
+      # Solo sirve archivos: /productos es a la vez una ruta de la app y la
+      # carpeta de las fotos. Sin este filtro la carpeta "ganaba" y la ruta
+      # devolvia 404 en local, cosa que en Vercel no pasa porque ahi el
+      # rewrite solo cede ante un archivo.
+      if ($resolved -and -not (Test-Path -LiteralPath $resolved -PathType Leaf)) { $resolved = $null }
       if ($resolved) { break }
     }
 
-    if ($resolved -and $resolved.StartsWith($Root, [System.StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $resolved -PathType Leaf)) {
+    # Emula lo que hace api/pagina.js en Vercel: cuando /productos/<slug> cae
+    # en el index.html, se le saca al bloque <helmet> la metadata generica y
+    # se le empalma la de esa pagina antes de </head>. El bloque no se arma
+    # aca: se lee de .claude/meta-local/<slug>.html, que se genera con la
+    # funcion de verdad. Asi la logica vive en un solo lugar y esto solo
+    # prueba el empalme, que es lo que puede romper el frontend.
+    $metaLocal = $null
+    if ($resolved -and $ruta -match '^/(productos|categorias)/([^/]+)$') {
+      $slugPedido = $Matches[2]
+      $fixture = Join-Path $Root (".claude\meta-local\" + $slugPedido + ".html")
+      if ((Test-Path -LiteralPath $fixture) -and $resolved.EndsWith("index.html", [System.StringComparison]::OrdinalIgnoreCase)) {
+        $metaLocal = [System.IO.File]::ReadAllText($fixture, [System.Text.Encoding]::UTF8)
+      }
+    }
+
+    if ($metaLocal) {
+      $html = [System.IO.File]::ReadAllText($resolved, [System.Text.Encoding]::UTF8)
+      $html = [regex]::Replace($html, '(?s)<helmet>.*?</helmet>', {
+        param($m)
+        $b = $m.Value
+        $b = [regex]::Replace($b, '(?is)[ \t]*<title>.*?</title>\s*\r?\n?', '')
+        $b = [regex]::Replace($b, '(?i)[ \t]*<meta\s+name="description"[^>]*>\s*\r?\n?', '')
+        $b = [regex]::Replace($b, '(?i)[ \t]*<link\s+rel="canonical"[^>]*>\s*\r?\n?', '')
+        $b = [regex]::Replace($b, '(?i)[ \t]*<meta\s+property="og:[^"]*"[^>]*>\s*\r?\n?', '')
+        $b = [regex]::Replace($b, '(?i)[ \t]*<meta\s+name="twitter:[^"]*"[^>]*>\s*\r?\n?', '')
+        return $b
+      })
+      $html = $html.Replace("</head>", "`n" + $metaLocal + "</head>")
+      $bytes = [System.Text.Encoding]::UTF8.GetBytes($html)
+      $res.ContentType = 'text/html; charset=utf-8'
+      $res.Headers.Add('Cache-Control', 'no-store')
+      $res.StatusCode = 200
+      $res.ContentLength64 = $bytes.Length
+      if ($req.HttpMethod -ne 'HEAD') { $res.OutputStream.Write($bytes, 0, $bytes.Length) }
+      Write-Host "200 $($req.Url.AbsolutePath) (metadata local)"
+    }
+    elseif ($resolved -and $resolved.StartsWith($Root, [System.StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $resolved -PathType Leaf)) {
       $bytes = [System.IO.File]::ReadAllBytes($resolved)
       $ext = [System.IO.Path]::GetExtension($resolved).ToLower()
       $ct = $mime[$ext]

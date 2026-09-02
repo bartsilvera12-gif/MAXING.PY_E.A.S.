@@ -2,6 +2,11 @@
   "outputDirectory": ".",
   "cleanUrls": false,
   "trailingSlash": false,
+  "functions": {
+    "api/pagina.js": {
+      "includeFiles": "index.html"
+    }
+  },
   "rewrites": [
     { "source": "/politicadeprivacidad", "destination": "/politicadeprivacidad.html" },
     { "source": "/admin", "destination": "/admin/index.html" },
@@ -10,8 +15,8 @@
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
 
     { "source": "/productos", "destination": "/index.html" },
-    { "source": "/productos/:slug", "destination": "/index.html" },
-    { "source": "/categorias/:slug", "destination": "/index.html" },
+    { "source": "/productos/:slug", "destination": "/api/pagina?tipo=producto&slug=:slug" },
+    { "source": "/categorias/:slug", "destination": "/api/pagina?tipo=categoria&slug=:slug" },
     { "source": "/nosotros", "destination": "/index.html" },
     { "source": "/favoritos", "destination": "/index.html" },
     { "source": "/lista-de-consulta", "destination": "/index.html" }

@@ -1563,6 +1563,9 @@ class Component extends DCLogic {
     // la misma para las doce categorías: apuntarlas todas al mismo lugar le
     // diría al buscador que son la misma página.
     let canonica = "";
+    // og:type e og:image acompanan a la pagina: "product" solo en una ficha.
+    let tipo = "website";
+    let imagen = "";
 
     if (s.page === "product") {
       const p = PRODUCTS.filter((x) => x.slug === s.pslug)[0];
@@ -1570,6 +1573,8 @@ class Component extends DCLogic {
         titulo = p.metaTitulo || [p.brand, p.name].filter(Boolean).join(" ") + " — MAXING.py";
         descripcion = p.metaDescripcion || p.spec || descripcion;
         if (p.canonica) canonica = p.canonica;
+        tipo = "product";
+        if (p.galeria && p.galeria.length) imagen = this.absoluta(p.galeria[0].url);
       }
     }
 
@@ -1579,17 +1584,33 @@ class Component extends DCLogic {
         titulo = c.seoTitulo || c.name + " — MAXING.py";
         descripcion = c.seoDescripcion || c.count || descripcion;
         if (c.canonica) canonica = c.canonica;
+        if (c.foto) imagen = this.absoluta(c.foto);
       }
     }
 
     const ruta = this.rutaDe(s);
     if (!canonica) canonica = "https://maxing.py" + (ruta === "/" ? "/" : ruta);
-    return { titulo, descripcion, canonica };
+    return { titulo, descripcion, canonica, tipo, imagen };
+  }
+
+  // Escribe una etiqueta del encabezado. Si el valor viene vacio la saca en
+  // vez de dejarla en blanco: una og:image vacia hace que la vista previa no
+  // muestre ninguna foto en lugar de caer en la del sitio.
+  fijarMeta(selector, valor) {
+    const el = document.querySelector(selector);
+    if (!valor) { if (el) el.remove(); return; }
+    if (el) { if (el.getAttribute("content") !== valor) el.setAttribute("content", valor); return; }
+    const nuevo = document.createElement("meta");
+    const m = selector.match(/\[(property|name)="([^"]+)"\]/);
+    if (!m) return;
+    nuevo.setAttribute(m[1], m[2]);
+    nuevo.setAttribute("content", valor);
+    document.head.appendChild(nuevo);
   }
 
   aplicarSeo() {
     try {
-      const { titulo, descripcion, canonica } = this.seoDe();
+      const { titulo, descripcion, canonica, tipo, imagen } = this.seoDe();
 
       if (titulo && document.title !== titulo) document.title = titulo;
 
@@ -1604,6 +1625,19 @@ class Component extends DCLogic {
       }
       if (link.getAttribute("href") !== canonica) link.setAttribute("href", canonica);
 
+      // Open Graph al navegar dentro del sitio. En la primera carga estas
+      // etiquetas ya vienen bien desde el servidor (api/pagina.js), que es lo
+      // que leen WhatsApp y Facebook. Esto es para que el DOM no quede
+      // diciendo el producto anterior despues de moverse por la vidriera.
+      this.fijarMeta('meta[property="og:type"]', tipo);
+      this.fijarMeta('meta[property="og:title"]', titulo);
+      this.fijarMeta('meta[property="og:description"]', descripcion);
+      this.fijarMeta('meta[property="og:url"]', canonica);
+      this.fijarMeta('meta[name="twitter:title"]', titulo);
+      this.fijarMeta('meta[name="twitter:description"]', descripcion);
+      this.fijarMeta('meta[property="og:image"]', imagen);
+      this.fijarMeta('meta[name="twitter:image"]', imagen);
+      this.fijarMeta('meta[property="og:image:alt"]', imagen ? titulo : "");
 
       this.aplicarJsonLd();
     } catch (e) { /* el SEO del HTML sigue siendo valido */ }
