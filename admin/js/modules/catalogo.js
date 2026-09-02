@@ -72,12 +72,14 @@
       },
 
       { k: "image_url", label: "Foto", tipo: "imagen", carpeta: "categories", grupo: "Apariencia" },
-      {
-        k: "icon_svg", label: "Ícono (path SVG)", grupo: "Apariencia",
-        pista: "Se usa solo cuando la categoría no tiene foto."
-      },
-      { k: "color", label: "Color de fondo", tipo: "color", grupo: "Apariencia" },
-      { k: "ink_color", label: "Color del texto", tipo: "color", grupo: "Apariencia" },
+      // Del grupo Apariencia queda solo la foto, que es contenido. Salieron:
+      //   · "Ícono (path SVG)" pedía escribir el trazo de un SVG a mano, y
+      //     además el sitio solo lo dibuja cuando la categoría no tiene foto.
+      //   · "Color del texto" pintaba ese mismo ícono, así que tampoco se veía.
+      //   · "Color de fondo" sí se ve —es la franja detrás del nombre— pero
+      //     elegirlo es trabajo de diseño y ya está a tono con la marca.
+      // Las columnas siguen en la base y el guardado no las toca, así que las
+      // tarjetas del inicio se siguen viendo igual.
 
       { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },
       { k: "is_active", label: "Categoría activa", tipo: "switch", grupo: "Publicación" }
