@@ -43,8 +43,10 @@
       { k: "title", label: "Título", grupo: "Textos", placeholder: "Tecnología que mejora tu día." },
       { k: "subtitle", label: "Bajada", tipo: "textarea", filas: 3, grupo: "Textos" },
 
+      // Sin texto alternativo: la imagen del hero es decorativa —va con
+      // alt="" y aria-hidden— porque el titulo ya dice lo que hay que decir.
+      // Un texto ahi seria ruido para quien usa lector de pantalla.
       { k: "image_url", label: "Imagen de fondo", tipo: "imagen", carpeta: "hero", grupo: "Imagen" },
-      { k: "image_alt", label: "Texto alternativo", grupo: "Imagen" },
 
       { k: "cta_label", label: "Botón principal", grupo: "Botones", placeholder: "Explorar productos" },
       {
@@ -52,8 +54,9 @@
         pista: "catalog, nosotros, whatsapp, #ancla o una URL completa.",
         placeholder: "catalog"
       },
-      { k: "cta_secondary_label", label: "Botón secundario", grupo: "Botones" },
-      { k: "cta_secondary_target", label: "Destino del secundario", grupo: "Botones", placeholder: "whatsapp" },
+      // El boton secundario no se configura: el sitio lo decide solo. Ofrece
+      // "Ver ofertas" cuando hay algo rebajado y "Ver novedades" cuando no,
+      // asi nunca lleva a una seccion vacia.
 
       { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },
       { k: "is_active", label: "Slide activo", tipo: "switch", grupo: "Publicación" }
