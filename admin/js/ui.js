@@ -417,13 +417,12 @@
     var sinFoto = h("div", { class: "vista", style: "display:grid;place-items:center;color:#b8beb8;font-size:11px" }, "sin imagen");
 
     var entrada = h("input", { type: "file", accept: "image/*", style: "display:none" });
-    var manual = h("input", { type: "text", placeholder: "productos/archivo.jpg" });
     var zona = h("div", { class: "zona-suelta", text: "Subir imagen o arrastrarla acá" });
     var contVista = h("div", { style: "flex:none" });
 
     function refrescar() {
       vaciar(contVista);
-      manual.value = ruta;
+      quitar.hidden = !ruta;
       if (ruta) {
         vista.src = urlImagen(ruta);
         contVista.appendChild(vista);
@@ -463,23 +462,34 @@
     entrada.addEventListener("change", function () {
       tomar(entrada.files[0]);
     });
-    manual.addEventListener("input", function () {
-      ruta = manual.value.trim();
-      refrescar();
-    });
 
+    // Antes había además un campo para escribir la ruta a mano. Se sacó: es
+    // una herramienta de programador, y quien administra sube la foto. Lo que
+    // sí hacía falta era poder quitarla, que antes solo se lograba vaciando
+    // ese campo.
+    var quitar = h(
+      "button",
+      {
+        class: "btn btn-plano btn-borrar",
+        type: "button",
+        style: "margin-top:8px",
+        onclick: function () {
+          ruta = "";
+          refrescar();
+        }
+      },
+      "Quitar imagen"
+    );
+
+    // Recién ahora: `refrescar` muestra u oculta el botón de quitar, así que
+    // no puede correr antes de que el botón exista.
     refrescar();
 
     var envoltorio = h("div", { class: "campo" }, [
       h("span", { class: "etiqueta", text: opciones.label }),
       h("div", { class: "subida" }, [
         contVista,
-        h("div", { class: "controles" }, [
-          zona,
-          entrada,
-          h("span", { class: "pista", style: "margin:8px 0 4px", text: "o escribí la ruta si la imagen ya está en el sitio" }),
-          manual
-        ])
+        h("div", { class: "controles" }, [zona, entrada, quitar])
       ])
     ]);
 
@@ -504,7 +514,6 @@
     var carpeta = opciones.carpeta || "products";
 
     var grilla = h("div", { class: "galeria" });
-    var ruta = h("input", { type: "text", placeholder: "productos/archivo.jpg" });
     var entrada = h("input", { type: "file", accept: "image/*", multiple: true, style: "display:none" });
     var zona = h("div", { class: "zona-suelta" }, "Subir imágenes o arrastrarlas acá");
 
@@ -595,19 +604,6 @@
     });
     entrada.addEventListener("change", function () { subir(entrada.files); });
 
-    var agregarRuta = h(
-      "button",
-      {
-        class: "btn",
-        type: "button",
-        onclick: function () {
-          agregar(ruta.value.trim());
-          ruta.value = "";
-        }
-      },
-      "Agregar"
-    );
-
     pintar();
 
     var envoltorio = h("div", { class: "campo" }, [
@@ -619,9 +615,7 @@
       }),
       grilla,
       zona,
-      entrada,
-      h("span", { class: "pista", style: "margin:9px 0 4px", text: "o agregá una que ya esté en el sitio" }),
-      h("div", { style: "display:flex;gap:7px" }, [ruta, agregarRuta])
+      entrada
     ]);
 
     envoltorio.leer = function () {

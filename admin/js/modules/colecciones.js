@@ -132,7 +132,21 @@
     c = c || { slug: "", name: "", description: "", anchor_id: "", is_automatic: false, auto_rule: "featured", max_items: 8, sort_order: 0, is_active: true };
 
     var fNombre = UI.campo({ label: "Nombre", valor: c.name, placeholder: "Destacados" });
-    var fSlug = UI.campo({ label: "Slug", valor: c.slug, placeholder: "destacados" });
+    var fSlug = UI.campo({
+      label: "Slug", valor: c.slug, placeholder: "destacados",
+      pista: esNueva ? "Se escribe solo desde el nombre." : "Es el identificador de la colección; conviene no cambiarlo."
+    });
+
+    // Igual que en el resto del panel: el slug sigue al nombre mientras la
+    // colección es nueva y hasta que alguien lo edite a mano. En una que ya
+    // existe no se toca.
+    if (esNueva) {
+      let slugTocado = false;
+      fSlug.control.addEventListener("input", () => { slugTocado = true; });
+      fNombre.control.addEventListener("input", () => {
+        if (!slugTocado) fSlug.control.value = UI.slugificar(fNombre.control.value);
+      });
+    }
 
     var swAuto = UI.interruptor("Se llena automáticamente", c.is_automatic, function (v) {
       fRegla.style.display = v ? "" : "none";
@@ -209,8 +223,9 @@
 
       boton.disabled = true;
       boton.textContent = "Guardando…";
+      // El alta devuelve el id para poder reacomodar el orden despues.
       var r = esNueva
-        ? await sb.from("collections").insert(datos)
+        ? await sb.from("collections").insert(datos).select("id").single()
         : await sb.from("collections").update(datos).eq("id", c.id);
 
       if (r.error) {
@@ -219,6 +234,10 @@
         boton.textContent = esNueva ? "Crear" : "Guardar cambios";
         return;
       }
+
+      // Poner una coleccion en 1 corre a las demas un lugar.
+      await reordenarTabla("collections", esNueva ? r.data.id : c.id, datos.sort_order);
+
       UI.cerrarCajon();
       UI.noti("Colección guardada.");
       App.recargar();

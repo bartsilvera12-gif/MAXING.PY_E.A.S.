@@ -37,7 +37,12 @@
 
     campos: [
       { k: "name", label: "Nombre", grupo: "Identificación", placeholder: "Envíos" },
-      { k: "slug", label: "Slug", grupo: "Identificación", placeholder: "envios" },
+      {
+        k: "slug", label: "Slug", grupo: "Identificación",
+        desde: "name",
+        pista: "Se escribe solo desde el nombre.",
+        placeholder: "envios"
+      },
       { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },
       { k: "is_active", label: "Tema activo", tipo: "switch", grupo: "Publicación" }
     ],

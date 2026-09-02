@@ -672,6 +672,10 @@
           if (rr.error) throw rr.error;
         }
 
+        // El orden se acomoda solo: poner un producto en 1 corre al resto un
+        // lugar, en vez de dejar dos con el mismo numero.
+        await reordenarTabla("products", idProd, datos.sort_order);
+
         UI.cerrarCajon();
         UI.noti(id ? "Producto actualizado." : "Producto creado.");
         App.recargar();

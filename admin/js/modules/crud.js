@@ -56,6 +56,42 @@
     return campoUI;
   }
 
+  // Reacomoda el orden de una tabla después de guardar.
+  //
+  // Sin esto, poner 1 en un registro dejaba dos con el número 1 y el desempate
+  // quedaba al azar. Ahora el registro se mete en la posición pedida y los
+  // demás corren un lugar, como cuando se inserta una carta en un mazo.
+  //
+  // `alcance` limita el reordenamiento a un subconjunto: el pie de página
+  // ordena por separado las tarjetas operativas y la columna de ayuda, así que
+  // mover una no debe tocar las otras.
+  async function reordenar(tabla, id, pedido, alcance, valorAlcance) {
+    // Sin saber a que grupo pertenece la fila no se puede reordenar: hacerlo
+    // sobre toda la tabla mezclaria grupos que se ordenan por separado.
+    if (alcance && valorAlcance == null) return;
+
+    var q = sb.from(tabla).select("id, sort_order").order("sort_order");
+    if (alcance) q = q.eq(alcance, valorAlcance);
+    var r = await q;
+    if (r.error || !r.data) return;
+
+    var otros = r.data.filter(function (f) { return f.id !== id; });
+    // El pedido se acota a lo posible: 0 o un número gigante no deberían
+    // dejar la lista con huecos.
+    var pos = Math.max(1, Math.min(Number(pedido) || otros.length + 1, otros.length + 1));
+    otros.splice(pos - 1, 0, { id: id, sort_order: pos });
+
+    // Solo se escriben las filas que de verdad cambiaron de número.
+    for (var i = 0; i < otros.length; i++) {
+      var nuevo = i + 1;
+      if (otros[i].sort_order === nuevo) continue;
+      var u = await sb.from(tabla).update({ sort_order: nuevo }).eq("id", otros[i].id);
+      if (u.error) return;
+    }
+  }
+
+  window.reordenarTabla = reordenar;
+
   window.crudSimple = function (def) {
     registrarModulo(def.clave, {
       titulo: def.titulo,
@@ -189,6 +225,24 @@
             return b.querySelector(".campo, .interruptor");
           });
 
+          // El slug se escribe solo mientras se tipea el nombre, pero SOLO en
+          // un registro nuevo. En uno que ya existe no se toca: el slug es la
+          // URL, y cambiarlo romperia los enlaces que ya circulan. Tambien
+          // deja de seguir al nombre en cuanto alguien lo edita a mano.
+          def.campos.forEach(function (campo) {
+            if (!campo.desde || fila) return;
+            var destino = controles[campo.k];
+            var origen = controles[campo.desde];
+            if (!destino || !origen) return;
+
+            var tocadoAMano = false;
+            destino.control.addEventListener("input", function () { tocadoAMano = true; });
+            origen.control.addEventListener("input", function () {
+              if (tocadoAMano) return;
+              destino.control.value = UI.slugificar(origen.control.value);
+            });
+          });
+
           // Un modulo puede sumar controles propios —relaciones, listas— que
           // no entran en un campo plano. Se dibujan al final y se guardan con
           // el hook `alGuardar`.
@@ -253,6 +307,15 @@
               if (r.error) throw r.error;
               if (def.alGuardar) {
                 await def.alGuardar(fila, datos, extras, r);
+              }
+
+              // Si la tabla se ordena a mano, se reacomoda el resto.
+              if ("sort_order" in datos) {
+                var idGuardado = fila ? fila[def.pk || "id"] : r.data && r.data.id;
+                if (idGuardado) {
+                  await reordenar(def.tabla, idGuardado, datos.sort_order,
+                    def.alcanceOrden, datos[def.alcanceOrden]);
+                }
               }
               UI.cerrarCajon();
               UI.noti(fila ? "Cambios guardados." : "Creado.");

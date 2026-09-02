@@ -2231,8 +2231,10 @@ class Component extends DCLogic {
         resto: parrafos.slice(1),
         foto: c && c.image_url ? MaxingDB.imagen(c.image_url) : (respaldo || ""),
         hayFoto: !!(c && c.image_url),
-        alt: (c && c.image_alt) || "",
-        izquierda: !!(c && c.image_side === "left"),
+        // El texto alternativo ya no se carga a mano: si no hay uno guardado
+        // se describe la foto con el titulo de la seccion, que es de lo que
+        // habla la imagen.
+        alt: (c && (c.image_alt || c.title)) || "",
         cta: (c && c.cta_label) || "",
         hayCta: !!(c && c.cta_label),
         abrirCta: this.accionDestino(c && c.cta_target, this.go("catalog"))
@@ -2486,7 +2488,11 @@ class Component extends DCLogic {
       // Salen de los interruptores de Ajustes. Por defecto visibles: si un
       // ajuste se borra o todavía no existe, la sección se sigue mostrando.
       // Apagar una no borra su contenido, solo la saca del inicio.
-      verHero: ver("show_hero"),
+      // Dos llaves apagan el hero: el interruptor de Ajustes y el estado del
+      // propio hero. Al ocultarlo desde su tabla, `data-api` deja de traerlo y
+      // HERO queda en null; sin esta condicion el bloque seguia dibujandose
+      // con los textos de respaldo, o sea que el boton "Oculto" no hacia nada.
+      verHero: ver("show_hero") && !!HERO,
       verCategorias: ver("show_categories"),
       verDestacados: ver("show_featured"),
       verSetup: ver("show_setup"),

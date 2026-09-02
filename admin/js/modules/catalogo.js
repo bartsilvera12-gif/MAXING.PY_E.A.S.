@@ -61,7 +61,8 @@
       { k: "name", label: "Nombre", grupo: "Identificación", placeholder: "Notebooks" },
       {
         k: "slug", label: "Slug", grupo: "Identificación",
-        pista: "Identificador estable. Cambiarlo afecta los enlaces guardados.",
+        desde: "name",
+        pista: "Se escribe solo desde el nombre. En una categoría que ya existe no se toca: es su URL.",
         placeholder: "notebooks"
       },
       {
@@ -123,7 +124,12 @@
 
     campos: [
       { k: "name", label: "Nombre", grupo: "Identificación", placeholder: "MSI" },
-      { k: "slug", label: "Slug", grupo: "Identificación", placeholder: "msi" },
+      {
+        k: "slug", label: "Slug", grupo: "Identificación",
+        desde: "name",
+        pista: "Se escribe solo desde el nombre.",
+        placeholder: "msi"
+      },
       { k: "logo_url", label: "Logo", tipo: "imagen", carpeta: "brands", grupo: "Identificación" },
       { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },
       { k: "is_active", label: "Marca activa", tipo: "switch", grupo: "Publicación" }

@@ -101,8 +101,6 @@
     columnas: [
       { label: "", render: celda.imagen("image_url") },
       { label: "Sección", render: celda.principal("title", "section_key") },
-      { label: "Imagen", render: celda.texto("image_side") },
-      { label: "Orden", clase: "num", render: celda.texto("sort_order") },
       { label: "Estado", render: celda.estado("is_visible", "Visible", "Oculta") }
     ],
 
@@ -122,23 +120,17 @@
       // dibuja CON imagen. En las demás ofrecer una subida seria mentir: la
       // foto se guardaria y no se veria en ningun lado.
       { k: "image_url", label: "Imagen", tipo: "imagen", carpeta: "sections", grupo: "Imagen", mostrarSi: CON_IMAGEN },
-      { k: "image_alt", label: "Texto alternativo", grupo: "Imagen", mostrarSi: CON_IMAGEN },
-      {
-        k: "image_side", label: "Lado de la imagen", tipo: "select", grupo: "Imagen",
-        mostrarSi: CON_IMAGEN,
-        opciones: [
-          { valor: "right", label: "Derecha" },
-          { valor: "left", label: "Izquierda" },
-          { valor: "none", label: "Sin imagen" }
-        ]
-      },
+      // Ya no se piden el texto alternativo ni el lado de la imagen. El
+      // alternativo lo resuelve el sitio con el titulo de la seccion, y el
+      // lado esta fijo en el diseno: elegirlo no cambiaba nada.
 
       // Solo "setup" dibuja un boton en el sitio; en las demas secciones
       // configurarlo no mostraria nada.
       { k: "cta_label", label: "Botón", grupo: "Botón", mostrarSi: CON_BOTON },
       { k: "cta_target", label: "Destino del botón", grupo: "Botón", placeholder: "catalog", mostrarSi: CON_BOTON },
 
-      { k: "sort_order", label: "Orden", tipo: "number", min: 0, pordefecto: 0, grupo: "Publicación" },
+      // Sin "Orden": el sitio busca cada seccion por su clave y las dibuja
+      // en el lugar que les corresponde, asi que el numero no movia nada.
       { k: "is_visible", label: "Sección visible", tipo: "switch", grupo: "Publicación" }
     ],
 
@@ -205,6 +197,8 @@
     icono: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15h18"/>',
     tabla: "footer_items",
     orden: ["group_key", "sort_order"],
+    // Cada grupo del pie se ordena por separado.
+    alcanceOrden: "group_key",
     nota:
       "Las columnas “Productos” y “Marcas” del pie se arman solas con las categorías y marcas activas. " +
       "Acá se administran las tarjetas de envíos, retiro, garantía y atención, y la columna de ayuda.",
