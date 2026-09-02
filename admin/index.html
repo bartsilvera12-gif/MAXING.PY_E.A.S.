@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="/admin/css/admin.css">
+<link rel="stylesheet" href="/admin/css/admin.css?v=2026-09-02">
 </head>
 <body>
 
@@ -27,22 +27,26 @@
   </div>
 </noscript>
 
-<script src="/js/config.js"></script>
+<!-- El ?v= es para que el navegador no siga usando una copia vieja del panel
+     despues de una actualizacion. Hay que subirlo cada vez que cambia algun
+     archivo de /admin/js: sin eso, un arreglo se sube pero el administrador
+     sigue viendo el codigo anterior hasta vaciar la cache a mano. -->
+<script src="/js/config.js?v=2026-09-02"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="/admin/js/supabase.js"></script>
-<script src="/admin/js/auth.js"></script>
-<script src="/admin/js/ui.js"></script>
-<script src="/admin/js/app.js"></script>
+<script src="/admin/js/supabase.js?v=2026-09-02"></script>
+<script src="/admin/js/auth.js?v=2026-09-02"></script>
+<script src="/admin/js/ui.js?v=2026-09-02"></script>
+<script src="/admin/js/app.js?v=2026-09-02"></script>
 
 <!-- El orden de los modulos define el orden del menu lateral. -->
-<script src="/admin/js/modules/resumen.js"></script>
-<script src="/admin/js/modules/crud.js"></script>
-<script src="/admin/js/modules/productos.js"></script>
-<script src="/admin/js/modules/catalogo.js"></script>
-<script src="/admin/js/modules/colecciones.js"></script>
-<script src="/admin/js/modules/contenido.js"></script>
-<script src="/admin/js/modules/faq.js"></script>
-<script src="/admin/js/modules/sitio.js"></script>
+<script src="/admin/js/modules/resumen.js?v=2026-09-02"></script>
+<script src="/admin/js/modules/crud.js?v=2026-09-02"></script>
+<script src="/admin/js/modules/productos.js?v=2026-09-02"></script>
+<script src="/admin/js/modules/catalogo.js?v=2026-09-02"></script>
+<script src="/admin/js/modules/colecciones.js?v=2026-09-02"></script>
+<script src="/admin/js/modules/contenido.js?v=2026-09-02"></script>
+<script src="/admin/js/modules/faq.js?v=2026-09-02"></script>
+<script src="/admin/js/modules/sitio.js?v=2026-09-02"></script>
 
 <script>
   App.iniciar().catch(function (e) {

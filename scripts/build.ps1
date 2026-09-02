@@ -196,10 +196,18 @@ $htaccess = @'
 # El panel no se indexa: se refuerza con su propio .htaccess, porque el
 # X-Robots-Tag de vercel.json no viaja al paquete.
 $htAdmin = @'
-# El panel de administración no se indexa nunca.
+# El panel de administracion no se indexa nunca.
 <IfModule mod_headers.c>
   Header set X-Robots-Tag "noindex, nofollow"
   Header set X-Frame-Options "DENY"
+
+  # El .htaccess de la raiz cachea el JS una semana, que esta bien para la
+  # vidriera pero no para el panel: un arreglo se subia y el administrador
+  # seguia viendo el codigo viejo. Aca se pisa esa regla. "no-cache" no es
+  # "no guardar": el navegador guarda igual pero pregunta antes de usarlo.
+  <FilesMatch "\.(js|css|html)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
 </IfModule>
 '@
 [System.IO.File]::WriteAllText((Join-Path $dist 'admin\.htaccess'), $htAdmin, (New-Object System.Text.UTF8Encoding $false))
