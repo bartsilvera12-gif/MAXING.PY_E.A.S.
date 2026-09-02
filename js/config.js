@@ -27,5 +27,5 @@ window.MAXING_CONFIG = {
   // Cuando el admin sube una imagen nueva, queda como URL absoluta de
   // Storage y este prefijo no se aplica. Convive el catalogo viejo con el
   // que se cargue desde el panel.
-  IMAGE_BASE: "./"
+  IMAGE_BASE: "/"
 };

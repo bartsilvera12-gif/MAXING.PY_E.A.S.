@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
+<script src="/support.js"></script>
 <!-- Catálogo y contenido: se leen de Supabase con la anon key, que es pública
      por diseño. Lo que impide escribir no es esconderla, sino las políticas
      RLS de Postgres (supabase/migrations/002_maxingpy_rls.sql). -->
-<script src="./js/config.js"></script>
-<script src="./js/supabase-client.js"></script>
-<script src="./js/data-api.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/data-api.js"></script>
 </head>
 <body>
 <x-dc>
@@ -1385,7 +1385,9 @@ class Component extends DCLogic {
         // El tope del filtro de precio recien se conoce con el catalogo cargado.
         this.setState(Object.assign({ cargando: false, errorCarga: "", fMax: PMAX }, desdeUrl));
         this.recuperar();
-        this.aplicarSeo();
+        // Despues de que el estado se asiente: aplicarSeo lee this.state y
+        // setState no es inmediato.
+        setTimeout(() => this.aplicarSeo(), 0);
         this.vigilar();
       })
       .catch((e) => {
@@ -1482,54 +1484,69 @@ class Component extends DCLogic {
   // Ojo con el alcance: esto lo ejecuta el navegador. Google lo toma, porque
   // corre JavaScript; la vista previa de WhatsApp o Facebook NO, porque leen
   // el HTML tal como sale del servidor, antes de que corra nada.
+  // El título y la canónica los pinta el runtime en el <head>, porque el
+  // helmet reescribe esas etiquetas en cada render: asignarlas con
+  // document.title quedaba pisado al siguiente dibujo.
+  tituloDe() {
+    return this.seoDe().titulo;
+  }
+
+  canonicaDe() {
+    return this.seoDe().canonica;
+  }
+
+  // Título, descripción y canónica de la página abierta, en un solo lugar.
+  seoDe() {
+    const s = this.state;
+    const pagina = SEO[s.page] || SEO.home || {};
+    let titulo = pagina.title || "MAXING.py | Tecnología e Informática en Paraguay";
+    let descripcion = pagina.meta_description || "";
+    // La canónica se deriva de la ruta y solo la pisa la del propio producto
+    // o categoría. La de `seo_pages` es por tipo de página, así que serviría
+    // la misma para las doce categorías: apuntarlas todas al mismo lugar le
+    // diría al buscador que son la misma página.
+    let canonica = "";
+
+    if (s.page === "product") {
+      const p = PRODUCTS.filter((x) => x.slug === s.pslug)[0];
+      if (p) {
+        titulo = p.metaTitulo || [p.brand, p.name].filter(Boolean).join(" ") + " — MAXING.py";
+        descripcion = p.metaDescripcion || p.spec || descripcion;
+        if (p.canonica) canonica = p.canonica;
+      }
+    }
+
+    if (s.page === "catalog" && s.fCat.length === 1) {
+      const c = CAT.filter((x) => x.name === s.fCat[0])[0];
+      if (c) {
+        titulo = c.seoTitulo || c.name + " — MAXING.py";
+        descripcion = c.seoDescripcion || c.count || descripcion;
+        if (c.canonica) canonica = c.canonica;
+      }
+    }
+
+    const ruta = this.rutaDe(s);
+    if (!canonica) canonica = "https://maxing.py" + (ruta === "/" ? "/" : ruta);
+    return { titulo, descripcion, canonica };
+  }
+
   aplicarSeo() {
     try {
-      const s = this.state;
-      const pagina = SEO[s.page] || SEO.home || {};
-      let titulo = pagina.title || "";
-      let descripcion = pagina.meta_description || "";
+      const { titulo, descripcion, canonica } = this.seoDe();
 
-      if (s.page === "product") {
-        const p = PRODUCTS.filter((x) => x.slug === s.pslug)[0];
-        if (p) {
-          titulo = p.metaTitulo || [p.brand, p.name].filter(Boolean).join(" ") + " — MAXING.py";
-          descripcion = p.metaDescripcion || p.spec || descripcion;
-        }
-      }
+      if (titulo && document.title !== titulo) document.title = titulo;
 
-      // Página de una categoría: /categorias/notebooks
-      if (s.page === "catalog" && s.fCat.length === 1) {
-        const c = CAT.filter((x) => x.name === s.fCat[0])[0];
-        if (c) {
-          titulo = c.seoTitulo || c.name + " — MAXING.py";
-          descripcion = c.seoDescripcion || c.count || descripcion;
-        }
-      }
-
-      if (titulo) document.title = titulo;
       const meta = document.querySelector('meta[name="description"]');
       if (meta && descripcion) meta.setAttribute("content", descripcion);
 
-      // Canónica: la del panel si la cargaron, o la ruta actual.
-      const ruta = this.rutaDe(s);
-      let canonica = pagina.canonical_url || "";
-      if (s.page === "product") {
-        const p = PRODUCTS.filter((x) => x.slug === s.pslug)[0];
-        if (p && p.canonica) canonica = p.canonica;
-      }
-      if (!canonica) {
-        const c = s.page === "catalog" && s.fCat.length === 1
-          ? CAT.filter((x) => x.name === s.fCat[0])[0]
-          : null;
-        canonica = (c && c.canonica) || "https://maxing.py" + (ruta === "/" ? "/" : ruta);
-      }
       let link = document.querySelector('link[rel="canonical"]');
       if (!link) {
         link = document.createElement("link");
         link.setAttribute("rel", "canonical");
         document.head.appendChild(link);
       }
-      link.setAttribute("href", canonica);
+      if (link.getAttribute("href") !== canonica) link.setAttribute("href", canonica);
+
 
       this.aplicarJsonLd();
     } catch (e) { /* el SEO del HTML sigue siendo valido */ }
@@ -2178,23 +2195,18 @@ class Component extends DCLogic {
     const listo = !s.cargando && !s.errorCarga;
     const hayDatos = listo && PRODUCTS.length > 0;
 
-    // Los relacionados del producto abierto, resueltos contra el indice de
-    // publicados: uno despublicado simplemente no aparece.
-    const relacionados = (current.relacionados || [])
-      .map((r) => {
-        const p = POR_ID[r.id];
-        return p ? Object.assign({}, p, { tipoRelacion: r.tipo }) : null;
-      })
-      .filter(Boolean)
-      .slice(0, 4);
-
-    const faqsPagina = this.faqsVisibles();
-
-    // La barra de direcciones acompaña a lo que se está viendo. Se hace acá,
-    // fuera del render, porque cada pantalla llega a mostrarse por muchos
-    // caminos distintos —el menú, una ficha, un filtro, el buscador— y
-    // engancharlo en cada uno era garantía de olvidarse de alguno.
-    if (listo) setTimeout(() => this.sincronizarUrl(), 0);
+    // Después de cada dibujo se acomodan la URL y el SEO. Se hace acá, fuera
+    // del render, por dos razones: cada pantalla llega a mostrarse por muchos
+    // caminos —el menú, una ficha, un filtro, el buscador— y engancharlo en
+    // cada uno era garantía de olvidarse de alguno; y el runtime reescribe el
+    // <title> del <head> en cada render, así que hay que volver a ponerlo
+    // después, no antes.
+    if (listo) {
+      setTimeout(() => {
+        this.sincronizarUrl();
+        this.aplicarSeo();
+      }, 0);
+    }
 
     // Interruptor de visibilidad de una sección del inicio. Visible salvo que
     // el panel lo haya apagado explícitamente: un ajuste que falta no debería
@@ -2372,6 +2384,19 @@ class Component extends DCLogic {
       ? s.fotoVista
       : (fotos[0] ? fotos[0].url : "");
 
+    // Los relacionados del producto abierto, resueltos contra el indice de
+    // publicados: uno despublicado simplemente no aparece.
+    const relacionados = (current.relacionados || [])
+      .map((r) => {
+        const p = POR_ID[r.id];
+        return p ? Object.assign({}, p, { tipoRelacion: r.tipo }) : null;
+      })
+      .filter(Boolean)
+      .slice(0, 4);
+
+    const faqsPagina = this.faqsVisibles();
+
+
     // --- Filtros del catálogo: se aplican sobre PRODUCTS, no sobre una lista fija ---
     const uniq = (arr) => arr.filter((v, i) => arr.indexOf(v) === i);
     const picked = (sel, v) => sel.length === 0 || sel.includes(v);
@@ -2487,7 +2512,7 @@ class Component extends DCLogic {
           palabras: titulo.split(/\s+/).filter(Boolean).map((w, i) => ({ w, estilo: "--rb-delay:" + i * 90 + "ms" })),
           bajada: d.subtitle || "",
           hayBajada: !!d.subtitle,
-          foto: d.image_url ? MaxingDB.imagen(d.image_url) : "./hero.jpg",
+          foto: d.image_url ? MaxingDB.imagen(d.image_url) : "/hero.jpg",
           alt: d.image_alt || "",
           cta: d.cta_label || "Explorar productos",
           abrirCta: this.accionDestino(d.cta_target, this.go("catalog"))
@@ -2497,9 +2522,9 @@ class Component extends DCLogic {
       // --- Secciones editables ---
       // `bloque` arma cada una a partir de su clave. Si el panel la ocultó,
       // `visible` queda en false y la sección entera desaparece del sitio.
-      setup: bloque("setup", "./setup.jpg"),
-      nosotros: bloque("nosotros", "./nosotros.jpg"),
-      editorial: bloque("seo_editorial", "./seccion.jpg"),
+      setup: bloque("setup", "/setup.jpg"),
+      nosotros: bloque("nosotros", "/nosotros.jpg"),
+      editorial: bloque("seo_editorial", "/seccion.jpg"),
       bloqueRedes: bloque("redes"),
 
       categories: CAT.map((c) => {

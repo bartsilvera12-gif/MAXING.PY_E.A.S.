@@ -167,7 +167,11 @@
     imagen: function (ruta) {
       if (!ruta) return "";
       if (/^https?:\/\//i.test(ruta)) return ruta;
-      if (/^\.?\//.test(ruta)) return ruta;
+      if (ruta.charAt(0) === "/") return ruta;
+      // "./productos/x.jpg" pasa a absoluta. En una ficha anidada como
+      // /productos/msi-katana-15 la relativa apuntaria a
+      // /productos/productos/x.jpg y daria 404.
+      if (ruta.slice(0, 2) === "./") return "/" + ruta.slice(2);
       // Rutas guardadas como "productos/foo.jpg": si el archivo esta en el
       // repo se resuelve solo; si se subio por el panel, lleva prefijo
       // "storage/" y se arma la URL del bucket.
