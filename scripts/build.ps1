@@ -84,6 +84,7 @@ $urls = New-Object System.Collections.Generic.List[string]
 $urls.Add((Url "$Sitio/" '' 'daily' '1.0'))
 $urls.Add((Url "$Sitio/productos" '' 'daily' '0.9'))
 $urls.Add((Url "$Sitio/nosotros" '' 'monthly' '0.5'))
+  $urls.Add((Url "$Sitio/politicas-comerciales" '' 'monthly' '0.5'))
 
 try {
   $cab = @{ apikey = $anon; Authorization = "Bearer $anon"; 'Accept-Profile' = 'maxingpy' }
