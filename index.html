@@ -33,11 +33,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Organization y WebSite describen al sitio y valen en cualquier pagina.
+     La miga de pan NO va aca: la de cada pagina la pone pagina.php (o el
+     JavaScript al navegar) con sus eslabones reales. Una miga estatica de un
+     solo "Inicio" viajaba en TODAS las fichas y convivia con la de verdad,
+     asi que cada producto publicaba dos BreadcrumbList. -->
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
 {"@type":"Organization","@id":"https://maxingpy.com/#org","name":"MAXING.py","url":"https://maxingpy.com/","slogan":"Tecnología que mejora tu día.","areaServed":"PY","contactPoint":{"@type":"ContactPoint","telephone":"+595984127274","contactType":"customer service","availableLanguage":"es"},"sameAs":["https://instagram.com/maxing.py","https://tiktok.com/@maxing.py"]},
-{"@type":"WebSite","@id":"https://maxingpy.com/#website","url":"https://maxingpy.com/","name":"MAXING.py","publisher":{"@id":"https://maxingpy.com/#org"},"inLanguage":"es-PY","potentialAction":{"@type":"SearchAction","target":"https://maxingpy.com/productos?q={search_term_string}","query-input":"required name=search_term_string"}},
-{"@type":"BreadcrumbList","@id":"https://maxingpy.com/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://maxingpy.com/"}]}
+{"@type":"WebSite","@id":"https://maxingpy.com/#website","url":"https://maxingpy.com/","name":"MAXING.py","publisher":{"@id":"https://maxingpy.com/#org"},"inLanguage":"es-PY","potentialAction":{"@type":"SearchAction","target":"https://maxingpy.com/productos?q={search_term_string}","query-input":"required name=search_term_string"}}
 ]}
 </script>
 <style>
