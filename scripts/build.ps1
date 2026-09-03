@@ -36,7 +36,7 @@ New-Item -ItemType Directory -Path $dist | Out-Null
 # la función serverless de Vercel, su configuración, el README y las
 # herramientas de .claude/. Nada de eso lo sirve Hostinger.
 $archivos = @(
-  'index.html', 'support.js', 'politicadeprivacidad.html', 'robots.txt',
+  'index.html', 'support.js', 'politicadeprivacidad.html', 'politicas-comerciales.html', 'robots.txt',
   'favicon.ico', 'favicon.svg', 'apple-touch-icon.png',
   'hero.jpg', 'setup.jpg', 'nosotros.jpg', 'seccion.jpg'
 )
@@ -169,6 +169,7 @@ Options -Indexes
 
   # Páginas sueltas con ruta amigable.
   RewriteRule ^politicadeprivacidad/?$ /politicadeprivacidad.html [L]
+  RewriteRule ^politicas-comerciales/?$ /politicas-comerciales.html [L]
   RewriteRule ^admin/login/?$ /admin/login.html [L]
   RewriteRule ^admin/?$ /admin/index.html [L]
 

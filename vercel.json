@@ -9,6 +9,7 @@
   },
   "rewrites": [
     { "source": "/politicadeprivacidad", "destination": "/politicadeprivacidad.html" },
+    { "source": "/politicas-comerciales", "destination": "/politicas-comerciales.html" },
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/admin/login", "destination": "/admin/login.html" },
 
